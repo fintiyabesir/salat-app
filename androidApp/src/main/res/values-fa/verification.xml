@@ -1,0 +1,6 @@
+<resources>
+    <string name="verification_official_source">مرجع رسمی</string>
+    <string name="verification_adapter_ready">رابط منبع رسمی آماده است. زمان‌های امروز هنوز در این دستگاه مقایسه نشده‌اند.</string>
+    <string name="verification_reference_only">مرجع رسمی تنظیم شده است. مقایسه زنده هنوز فعال نیست.</string>
+    <string name="verification_local_only">هنوز مرجع رسمی تنظیم نشده است. محاسبه محلی استفاده می‌شود.</string>
+</resources>
