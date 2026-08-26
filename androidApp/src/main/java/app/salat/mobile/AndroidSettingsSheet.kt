@@ -16,6 +16,7 @@ import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -46,14 +47,14 @@ fun AndroidSettingsSheet(
                 .verticalScroll(rememberScrollState())
                 .padding(horizontal = 22.dp, vertical = 8.dp)
         ) {
-            Text("Settings", fontSize = 28.sp, fontWeight = FontWeight.SemiBold)
+            Text(stringResource(R.string.settings), fontSize = 28.sp, fontWeight = FontWeight.SemiBold)
             Spacer(Modifier.height(24.dp))
 
-            SettingsHeading("Calculation method")
+            SettingsHeading(stringResource(R.string.settings_calculation_method))
             ChipFlow(
                 choices = listOf<String?>(null) + CalculationMethodId.entries.map { it.name },
                 selected = value.calculation.methodOverride?.name,
-                label = { it?.methodLabel() ?: "Automatic · ${autoMethod.methodLabel()}" },
+                label = { it?.methodLabel() ?: "${stringResource(R.string.settings_automatic)} · ${autoMethod.name.methodLabel()}" },
                 onSelected = { raw ->
                     onChange(value.copy(calculation = value.calculation.copy(
                         methodOverride = raw?.let(CalculationMethodId::valueOf)
@@ -61,14 +62,14 @@ fun AndroidSettingsSheet(
                 }
             )
 
-            SettingsHeading("Asr method")
+            SettingsHeading(stringResource(R.string.settings_asr_method))
             ChipFlow(
                 choices = listOf<String?>(null, MadhabId.SHAFI.name, MadhabId.HANAFI.name),
                 selected = value.calculation.madhabOverride?.name,
                 label = { raw -> when (raw) {
-                    null -> "Automatic"
-                    MadhabId.HANAFI.name -> "Hanafi"
-                    else -> "Standard / Shafi"
+                    null -> stringResource(R.string.settings_automatic)
+                    MadhabId.HANAFI.name -> stringResource(R.string.settings_hanafi)
+                    else -> stringResource(R.string.settings_standard_shafi)
                 } },
                 onSelected = { raw ->
                     onChange(value.copy(calculation = value.calculation.copy(
@@ -77,7 +78,7 @@ fun AndroidSettingsSheet(
                 }
             )
 
-            SettingsHeading("High latitude")
+            SettingsHeading(stringResource(R.string.settings_high_latitude))
             ChipFlow(
                 choices = HighLatitudeRuleId.entries.map { it.name },
                 selected = value.calculation.highLatitudeRule.name,
@@ -89,10 +90,10 @@ fun AndroidSettingsSheet(
                 }
             )
 
-            SettingsHeading("Prayer time adjustments")
+            SettingsHeading(stringResource(R.string.settings_prayer_adjustments))
             PrayerName.entries.forEach { prayer ->
                 AdjustmentRow(
-                    label = prayer.name.lowercase().replaceFirstChar { it.uppercase() },
+                    label = prayer.localizedSettingsLabel(),
                     value = value.calculation.adjustments.value(prayer),
                     onValue = { minutes ->
                         val adjustments = value.calculation.adjustments.with(prayer, minutes.coerceIn(-30, 30))
@@ -101,7 +102,7 @@ fun AndroidSettingsSheet(
                 )
             }
 
-            SettingsHeading("Hijri calendar")
+            SettingsHeading(stringResource(R.string.settings_hijri_calendar))
             ChipFlow(
                 choices = HijriCalendarMethodId.entries.map { it.name },
                 selected = value.hijriMethod.name,
@@ -109,13 +110,13 @@ fun AndroidSettingsSheet(
                 onSelected = { raw -> onChange(value.copy(hijriMethod = HijriCalendarMethodId.valueOf(raw))) }
             )
             AdjustmentRow(
-                label = "Hijri day adjustment",
+                label = stringResource(R.string.settings_hijri_day_adjustment),
                 value = value.hijriDayAdjustment,
                 range = -2..2,
                 onValue = { onChange(value.copy(hijriDayAdjustment = it.coerceIn(-2, 2))) }
             )
 
-            SettingsHeading("Language")
+            SettingsHeading(stringResource(R.string.settings_language))
             ChipFlow(
                 choices = listOf<String?>(null, "en", "tr", "ar", "fa", "ur", "bn", "ms", "zh-Hans", "zh-Hant"),
                 selected = value.languageTag,
@@ -123,11 +124,11 @@ fun AndroidSettingsSheet(
                 onSelected = { onChange(value.copy(languageTag = it)) }
             )
 
-            SettingsHeading("Appearance")
+            SettingsHeading(stringResource(R.string.settings_appearance))
             ChipFlow(
                 choices = AppearanceMode.entries.map { it.name },
                 selected = value.appearance.name,
-                label = { it.lowercase().replaceFirstChar { c -> c.uppercase() } },
+                label = { it.appearanceLabel() },
                 onSelected = { onChange(value.copy(appearance = AppearanceMode.valueOf(it))) }
             )
 
@@ -147,7 +148,7 @@ private fun SettingsHeading(text: String) {
 private fun <T> ChipFlow(
     choices: List<T>,
     selected: T,
-    label: (T) -> String,
+    label: @Composable (T) -> String,
     onSelected: (T) -> Unit
 ) {
     Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
@@ -180,7 +181,7 @@ private fun AdjustmentRow(
         Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
             OutlinedButton(onClick = { if (value > range.first) onValue(value - 1) }) { Text("−") }
             Text(
-                if (value > 0) "+$value min" else "$value min",
+                stringResource(R.string.settings_minutes, value).let { if (value > 0) "+$it" else it },
                 modifier = Modifier.padding(top = 12.dp)
             )
             OutlinedButton(onClick = { if (value < range.last) onValue(value + 1) }) { Text("+") }
@@ -222,23 +223,44 @@ private fun String.methodLabel(): String = when (this) {
     else -> this
 }
 
+@Composable
 private fun String.highLatitudeLabel(): String = when (this) {
-    HighLatitudeRuleId.AUTOMATIC.name -> "Automatic"
-    HighLatitudeRuleId.MIDDLE_OF_THE_NIGHT.name -> "Middle of night"
-    HighLatitudeRuleId.SEVENTH_OF_THE_NIGHT.name -> "Seventh of night"
-    HighLatitudeRuleId.TWILIGHT_ANGLE.name -> "Twilight angle"
+    HighLatitudeRuleId.AUTOMATIC.name -> stringResource(R.string.settings_automatic)
+    HighLatitudeRuleId.MIDDLE_OF_THE_NIGHT.name -> stringResource(R.string.settings_middle_night)
+    HighLatitudeRuleId.SEVENTH_OF_THE_NIGHT.name -> stringResource(R.string.settings_seventh_night)
+    HighLatitudeRuleId.TWILIGHT_ANGLE.name -> stringResource(R.string.settings_twilight_angle)
     else -> this
 }
 
+@Composable
 private fun String.hijriLabel(): String = when (this) {
-    HijriCalendarMethodId.AUTOMATIC.name -> "Automatic"
+    HijriCalendarMethodId.AUTOMATIC.name -> stringResource(R.string.settings_automatic)
     HijriCalendarMethodId.UMM_AL_QURA.name -> "Umm al-Qura"
     HijriCalendarMethodId.TABULAR.name -> "Tabular"
     else -> this
 }
 
+@Composable
+private fun String.appearanceLabel(): String = when (this) {
+    AppearanceMode.SYSTEM.name -> stringResource(R.string.settings_system)
+    AppearanceMode.LIGHT.name -> stringResource(R.string.settings_light)
+    AppearanceMode.DARK.name -> stringResource(R.string.settings_dark)
+    else -> this
+}
+
+@Composable
+private fun PrayerName.localizedSettingsLabel(): String = when (this) {
+    PrayerName.FAJR -> stringResource(R.string.prayer_fajr)
+    PrayerName.SUNRISE -> stringResource(R.string.prayer_sunrise)
+    PrayerName.DHUHR -> stringResource(R.string.prayer_dhuhr)
+    PrayerName.ASR -> stringResource(R.string.prayer_asr)
+    PrayerName.MAGHRIB -> stringResource(R.string.prayer_maghrib)
+    PrayerName.ISHA -> stringResource(R.string.prayer_isha)
+}
+
+@Composable
 private fun String?.languageLabel(): String = when (this) {
-    null -> "System"
+    null -> stringResource(R.string.settings_system)
     "en" -> "English"
     "tr" -> "Türkçe"
     "ar" -> "العربية"
