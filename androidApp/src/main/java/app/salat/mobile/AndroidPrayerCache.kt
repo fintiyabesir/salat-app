@@ -29,6 +29,7 @@ class AndroidPrayerCache(context: Context) :
                 calculation_profile TEXT NOT NULL,
                 fetched_at INTEGER NOT NULL,
                 refresh_after INTEGER NOT NULL,
+                max_delta_minutes INTEGER,
                 PRIMARY KEY (source_id, location_key, prayer_date)
             )
             """.trimIndent()
@@ -104,12 +105,27 @@ class AndroidPrayerCache(context: Context) :
         }
     }
 
+    override suspend fun recordDelta(
+        sourceId: String,
+        locationKey: String,
+        date: LocalDate,
+        maxDeltaMinutes: Int
+    ) {
+        val values = ContentValues().apply { put("max_delta_minutes", maxDeltaMinutes) }
+        writableDatabase.update(
+            "official_prayer_cache",
+            values,
+            "source_id = ? AND location_key = ? AND prayer_date = ?",
+            arrayOf(sourceId, locationKey, date.toString())
+        )
+    }
+
     private companion object {
         const val DATABASE_NAME = "salat_cache.db"
-        const val DATABASE_VERSION = 1
+        const val DATABASE_VERSION = 2
         val COLUMNS = arrayOf(
             "prayer_date", "fajr", "sunrise", "dhuhr", "asr", "maghrib", "isha",
-            "calculation_profile", "fetched_at", "refresh_after"
+            "calculation_profile", "fetched_at", "refresh_after", "max_delta_minutes"
         )
     }
 }
