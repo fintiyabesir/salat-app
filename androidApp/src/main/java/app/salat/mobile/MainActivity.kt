@@ -46,7 +46,8 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         val resolver = AndroidLocationResolver(this)
-        setContent { SalatApp(resolver) }
+        val notificationCoordinator = AndroidPrayerNotificationCoordinator(this)
+        setContent { SalatApp(resolver, notificationCoordinator) }
     }
 }
 
@@ -56,7 +57,10 @@ private val Warm = Color(0xFFF5EEDB)
 private val ActiveWarm = Color(0xFFFFF1D8)
 
 @Composable
-private fun SalatApp(resolver: AndroidLocationResolver) {
+private fun SalatApp(
+    resolver: AndroidLocationResolver,
+    notificationCoordinator: AndroidPrayerNotificationCoordinator
+) {
     var location by remember { mutableStateOf<ResolvedLocation?>(null) }
     var resolving by remember { mutableStateOf(false) }
     var locationError by remember { mutableStateOf(false) }
@@ -68,6 +72,11 @@ private fun SalatApp(resolver: AndroidLocationResolver) {
             location = resolved
             resolving = false
             locationError = resolved == null
+            if (resolved != null) {
+                // Rebuilds only from already-saved user preferences and never asks
+                // for notification permission on its own.
+                notificationCoordinator.rebuild(resolved)
+            }
         }
     }
 
