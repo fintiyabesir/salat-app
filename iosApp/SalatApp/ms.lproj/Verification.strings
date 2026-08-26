@@ -1,0 +1,4 @@
+"verification_official_source" = "Rujukan rasmi";
+"verification_adapter_ready" = "Penyesuai sumber rasmi tersedia. Waktu hari ini belum dibandingkan pada peranti ini.";
+"verification_reference_only" = "Rujukan rasmi telah ditetapkan. Perbandingan langsung belum aktif.";
+"verification_local_only" = "Belum ada rujukan rasmi ditetapkan. Pengiraan tempatan sedang digunakan.";
