@@ -3,6 +3,7 @@ import SwiftUI
 @MainActor
 struct TodayView: View {
     @StateObject private var locationModel = IOSLocationModel()
+    @State private var selectedPrayer: PrayerDisplay?
     private let notificationCoordinator = IOSPrayerNotificationCoordinator()
 
     var body: some View {
@@ -19,6 +20,12 @@ struct TodayView: View {
                 if let location {
                     notificationCoordinator.rebuild(location: location)
                 }
+            }
+        }
+        .sheet(item: $selectedPrayer) { prayer in
+            if let location = locationModel.location {
+                PrayerNotificationSettingsView(prayer: prayer, location: location)
+                    .presentationDetents([.medium, .large])
             }
         }
     }
@@ -54,18 +61,23 @@ struct TodayView: View {
 
                 VStack(spacing: 2) {
                     ForEach(model.prayers) { prayer in
-                        HStack {
-                            Text(prayer.name)
-                            Spacer()
-                            Text(prayer.time)
+                        Button {
+                            selectedPrayer = prayer
+                        } label: {
+                            HStack {
+                                Text(prayer.name)
+                                Spacer()
+                                Text(prayer.time)
+                            }
+                            .fontWeight(prayer.id == model.nextPrayer.id ? .semibold : .regular)
+                            .padding(.horizontal, 12)
+                            .padding(.vertical, 13)
+                            .background(
+                                prayer.id == model.nextPrayer.id ? Color.orange.opacity(0.10) : Color.clear,
+                                in: RoundedRectangle(cornerRadius: 16)
+                            )
                         }
-                        .fontWeight(prayer.id == model.nextPrayer.id ? .semibold : .regular)
-                        .padding(.horizontal, 12)
-                        .padding(.vertical, 13)
-                        .background(
-                            prayer.id == model.nextPrayer.id ? Color.orange.opacity(0.10) : Color.clear,
-                            in: RoundedRectangle(cornerRadius: 16)
-                        )
+                        .buttonStyle(.plain)
                     }
                 }
             }
