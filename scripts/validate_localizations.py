@@ -39,11 +39,16 @@ def android_keys(directory: str) -> set[str]:
 
 
 def ios_keys(locale: str) -> set[str]:
-    path = IOS_ROOT / f"{locale}.lproj" / "Localizable.strings"
-    if not path.exists():
-        raise AssertionError(f"missing iOS localization: {path}")
-    text = path.read_text(encoding="utf-8")
-    return set(re.findall(r'^\s*"([^"]+)"\s*=', text, flags=re.MULTILINE))
+    folder = IOS_ROOT / f"{locale}.lproj"
+    if not folder.exists():
+        raise AssertionError(f"missing iOS localization directory: {folder}")
+    keys: set[str] = set()
+    for path in sorted(folder.glob("*.strings")):
+        text = path.read_text(encoding="utf-8")
+        keys.update(re.findall(r'^\s*"([^"]+)"\s*=', text, flags=re.MULTILINE))
+    if not keys:
+        raise AssertionError(f"no iOS localization strings found in {folder}")
+    return keys
 
 
 def assert_equal(reference: set[str], actual: set[str], label: str) -> None:
