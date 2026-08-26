@@ -2,11 +2,14 @@ import Foundation
 
 enum L10n {
     private static let languageKey = "app.language"
+    private static let tables = ["Localizable", "Settings", "Qibla"]
 
     static func text(_ key: String) -> String {
-        let mainValue = selectedBundle.localizedString(forKey: key, value: nil, table: "Localizable")
-        if mainValue != key { return mainValue }
-        return selectedBundle.localizedString(forKey: key, value: nil, table: "Settings")
+        for table in tables {
+            let value = selectedBundle.localizedString(forKey: key, value: nil, table: table)
+            if value != key { return value }
+        }
+        return key
     }
 
     static func format(_ key: String, _ arguments: CVarArg...) -> String {
