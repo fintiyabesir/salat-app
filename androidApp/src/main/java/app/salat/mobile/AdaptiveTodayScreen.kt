@@ -26,6 +26,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import app.salat.domain.SalatEngine
+import app.salat.model.CalculationPreferences
 import app.salat.model.PrayerDay
 import app.salat.model.PrayerName
 import app.salat.model.ResolvedLocation
@@ -41,11 +42,14 @@ private val AdaptiveWarm = Color(0xFFF5EEDB)
 private val AdaptiveActiveWarm = Color(0xFFFFF1D8)
 
 @Composable
-fun AdaptiveTodayScreen(location: ResolvedLocation) {
+fun AdaptiveTodayScreen(
+    location: ResolvedLocation,
+    preferences: CalculationPreferences = CalculationPreferences()
+) {
     val zone = remember(location.timeZoneId) { ZoneId.of(location.timeZoneId) }
     val today = remember(location, zone) { LocalDate.now(zone) }
     var selectedPrayer by remember { mutableStateOf<PrayerName?>(null) }
-    val day = remember(location, today) {
+    val day = remember(location, today, preferences) {
         SalatEngine().calculateDay(
             year = today.year,
             month = today.monthValue,
@@ -53,7 +57,8 @@ fun AdaptiveTodayScreen(location: ResolvedLocation) {
             latitude = location.point.latitude,
             longitude = location.point.longitude,
             timeZoneId = location.timeZoneId,
-            countryCode = location.countryCode ?: "ZZ"
+            countryCode = location.countryCode ?: "ZZ",
+            preferences = preferences
         )
     }
     val next = PrayerName.entries.firstOrNull {
