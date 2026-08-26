@@ -1,8 +1,14 @@
+import SalatShared
 import SwiftUI
 
 private struct IOSCalculationMethodOption: Identifiable {
     let id: String
     let title: String
+}
+
+private struct IOSOfficialSourceReference {
+    let name: String
+    let status: String
 }
 
 struct IOSSettingsView: View {
@@ -32,6 +38,19 @@ struct IOSSettingsView: View {
                     Section(L10n.text("settings_location")) {
                         LabeledContent(L10n.text("settings_place"), value: location.displayName)
                         LabeledContent(L10n.text("settings_timezone"), value: location.timeZoneId)
+                    }
+
+                    Section(L10n.text("verification_official_source")) {
+                        if let source = officialSource(for: location.countryCode) {
+                            Text(source.name)
+                            Text(verificationStatusText(source.status))
+                                .font(.footnote)
+                                .foregroundStyle(.secondary)
+                        } else {
+                            Text(L10n.text("verification_local_only"))
+                                .font(.footnote)
+                                .foregroundStyle(.secondary)
+                        }
                     }
                 }
 
@@ -106,6 +125,23 @@ struct IOSSettingsView: View {
                     Button(L10n.text("settings_done")) { dismiss() }
                 }
             }
+        }
+    }
+
+    private func officialSource(for countryCode: String) -> IOSOfficialSourceReference? {
+        guard let encoded = SalatApi.shared.officialSourceReferenceEncoded(countryCode: countryCode) else {
+            return nil
+        }
+        let parts = encoded.split(separator: "\t", omittingEmptySubsequences: false).map(String.init)
+        guard parts.count == 3 else { return nil }
+        return IOSOfficialSourceReference(name: parts[1], status: parts[2])
+    }
+
+    private func verificationStatusText(_ status: String) -> String {
+        switch status {
+        case "ADAPTER_AVAILABLE": return L10n.text("verification_adapter_ready")
+        case "REFERENCE_CONFIGURED": return L10n.text("verification_reference_only")
+        default: return L10n.text("verification_local_only")
         }
     }
 
