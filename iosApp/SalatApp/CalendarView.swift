@@ -11,6 +11,7 @@ private struct CalendarDayDisplay: Identifiable {
 
 struct CalendarView: View {
     let location: PrayerLocation
+    let settings: IOSAppSettings
 
     var body: some View {
         ScrollView {
@@ -51,20 +52,30 @@ struct CalendarView: View {
         var calendar = Calendar(identifier: .gregorian)
         calendar.timeZone = timeZone
         let start = calendar.startOfDay(for: Date())
+        let calculation = settings.calculation
 
         return (0..<30).compactMap { offset in
             guard let date = calendar.date(byAdding: .day, value: offset, to: start) else { return nil }
             let components = calendar.dateComponents([.year, .month, .day], from: date)
             guard let year = components.year, let month = components.month, let day = components.day else { return nil }
 
-            let snapshot = SalatApi.shared.calculateDaySnapshot(
+            let snapshot = SalatApi.shared.calculateDaySnapshotConfigured(
                 year: Int32(year),
                 month: Int32(month),
                 day: Int32(day),
                 latitude: location.latitude,
                 longitude: location.longitude,
                 timeZoneId: timeZone.identifier,
-                countryCode: location.countryCode
+                countryCode: location.countryCode,
+                methodOverride: calculation.methodOverride,
+                madhabOverride: calculation.madhabOverride,
+                highLatitudeRule: calculation.highLatitudeRule,
+                fajrAdjustment: Int32(calculation.fajrAdjustment),
+                sunriseAdjustment: Int32(calculation.sunriseAdjustment),
+                dhuhrAdjustment: Int32(calculation.dhuhrAdjustment),
+                asrAdjustment: Int32(calculation.asrAdjustment),
+                maghribAdjustment: Int32(calculation.maghribAdjustment),
+                ishaAdjustment: Int32(calculation.ishaAdjustment)
             )
 
             let prayers = [
