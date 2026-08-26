@@ -5,8 +5,10 @@ on:
   pull_request:
     branches: [ main ]
     paths:
-      - scripts/process_geonames_cities.py
-      - .github/workflows/city-catalog-benchmark.yml
+      - 'scripts/process_geonames_cities.py'
+      - '.github/workflows/city-catalog-benchmark.yml'
+      - 'docs/CITY_DATA.md'
+      - 'THIRD_PARTY_NOTICES.md'
 
 jobs:
   android-benchmark:
