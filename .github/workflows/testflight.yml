@@ -77,7 +77,7 @@ jobs:
               source.replace(debug_framework, release_framework), encoding='utf-8'
           )
           PY
-          xcodegen generate --spec iosApp/project.release.generated.yml --project iosApp
+          xcodegen generate --spec "$GITHUB_WORKSPACE/iosApp/project.release.generated.yml" --project "$GITHUB_WORKSPACE/iosApp"
 
       - name: Validate privacy manifests
         run: |
@@ -205,7 +205,7 @@ jobs:
           )
           Path('iosApp/project.release.generated.yml').write_text(source, encoding='utf-8')
           PY
-          xcodegen generate --spec iosApp/project.release.generated.yml --project iosApp
+          xcodegen generate --spec "$GITHUB_WORKSPACE/iosApp/project.release.generated.yml" --project "$GITHUB_WORKSPACE/iosApp"
 
       - name: Install Apple distribution certificate
         shell: bash
