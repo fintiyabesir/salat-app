@@ -37,6 +37,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.res.stringResource
@@ -53,7 +54,6 @@ import java.time.Instant
 import java.time.LocalDate
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
-import java.util.Locale
 import kotlin.math.abs
 
 private enum class MainSection { TODAY, CALENDAR, QIBLA }
@@ -61,7 +61,6 @@ private enum class MainSection { TODAY, CALENDAR, QIBLA }
 private val ShellCanvas = Color(0xFFFAF8F3)
 private val ShellCanvasDark = Color(0xFF171916)
 private val ShellSage = Color(0xFF467A69)
-private val ShellWarm = Color(0xFFF5EEDB)
 private val ShellCardDark = Color(0xFF242823)
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -114,7 +113,7 @@ fun SalatMainShell(location: ResolvedLocation) {
             containerColor = canvas,
             topBar = {
                 TopAppBar(
-                    title = { Text(stringResource(R.string.brand_name), color = ShellSage, letterSpacing = 2.sp) },
+                    title = { Text(stringResource(R.string.brand_name), color = MaterialTheme.colorScheme.primary, letterSpacing = 2.sp) },
                     actions = {
                         IconButton(onClick = { showSettings = true }) {
                             Text("⚙", fontSize = 22.sp)
@@ -147,7 +146,7 @@ fun SalatMainShell(location: ResolvedLocation) {
         ) { padding ->
             Box(Modifier.fillMaxSize().padding(padding).background(canvas)) {
                 when (section) {
-                    MainSection.TODAY -> AdaptiveTodayScreen(location, settings.calculation)
+                    MainSection.TODAY -> AdaptiveTodayScreen(location, settings)
                     MainSection.CALENDAR -> SalatCalendarScreen(location, settings.calculation, dark)
                     MainSection.QIBLA -> SalatQiblaScreen(location)
                 }
@@ -176,10 +175,11 @@ private fun SalatCalendarScreen(
     preferences: CalculationPreferences,
     dark: Boolean
 ) {
+    val locale = LocalConfiguration.current.locales[0]
     val zone = remember(location.timeZoneId) { ZoneId.of(location.timeZoneId) }
     val engine = remember { SalatEngine() }
     val start = remember(location, zone) { LocalDate.now(zone) }
-    val days = remember(location, start, preferences) {
+    val days = remember(location, start, preferences, locale) {
         (0L until 30L).map { offset ->
             val date = start.plusDays(offset)
             val day = engine.calculateDay(
@@ -195,7 +195,7 @@ private fun SalatCalendarScreen(
             CalendarDayUi(
                 date = date,
                 rows = PrayerName.entries.map { prayer ->
-                    prayer to DateTimeFormatter.ofPattern("HH:mm", Locale.getDefault())
+                    prayer to DateTimeFormatter.ofPattern("HH:mm", locale)
                         .withZone(zone)
                         .format(Instant.ofEpochMilli(day.time(prayer).toEpochMilliseconds()))
                 }
@@ -215,7 +215,7 @@ private fun SalatCalendarScreen(
                     .padding(18.dp)
             ) {
                 Text(
-                    item.date.format(DateTimeFormatter.ofPattern("EEEE, d MMMM", Locale.getDefault())),
+                    item.date.format(DateTimeFormatter.ofPattern("EEEE, d MMMM", locale)),
                     fontSize = 18.sp,
                     fontWeight = FontWeight.SemiBold
                 )
@@ -226,7 +226,7 @@ private fun SalatCalendarScreen(
                         horizontalArrangement = Arrangement.SpaceBetween
                     ) {
                         Text(prayer.localizedLabel())
-                        Text(time, color = ShellSage, fontWeight = FontWeight.Medium)
+                        Text(time, color = MaterialTheme.colorScheme.primary, fontWeight = FontWeight.Medium)
                     }
                 }
             }
@@ -266,29 +266,32 @@ private fun SalatQiblaScreen(location: ResolvedLocation) {
     ) {
         Text(stringResource(R.string.qibla), fontSize = 28.sp, fontWeight = FontWeight.SemiBold)
         Spacer(Modifier.height(8.dp))
-        Text("${qibla.toInt()}°", color = ShellSage, fontSize = 18.sp)
+        Text("${qibla.toInt()}°", color = MaterialTheme.colorScheme.primary, fontSize = 18.sp)
         Spacer(Modifier.height(54.dp))
 
         Box(
             Modifier
-                .background(ShellWarm, RoundedCornerShape(120.dp))
+                .background(
+                    if (aligned) MaterialTheme.colorScheme.secondaryContainer else MaterialTheme.colorScheme.surfaceVariant,
+                    RoundedCornerShape(120.dp)
+                )
                 .padding(64.dp),
             contentAlignment = Alignment.Center
         ) {
             Text(
                 "▲",
                 modifier = Modifier.rotate(delta ?: 0f),
-                color = ShellSage,
+                color = MaterialTheme.colorScheme.primary,
                 fontSize = 72.sp
             )
         }
 
         Spacer(Modifier.height(34.dp))
         when {
-            !provider.isAvailable -> Text("Compass sensor unavailable", color = Color(0xFF8A5C4A))
-            heading == null -> Text("Calibrating compass…", color = Color(0xFF6D716E))
-            aligned -> Text("Aligned with Qibla", color = ShellSage, fontWeight = FontWeight.SemiBold)
-            else -> Text("${abs(delta ?: 0f).toInt()}°", color = Color(0xFF6D716E))
+            !provider.isAvailable -> Text(stringResource(R.string.qibla_compass_unavailable), color = MaterialTheme.colorScheme.onSurfaceVariant)
+            heading == null -> Text(stringResource(R.string.qibla_calibrating), color = MaterialTheme.colorScheme.onSurfaceVariant)
+            aligned -> Text(stringResource(R.string.qibla_aligned), color = MaterialTheme.colorScheme.primary, fontWeight = FontWeight.SemiBold)
+            else -> Text("${abs(delta ?: 0f).toInt()}°", color = MaterialTheme.colorScheme.onSurfaceVariant)
         }
     }
 }
