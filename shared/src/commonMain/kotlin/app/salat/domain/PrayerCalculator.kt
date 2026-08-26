@@ -6,11 +6,13 @@ import app.salat.model.GeoPoint
 import app.salat.model.MadhabId
 import app.salat.model.PrayerDay
 import com.batoulapps.adhan2.CalculationMethod
+import com.batoulapps.adhan2.CalculationParameters
 import com.batoulapps.adhan2.Coordinates
 import com.batoulapps.adhan2.Madhab
-import com.batoulapps.adhan2.PrayerAdjustments
+import com.batoulapps.adhan2.PrayerAdjustments as AdhanPrayerAdjustments
 import com.batoulapps.adhan2.PrayerTimes
 import com.batoulapps.adhan2.data.DateComponents
+import com.batoulapps.adhan2.model.Rounding
 import kotlinx.datetime.LocalDate
 
 interface PrayerCalculator {
@@ -24,12 +26,12 @@ class AdhanPrayerCalculator : PrayerCalculator {
         timeZoneId: String,
         profile: CalculationProfile
     ): PrayerDay {
-        val parameters = profile.method.toAdhan().parameters.copy(
+        val parameters = profile.method.toAdhanParameters().copy(
             madhab = when (profile.madhab) {
                 MadhabId.HANAFI -> Madhab.HANAFI
                 MadhabId.SHAFI -> Madhab.SHAFI
             },
-            prayerAdjustments = PrayerAdjustments(
+            prayerAdjustments = AdhanPrayerAdjustments(
                 fajr = profile.adjustments.fajr,
                 sunrise = profile.adjustments.sunrise,
                 dhuhr = profile.adjustments.dhuhr,
@@ -55,17 +57,24 @@ class AdhanPrayerCalculator : PrayerCalculator {
         )
     }
 
-    private fun CalculationMethodId.toAdhan(): CalculationMethod = when (this) {
-        CalculationMethodId.TURKEY -> CalculationMethod.TURKEY
-        CalculationMethodId.MUSLIM_WORLD_LEAGUE -> CalculationMethod.MUSLIM_WORLD_LEAGUE
-        CalculationMethodId.EGYPTIAN -> CalculationMethod.EGYPTIAN
-        CalculationMethodId.KARACHI -> CalculationMethod.KARACHI
-        CalculationMethodId.UMM_AL_QURA -> CalculationMethod.UMM_AL_QURA
-        CalculationMethodId.DUBAI -> CalculationMethod.DUBAI
-        CalculationMethodId.QATAR -> CalculationMethod.QATAR
-        CalculationMethodId.KUWAIT -> CalculationMethod.KUWAIT
-        CalculationMethodId.MOON_SIGHTING_COMMITTEE -> CalculationMethod.MOON_SIGHTING_COMMITTEE
-        CalculationMethodId.SINGAPORE -> CalculationMethod.SINGAPORE
-        CalculationMethodId.NORTH_AMERICA -> CalculationMethod.NORTH_AMERICA
+    private fun CalculationMethodId.toAdhanParameters(): CalculationParameters = when (this) {
+        CalculationMethodId.MALAYSIA -> CalculationParameters(
+            fajrAngle = 18.0,
+            ishaAngle = 18.0,
+            method = CalculationMethod.OTHER,
+            methodAdjustments = AdhanPrayerAdjustments(dhuhr = 1),
+            rounding = Rounding.UP
+        )
+        CalculationMethodId.TURKEY -> CalculationMethod.TURKEY.parameters
+        CalculationMethodId.MUSLIM_WORLD_LEAGUE -> CalculationMethod.MUSLIM_WORLD_LEAGUE.parameters
+        CalculationMethodId.EGYPTIAN -> CalculationMethod.EGYPTIAN.parameters
+        CalculationMethodId.KARACHI -> CalculationMethod.KARACHI.parameters
+        CalculationMethodId.UMM_AL_QURA -> CalculationMethod.UMM_AL_QURA.parameters
+        CalculationMethodId.DUBAI -> CalculationMethod.DUBAI.parameters
+        CalculationMethodId.QATAR -> CalculationMethod.QATAR.parameters
+        CalculationMethodId.KUWAIT -> CalculationMethod.KUWAIT.parameters
+        CalculationMethodId.MOON_SIGHTING_COMMITTEE -> CalculationMethod.MOON_SIGHTING_COMMITTEE.parameters
+        CalculationMethodId.SINGAPORE -> CalculationMethod.SINGAPORE.parameters
+        CalculationMethodId.NORTH_AMERICA -> CalculationMethod.NORTH_AMERICA.parameters
     }
 }
