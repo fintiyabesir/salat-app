@@ -1,0 +1,24 @@
+name: Official prayer source research
+description: Validate a country/region official prayer-time source
+labels: ["official-source"]
+body:
+  - type: input
+    id: region
+    attributes:
+      label: Country / region
+    validations:
+      required: true
+  - type: input
+    id: authority
+    attributes:
+      label: Official authority
+  - type: input
+    id: url
+    attributes:
+      label: Official URL
+  - type: textarea
+    id: review
+    attributes:
+      label: API/feed shape, terms, quota, attribution, cacheability
+    validations:
+      required: true
