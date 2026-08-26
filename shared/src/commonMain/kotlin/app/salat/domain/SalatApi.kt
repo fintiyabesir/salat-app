@@ -8,6 +8,7 @@ import app.salat.model.HighLatitudeRuleId
 import app.salat.model.MadhabId
 import app.salat.model.PrayerAdjustments
 import app.salat.model.PrayerDaySnapshot
+import app.salat.verification.OfficialSourceReferenceResolver
 
 /** Stable primitive-oriented entry point for Swift and other native platform code. */
 object SalatApi {
@@ -81,6 +82,15 @@ object SalatApi {
 
     fun starterCityEncoded(id: String): String? =
         StarterManualCityCatalog.byId(id)?.encode()
+
+    /**
+     * Encoded as sourceId<TAB>displayName<TAB>integrationStatus. This is reference
+     * metadata only and never implies that today's prayer values were verified.
+     */
+    fun officialSourceReferenceEncoded(countryCode: String): String? =
+        OfficialSourceReferenceResolver.resolve(countryCode)?.let { source ->
+            listOf(source.sourceId, source.displayName, source.status.name).joinToString("\t")
+        }
 
     fun qiblaBearing(latitude: Double, longitude: Double): Double =
         engine.qiblaBearing(latitude, longitude)
