@@ -10,29 +10,29 @@ struct PrayerDisplay: Identifiable {
 
 struct TodayPrayerDisplay {
     let locationName: String
+    let regionText: String
     let dateText: String
     let prayers: [PrayerDisplay]
     let nextPrayer: PrayerDisplay
 }
 
-/// Temporary Istanbul location until CoreLocation is wired. Prayer values themselves
-/// come from the shared KMP/Adhan engine rather than duplicated Swift calculations.
+/// Formats KMP prayer snapshots for SwiftUI. Prayer calculation remains entirely
+/// in the shared Kotlin/Adhan engine; Swift only supplies location and presentation.
 struct SharedPrayerProvider {
-    func today() -> TodayPrayerDisplay {
-        let timeZone = TimeZone(identifier: "Europe/Istanbul")!
+    func today(location: PrayerLocation, now: Date = Date()) -> TodayPrayerDisplay {
+        let timeZone = TimeZone(identifier: location.timeZoneId) ?? .current
         var calendar = Calendar(identifier: .gregorian)
         calendar.timeZone = timeZone
-        let now = Date()
         let components = calendar.dateComponents([.year, .month, .day], from: now)
 
         let snapshot = SalatApi.shared.calculateDaySnapshot(
             year: Int32(components.year!),
             month: Int32(components.month!),
             day: Int32(components.day!),
-            latitude: 41.005616,
-            longitude: 28.976380,
-            timeZoneId: "Europe/Istanbul",
-            countryCode: "TR"
+            latitude: location.latitude,
+            longitude: location.longitude,
+            timeZoneId: timeZone.identifier,
+            countryCode: location.countryCode
         )
 
         let rows = [
@@ -50,8 +50,17 @@ struct SharedPrayerProvider {
         dateFormatter.timeZone = timeZone
         dateFormatter.setLocalizedDateFormatFromTemplate("d MMM yyyy")
 
+        let region = [location.regionName, location.countryCode]
+            .compactMap { $0 }
+            .filter { !$0.isEmpty }
+            .reduce(into: [String]()) { values, item in
+                if !values.contains(item) { values.append(item) }
+            }
+            .joined(separator: " · ")
+
         return TodayPrayerDisplay(
-            locationName: "Istanbul",
+            locationName: location.displayName,
+            regionText: region,
             dateText: dateFormatter.string(from: now),
             prayers: rows,
             nextPrayer: next
