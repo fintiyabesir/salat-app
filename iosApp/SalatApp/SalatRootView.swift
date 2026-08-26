@@ -7,6 +7,7 @@ struct SalatRootView: View {
     @State private var showSettings = false
     @State private var showCityPicker = false
     private let notificationCoordinator = IOSPrayerNotificationCoordinator()
+    private let glanceTimelineStore = IOSGlanceTimelineStore()
 
     var body: some View {
         NavigationStack {
@@ -37,11 +38,13 @@ struct SalatRootView: View {
             .onChange(of: locationModel.location) { _, location in
                 if let location {
                     notificationCoordinator.rebuild(location: location, appSettings: settingsStore.value)
+                    glanceTimelineStore.rebuild(location: location, settings: settingsStore.value)
                 }
             }
             .onChange(of: settingsStore.value) { _, settings in
                 if let location = locationModel.location {
                     notificationCoordinator.rebuild(location: location, appSettings: settings)
+                    glanceTimelineStore.rebuild(location: location, settings: settings)
                 }
             }
             .onAppear {
