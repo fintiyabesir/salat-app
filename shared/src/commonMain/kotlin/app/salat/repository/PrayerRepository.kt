@@ -53,7 +53,7 @@ class PrayerRepository(
         if (official == null) return local.copy(verification = VerificationState.Unavailable(adapter.metadata.id))
 
         val maxDelta = PrayerComparator.maxDeltaMinutes(local, official)
-        cache.recordDelta(adapter.metadata.id, cacheLocationKey, date, maxDelta)
+        cache.recordDelta(adapter.metadata.id, cacheLocationKey, date, profile.id, maxDelta)
         val state = if (maxDelta <= expectedDeltaMinutes) {
             VerificationState.Verified(adapter.metadata.id, now, maxDelta)
         } else {
@@ -97,6 +97,7 @@ data class CachedPrayerDay(
     val day: PrayerDay,
     val fetchedAt: Instant,
     val refreshAfter: Instant,
+    val comparisonProfile: String? = null,
     val maxDeltaMinutes: Int? = null
 )
 
@@ -109,7 +110,13 @@ interface PrayerCache {
         fetchedAt: Instant,
         refreshAfter: Instant
     )
-    suspend fun recordDelta(sourceId: String, locationKey: String, date: LocalDate, maxDeltaMinutes: Int)
+    suspend fun recordDelta(
+        sourceId: String,
+        locationKey: String,
+        date: LocalDate,
+        calculationProfile: String,
+        maxDeltaMinutes: Int
+    )
 }
 
 class InMemoryPrayerCache : PrayerCache {
@@ -136,10 +143,14 @@ class InMemoryPrayerCache : PrayerCache {
         sourceId: String,
         locationKey: String,
         date: LocalDate,
+        calculationProfile: String,
         maxDeltaMinutes: Int
     ) {
         val key = PrayerCacheKey(sourceId, locationKey, date)
         val cached = data[key] ?: return
-        data[key] = cached.copy(maxDeltaMinutes = maxDeltaMinutes)
+        data[key] = cached.copy(
+            comparisonProfile = calculationProfile,
+            maxDeltaMinutes = maxDeltaMinutes
+        )
     }
 }
