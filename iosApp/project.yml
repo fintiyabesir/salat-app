@@ -26,6 +26,12 @@ targets:
       path: SalatApp/Info.plist
     entitlements:
       path: SalatApp/SalatApp.entitlements
+    preBuildScripts:
+      - name: Generate App Icon
+        script: |
+          python3 "$SRCROOT/../scripts/generate_app_icon.py" --output "$SRCROOT/SalatApp/Assets.xcassets/AppIcon.appiconset/AppIcon.png"
+        outputFiles:
+          - $(SRCROOT)/SalatApp/Assets.xcassets/AppIcon.appiconset/AppIcon.png
     settings:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: app.salat.mobile
@@ -34,6 +40,7 @@ targets:
         TARGETED_DEVICE_FAMILY: "1,2"
         SUPPORTS_MACCATALYST: NO
         CODE_SIGN_STYLE: Automatic
+        ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
         ARCHS: arm64
         ONLY_ACTIVE_ARCH: YES
     dependencies:
