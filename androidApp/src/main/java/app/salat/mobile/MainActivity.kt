@@ -30,6 +30,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -41,6 +42,7 @@ import java.time.Instant
 import java.time.LocalDate
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
+import java.util.Locale
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -72,11 +74,7 @@ private fun SalatApp(
             location = resolved
             resolving = false
             locationError = resolved == null
-            if (resolved != null) {
-                // Rebuilds only from already-saved user preferences and never asks
-                // for notification permission on its own.
-                notificationCoordinator.rebuild(resolved)
-            }
+            if (resolved != null) notificationCoordinator.rebuild(resolved)
         }
     }
 
@@ -95,16 +93,13 @@ private fun SalatApp(
             resolving = resolving,
             showError = locationError,
             onUseLocation = {
-                if (resolver.hasPermission()) {
-                    resolve()
-                } else {
-                    permissionLauncher.launch(
-                        arrayOf(
-                            Manifest.permission.ACCESS_FINE_LOCATION,
-                            Manifest.permission.ACCESS_COARSE_LOCATION
-                        )
+                if (resolver.hasPermission()) resolve()
+                else permissionLauncher.launch(
+                    arrayOf(
+                        Manifest.permission.ACCESS_FINE_LOCATION,
+                        Manifest.permission.ACCESS_COARSE_LOCATION
                     )
-                }
+                )
             }
         )
     } else {
@@ -124,15 +119,11 @@ private fun LocationStartScreen(
                 Modifier.padding(horizontal = 26.dp, vertical = 52.dp),
                 verticalArrangement = Arrangement.Center
             ) {
-                Text("SALAT", color = Sage, fontSize = 14.sp, letterSpacing = 3.sp, fontWeight = FontWeight.SemiBold)
+                Text(stringResource(R.string.brand_name), color = Sage, fontSize = 14.sp, letterSpacing = 3.sp, fontWeight = FontWeight.SemiBold)
                 Spacer(Modifier.height(16.dp))
-                Text("Prayer times for where you are", fontSize = 34.sp, lineHeight = 40.sp, fontWeight = FontWeight.Medium)
+                Text(stringResource(R.string.location_title), fontSize = 34.sp, lineHeight = 40.sp, fontWeight = FontWeight.Medium)
                 Spacer(Modifier.height(14.dp))
-                Text(
-                    "Your coordinates are used on this device to calculate prayer times and Qibla. Salat has no location server.",
-                    color = Color(0xFF6D716E),
-                    lineHeight = 22.sp
-                )
+                Text(stringResource(R.string.location_privacy), color = Color(0xFF6D716E), lineHeight = 22.sp)
                 Spacer(Modifier.height(28.dp))
                 Button(
                     onClick = onUseLocation,
@@ -141,15 +132,12 @@ private fun LocationStartScreen(
                     shape = RoundedCornerShape(18.dp),
                     modifier = Modifier.fillMaxWidth().height(56.dp)
                 ) {
-                    if (resolving) CircularProgressIndicator(color = Color.White) else Text("Use current location")
+                    if (resolving) CircularProgressIndicator(color = Color.White)
+                    else Text(stringResource(R.string.use_current_location))
                 }
                 if (showError) {
                     Spacer(Modifier.height(14.dp))
-                    Text(
-                        "Location is unavailable. Manual global city search will be the offline fallback before v1.",
-                        color = Color(0xFF9A5B45),
-                        lineHeight = 20.sp
-                    )
+                    Text(stringResource(R.string.location_unavailable), color = Color(0xFF9A5B45), lineHeight = 20.sp)
                 }
             }
         }
@@ -181,16 +169,15 @@ fun SalatTodayScreen(location: ResolvedLocation) {
                 Text(location.displayName, fontSize = 24.sp, fontWeight = FontWeight.SemiBold)
                 val regionLabel = listOfNotNull(location.regionName, location.countryCode).distinct().joinToString(" · ")
                 if (regionLabel.isNotBlank()) Text(regionLabel, color = Color(0xFF6D716E))
-                Text(today.format(DateTimeFormatter.ofPattern("d MMM yyyy")), color = Color(0xFF6D716E))
+                Text(
+                    today.format(DateTimeFormatter.ofPattern("d MMM yyyy", Locale.getDefault())),
+                    color = Color(0xFF6D716E)
+                )
                 Spacer(Modifier.height(28.dp))
                 NextPrayerCard(day, next, zone)
                 Spacer(Modifier.height(20.dp))
                 PrayerName.entries.forEach { prayer ->
-                    PrayerRow(
-                        name = prayer.label(),
-                        time = format(day, prayer, zone),
-                        active = prayer == next
-                    )
+                    PrayerRow(name = prayer.label(), time = format(day, prayer, zone), active = prayer == next)
                 }
             }
         }
@@ -199,10 +186,8 @@ fun SalatTodayScreen(location: ResolvedLocation) {
 
 @Composable
 private fun NextPrayerCard(day: PrayerDay, prayer: PrayerName, zone: ZoneId) {
-    Column(
-        Modifier.fillMaxWidth().background(Warm, RoundedCornerShape(28.dp)).padding(24.dp)
-    ) {
-        Text("NEXT PRAYER", color = Sage, fontSize = 12.sp, letterSpacing = 1.2.sp)
+    Column(Modifier.fillMaxWidth().background(Warm, RoundedCornerShape(28.dp)).padding(24.dp)) {
+        Text(stringResource(R.string.next_prayer), color = Sage, fontSize = 12.sp, letterSpacing = 1.2.sp)
         Text(prayer.label(), fontSize = 25.sp, fontWeight = FontWeight.Medium)
         Text(format(day, prayer, zone), fontSize = 54.sp, fontWeight = FontWeight.Light)
     }
@@ -223,14 +208,15 @@ private fun PrayerRow(name: String, time: String, active: Boolean = false) {
 
 private fun format(day: PrayerDay, prayer: PrayerName, zone: ZoneId): String {
     val javaInstant = Instant.ofEpochMilli(day.time(prayer).toEpochMilliseconds())
-    return DateTimeFormatter.ofPattern("HH:mm").withZone(zone).format(javaInstant)
+    return DateTimeFormatter.ofPattern("HH:mm", Locale.getDefault()).withZone(zone).format(javaInstant)
 }
 
+@Composable
 private fun PrayerName.label(): String = when (this) {
-    PrayerName.FAJR -> "Fajr"
-    PrayerName.SUNRISE -> "Sunrise"
-    PrayerName.DHUHR -> "Dhuhr"
-    PrayerName.ASR -> "Asr"
-    PrayerName.MAGHRIB -> "Maghrib"
-    PrayerName.ISHA -> "Isha"
+    PrayerName.FAJR -> stringResource(R.string.prayer_fajr)
+    PrayerName.SUNRISE -> stringResource(R.string.prayer_sunrise)
+    PrayerName.DHUHR -> stringResource(R.string.prayer_dhuhr)
+    PrayerName.ASR -> stringResource(R.string.prayer_asr)
+    PrayerName.MAGHRIB -> stringResource(R.string.prayer_maghrib)
+    PrayerName.ISHA -> stringResource(R.string.prayer_isha)
 }
