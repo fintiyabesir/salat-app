@@ -2,7 +2,7 @@ import Foundation
 
 enum L10n {
     private static let languageKey = "app.language"
-    private static let tables = ["Localizable", "Settings", "Qibla"]
+    private static let tables = ["Localizable", "Settings", "Qibla", "ManualCity"]
 
     static func text(_ key: String) -> String {
         for table in tables {
