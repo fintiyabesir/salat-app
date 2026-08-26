@@ -3,6 +3,7 @@ import SwiftUI
 @MainActor
 struct TodayView: View {
     @StateObject private var locationModel = IOSLocationModel()
+    private let notificationCoordinator = IOSPrayerNotificationCoordinator()
 
     var body: some View {
         NavigationStack {
@@ -14,6 +15,13 @@ struct TodayView: View {
                 }
             }
             .background(Color(red: 0.98, green: 0.97, blue: 0.95))
+            .onChange(of: locationModel.location) { location in
+                if let location {
+                    // Rebuilds only previously opted-in alerts. This never requests
+                    // notification permission just because location became available.
+                    notificationCoordinator.rebuild(location: location)
+                }
+            }
         }
     }
 
