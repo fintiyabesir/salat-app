@@ -1,0 +1,4 @@
+"qibla_compass_unavailable" = "Compass sensor unavailable";
+"qibla_calibrating" = "Calibrating compass…";
+"qibla_aligned" = "Aligned with Qibla";
+"qibla_accuracy_hint" = "Move the phone in a figure-eight to improve compass accuracy.";
