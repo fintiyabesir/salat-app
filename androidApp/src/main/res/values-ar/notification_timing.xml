@@ -1,0 +1,5 @@
+<resources>
+    <string name="notification_exact_timing_title">التوقيت الدقيق</string>
+    <string name="notification_exact_timing_explanation">اسمح بالتنبيهات الدقيقة كي تصل إشعارات الصلاة في الوقت المحسوب. بدون هذا الإذن قد يؤخر Android الإشعار.</string>
+    <string name="notification_exact_timing_action">السماح بالتوقيت الدقيق</string>
+</resources>
