@@ -4,6 +4,7 @@ import UserNotifications
 struct PrayerNotificationSettingsView: View {
     let prayer: PrayerDisplay
     let location: PrayerLocation
+    let appSettings: IOSAppSettings
 
     @Environment(\.dismiss) private var dismiss
     @State private var preference: IOSPrayerAlertPreference
@@ -12,9 +13,10 @@ struct PrayerNotificationSettingsView: View {
     private let scheduler = IOSPrayerNotificationScheduler()
     private let coordinator = IOSPrayerNotificationCoordinator()
 
-    init(prayer: PrayerDisplay, location: PrayerLocation) {
+    init(prayer: PrayerDisplay, location: PrayerLocation, appSettings: IOSAppSettings = .defaults) {
         self.prayer = prayer
         self.location = location
+        self.appSettings = appSettings
         let loaded = IOSPrayerNotificationSettingsStore().load()
             .first(where: { $0.prayerId == prayer.id })
             ?? IOSPrayerAlertPreference(
@@ -115,6 +117,6 @@ struct PrayerNotificationSettingsView: View {
             all.append(preference)
         }
         store.save(all)
-        coordinator.rebuild(location: location)
+        coordinator.rebuild(location: location, appSettings: appSettings)
     }
 }
