@@ -12,39 +12,64 @@ private struct CalendarDayDisplay: Identifiable {
 struct CalendarView: View {
     let location: PrayerLocation
     let settings: IOSAppSettings
+    @Environment(\.horizontalSizeClass) private var horizontalSizeClass
 
     var body: some View {
         ScrollView {
-            LazyVStack(spacing: 12) {
-                ForEach(days) { day in
-                    VStack(alignment: .leading, spacing: 10) {
-                        Text(day.dateText)
-                            .font(.headline)
-
-                        ForEach(day.prayers) { prayer in
-                            HStack {
-                                Text(prayer.name)
-                                Spacer()
-                                Text(prayer.time)
-                                    .fontWeight(.medium)
-                                    .foregroundStyle(.tint)
-                            }
-                            .padding(.vertical, 3)
-                        }
+            if horizontalSizeClass == .regular {
+                LazyVGrid(
+                    columns: [
+                        GridItem(.flexible(), spacing: 16, alignment: .top),
+                        GridItem(.flexible(), spacing: 16, alignment: .top)
+                    ],
+                    alignment: .center,
+                    spacing: 16
+                ) {
+                    ForEach(days) { day in
+                        dayCard(day)
                     }
-                    .padding(18)
-                    .frame(maxWidth: .infinity, alignment: .leading)
-                    .background(
-                        Color(uiColor: .secondarySystemBackground),
-                        in: RoundedRectangle(cornerRadius: 22)
-                    )
                 }
+                .frame(maxWidth: 1080)
+                .padding(.horizontal, 28)
+                .padding(.vertical, 18)
+                .frame(maxWidth: .infinity)
+            } else {
+                LazyVStack(spacing: 12) {
+                    ForEach(days) { day in
+                        dayCard(day)
+                    }
+                }
+                .padding(.horizontal, 18)
+                .padding(.vertical, 10)
             }
-            .padding(.horizontal, 18)
-            .padding(.vertical, 10)
         }
         .background(Color(uiColor: .systemBackground))
         .navigationTitle(L10n.text("calendar"))
+    }
+
+    @ViewBuilder
+    private func dayCard(_ day: CalendarDayDisplay) -> some View {
+        VStack(alignment: .leading, spacing: 10) {
+            Text(day.dateText)
+                .font(.headline)
+
+            ForEach(day.prayers) { prayer in
+                HStack {
+                    Text(prayer.name)
+                    Spacer()
+                    Text(prayer.time)
+                        .fontWeight(.medium)
+                        .foregroundStyle(.tint)
+                }
+                .padding(.vertical, 3)
+            }
+        }
+        .padding(18)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .background(
+            Color(uiColor: .secondarySystemBackground),
+            in: RoundedRectangle(cornerRadius: 22)
+        )
     }
 
     private var days: [CalendarDayDisplay] {
