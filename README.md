@@ -22,10 +22,11 @@ English, Chinese, Arabic, Turkish, Bengali, Malay, Urdu and Persian. Arabic, Per
 - Shared domain: Kotlin Multiplatform.
 - Prayer calculation: BatoulApps `adhan2`, wrapped behind `PrayerCalculator`.
 - Android phone/tablet: native Jetpack Compose.
-- iPhone/iPad: native SwiftUI.
+- iPhone/iPad: native SwiftUI using the same KMP calculation engine.
 - Apple Watch: native SwiftUI/WidgetKit; v1 does not depend on KMP watchOS runtime.
 - Wear OS: native Wear Compose.
 - Official-source verification: pluggable `OfficialSourceAdapter`s.
+- Persistent official timetable cache: SQLite on Android, `NSUserDefaults` on iOS, both behind the shared `PrayerCache` contract.
 
 See [Architecture](docs/ARCHITECTURE.md), [Product spec](docs/PRODUCT_SPEC.md), and [official source matrix](data/prayer_source_matrix.csv).
 
@@ -33,8 +34,8 @@ See [Architecture](docs/ARCHITECTURE.md), [Product spec](docs/PRODUCT_SPEC.md), 
 
 ```text
 shared/       KMP prayer/Qibla/verification domain
-androidApp/   Android phone/tablet native UI starter
-iosApp/       SwiftUI starter source
+androidApp/   Android phone/tablet native UI
+iosApp/       SwiftUI source wired to KMP
 prototype/    Browser UX prototype
 docs/         Product and architecture decisions
 data/         Official-source research matrix
@@ -50,11 +51,13 @@ data/         Official-source research matrix
 - [x] Official source adapter contract
 - [x] JAKIM e-Solat XML parser/adapter first pass
 - [x] Core regression tests
-- [x] Android/SwiftUI Today-screen starters
-- [ ] Location and timezone resolver
-- [ ] Persistent cache
+- [x] Android and SwiftUI Today screens backed by shared prayer calculation
+- [x] Android/iOS device location and timezone resolution
+- [x] Manual-city fallback domain contract and offline city-data strategy
+- [x] Persistent Android/iOS official timetable cache with refresh horizons and comparison deltas
+- [x] CI: JVM tests, Android APK compile, KMP iOS framework build, Swift source typecheck
 - [ ] Real mobile HTTP transport
-- [ ] Notification scheduler
+- [ ] Native notification schedulers
 - [ ] Calendar + Qibla production screens
 - [ ] Widgets / complications / Wear tiles
 - [ ] Remaining official-source adapters and legal review
@@ -77,7 +80,9 @@ Open `prototype/index.html` directly in a browser. It is self-contained and does
 
 ## Development notes
 
-The Gradle configuration targets current stable Android 16 / API 36 with Kotlin 2.4 and AGP 9.3. Platform projects will evolve as native app wiring is completed.
+The Android configuration targets Android 16 / API 36 with Kotlin 2.4 and AGP 9.3. Compose is pinned to the stable 2026.04 BOM because newer Compose generations require an Android API 37 compile SDK that is not yet available from the stable SDK channel used by CI.
+
+The CI workflow validates both platform paths: Ubuntu builds/tests shared + Android, while macOS builds the KMP iOS simulator framework and typechecks the SwiftUI source against it.
 
 ## Planning & privacy
 
@@ -86,5 +91,5 @@ The Gradle configuration targets current stable Android 16 / API 36 with Kotlin 
 - [Official source strategy](docs/OFFICIAL_SOURCES.md)
 - [Licensing status](docs/LICENSING.md)
 
-### Current Android starter
-The Android Today screen now reads prayer times from the shared `SalatEngine`/Adhan calculation path (using Istanbul as the temporary demo location until the location resolver is wired). It is no longer a hard-coded timetable.
+### Current platform starters
+Android and iOS now resolve device location with contextual permission and feed coordinates, country and timezone into the shared `SalatEngine`. Prayer calculation remains local; platform location data is not sent to a Salat backend.
