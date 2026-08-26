@@ -6,6 +6,10 @@ on:
   pull_request:
     branches: [ main ]
 
+concurrency:
+  group: core-ci-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   shared-core:
     runs-on: ubuntu-latest
