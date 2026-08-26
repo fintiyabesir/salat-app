@@ -8,7 +8,7 @@ struct TodayView: View {
 
     var body: some View {
         prayerContent(SharedPrayerProvider().today(location: location, settings: settings))
-            .background(Color(red: 0.98, green: 0.97, blue: 0.95))
+            .background(Color(uiColor: .systemBackground))
             .sheet(item: $selectedPrayer) { prayer in
                 PrayerNotificationSettingsView(prayer: prayer, location: location, appSettings: settings)
                     .presentationDetents([.medium, .large])
@@ -60,7 +60,7 @@ struct TodayView: View {
             Text(L10n.text("next_prayer"))
                 .font(.caption)
                 .tracking(1.2)
-                .foregroundStyle(Color(red: 0.27, green: 0.48, blue: 0.41))
+                .foregroundStyle(.tint)
             Text(model.nextPrayer.name).font(.title2)
             Text(model.nextPrayer.time)
                 .font(.system(size: horizontalSizeClass == .regular ? 64 : 56, weight: .light, design: .rounded))
@@ -68,7 +68,7 @@ struct TodayView: View {
         .padding(horizontalSizeClass == .regular ? 28 : 24)
         .frame(maxWidth: .infinity, alignment: .leading)
         .background(
-            Color(red: 0.96, green: 0.93, blue: 0.86),
+            Color(uiColor: .secondarySystemBackground),
             in: RoundedRectangle(cornerRadius: 28)
         )
     }
@@ -89,7 +89,7 @@ struct TodayView: View {
                     .padding(.horizontal, 14)
                     .padding(.vertical, 14)
                     .background(
-                        prayer.id == model.nextPrayer.id ? Color.orange.opacity(0.10) : Color.clear,
+                        prayer.id == model.nextPrayer.id ? Color.accentColor.opacity(0.10) : Color.clear,
                         in: RoundedRectangle(cornerRadius: 16)
                     )
                 }
