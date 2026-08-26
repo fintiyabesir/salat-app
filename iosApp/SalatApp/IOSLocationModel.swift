@@ -16,7 +16,7 @@ struct PrayerLocation: Equatable {
 }
 
 @MainActor
-final class IOSLocationModel: NSObject, ObservableObject, CLLocationManagerDelegate {
+final class IOSLocationModel: NSObject, ObservableObject, @preconcurrency CLLocationManagerDelegate {
     @Published private(set) var location: PrayerLocation?
     @Published private(set) var isResolving = false
     @Published private(set) var errorMessage: String?
