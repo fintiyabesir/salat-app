@@ -29,6 +29,13 @@ enum class CalculationMethodId {
 
 enum class MadhabId { SHAFI, HANAFI }
 
+enum class HighLatitudeRuleId {
+    AUTOMATIC,
+    MIDDLE_OF_THE_NIGHT,
+    SEVENTH_OF_THE_NIGHT,
+    TWILIGHT_ANGLE
+}
+
 data class PrayerAdjustments(
     val fajr: Int = 0,
     val sunrise: Int = 0,
@@ -36,12 +43,27 @@ data class PrayerAdjustments(
     val asr: Int = 0,
     val maghrib: Int = 0,
     val isha: Int = 0
-)
+) {
+    fun isZero(): Boolean = fajr == 0 && sunrise == 0 && dhuhr == 0 && asr == 0 && maghrib == 0 && isha == 0
+}
+
+data class CalculationPreferences(
+    val methodOverride: CalculationMethodId? = null,
+    val madhabOverride: MadhabId? = null,
+    val highLatitudeRule: HighLatitudeRuleId = HighLatitudeRuleId.AUTOMATIC,
+    val adjustments: PrayerAdjustments = PrayerAdjustments()
+) {
+    fun isDefault(): Boolean = methodOverride == null &&
+        madhabOverride == null &&
+        highLatitudeRule == HighLatitudeRuleId.AUTOMATIC &&
+        adjustments.isZero()
+}
 
 data class CalculationProfile(
     val id: String,
     val method: CalculationMethodId,
     val madhab: MadhabId = MadhabId.SHAFI,
+    val highLatitudeRule: HighLatitudeRuleId = HighLatitudeRuleId.AUTOMATIC,
     val adjustments: PrayerAdjustments = PrayerAdjustments()
 )
 
