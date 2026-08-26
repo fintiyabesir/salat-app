@@ -62,7 +62,7 @@ struct SharedPrayerProvider {
 
         let dateFormatter = DateFormatter()
         dateFormatter.timeZone = timeZone
-        dateFormatter.locale = .current
+        dateFormatter.locale = L10n.selectedLocale
         dateFormatter.setLocalizedDateFormatFromTemplate("d MMM yyyy")
 
         let region = [location.regionName, location.countryCode]
@@ -85,7 +85,7 @@ struct SharedPrayerProvider {
     private func format(_ epochMillis: Int64, _ timeZone: TimeZone) -> String {
         let formatter = DateFormatter()
         formatter.timeZone = timeZone
-        formatter.locale = .current
+        formatter.locale = L10n.selectedLocale
         formatter.dateFormat = "HH:mm"
         return formatter.string(from: Date(timeIntervalSince1970: Double(epochMillis) / 1000.0))
     }
