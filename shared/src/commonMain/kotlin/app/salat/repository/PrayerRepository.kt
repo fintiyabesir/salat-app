@@ -32,9 +32,12 @@ class PrayerRepository(
         val adapter = adapters.firstOrNull { it.supports(countryCode, regionCode) }
             ?: return local.copy(verification = VerificationState.Unavailable(null))
 
-        val official = cache.official(adapter.metadata.id, date) ?: runCatching {
-            adapter.fetch(VerificationRequest(date..date, point, timeZoneId, locationKey)).firstOrNull()
-        }.getOrNull()?.also { cache.putOfficial(adapter.metadata.id, it) }
+        val cacheLocationKey = locationKey ?: coordinateKey(point)
+        val official = cache.official(adapter.metadata.id, cacheLocationKey, date) ?: runCatching {
+            adapter.fetch(VerificationRequest(date..date, point, timeZoneId, locationKey))
+        }.getOrNull()?.also { days ->
+            cache.putOfficial(adapter.metadata.id, cacheLocationKey, days)
+        }?.firstOrNull { it.date == date }
 
         if (official == null) return local.copy(verification = VerificationState.Unavailable(adapter.metadata.id))
 
@@ -50,6 +53,11 @@ class PrayerRepository(
             SourcePreference.COMPARE_ONLY -> local.copy(verification = state)
         }
     }
+
+    private fun coordinateKey(point: GeoPoint): String =
+        "${quantize(point.latitude)},${quantize(point.longitude)}"
+
+    private fun quantize(value: Double): Double = (value * 10_000.0).toInt() / 10_000.0
 }
 
 object PrayerComparator {
@@ -58,15 +66,24 @@ object PrayerComparator {
     }
 }
 
+data class PrayerCacheKey(
+    val sourceId: String,
+    val locationKey: String,
+    val date: LocalDate
+)
+
 interface PrayerCache {
-    suspend fun official(sourceId: String, date: LocalDate): PrayerDay?
-    suspend fun putOfficial(sourceId: String, day: PrayerDay)
+    suspend fun official(sourceId: String, locationKey: String, date: LocalDate): PrayerDay?
+    suspend fun putOfficial(sourceId: String, locationKey: String, days: List<PrayerDay>)
 }
 
 class InMemoryPrayerCache : PrayerCache {
-    private val data = mutableMapOf<Pair<String, LocalDate>, PrayerDay>()
-    override suspend fun official(sourceId: String, date: LocalDate): PrayerDay? = data[sourceId to date]
-    override suspend fun putOfficial(sourceId: String, day: PrayerDay) {
-        data[sourceId to day.date] = day
+    private val data = mutableMapOf<PrayerCacheKey, PrayerDay>()
+
+    override suspend fun official(sourceId: String, locationKey: String, date: LocalDate): PrayerDay? =
+        data[PrayerCacheKey(sourceId, locationKey, date)]
+
+    override suspend fun putOfficial(sourceId: String, locationKey: String, days: List<PrayerDay>) {
+        days.forEach { day -> data[PrayerCacheKey(sourceId, locationKey, day.date)] = day }
     }
 }
