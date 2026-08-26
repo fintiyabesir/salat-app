@@ -2,14 +2,15 @@ import SwiftUI
 
 struct TodayView: View {
     let location: PrayerLocation
+    let settings: IOSAppSettings
     @Environment(\.horizontalSizeClass) private var horizontalSizeClass
     @State private var selectedPrayer: PrayerDisplay?
 
     var body: some View {
-        prayerContent(SharedPrayerProvider().today(location: location))
+        prayerContent(SharedPrayerProvider().today(location: location, settings: settings))
             .background(Color(red: 0.98, green: 0.97, blue: 0.95))
             .sheet(item: $selectedPrayer) { prayer in
-                PrayerNotificationSettingsView(prayer: prayer, location: location)
+                PrayerNotificationSettingsView(prayer: prayer, location: location, appSettings: settings)
                     .presentationDetents([.medium, .large])
             }
     }
