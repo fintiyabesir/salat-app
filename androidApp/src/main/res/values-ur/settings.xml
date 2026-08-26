@@ -1,0 +1,25 @@
+<resources>
+    <string name="settings_calculation_method">حساب کا طریقہ</string>
+    <string name="settings_asr_method">عصر کا طریقہ</string>
+    <string name="settings_high_latitude">بلند عرض البلد</string>
+    <string name="settings_prayer_adjustments">نماز کے اوقات کی درستگی</string>
+    <string name="settings_hijri_calendar">ہجری کیلنڈر</string>
+    <string name="settings_hijri_day_adjustment">ہجری دن کی درستگی</string>
+    <string name="settings_language">زبان</string>
+    <string name="settings_appearance">ظاہری شکل</string>
+    <string name="settings_automatic">خودکار</string>
+    <string name="settings_standard_shafi">معیاری / شافعی</string>
+    <string name="settings_hanafi">حنفی</string>
+    <string name="settings_middle_night">نصف شب</string>
+    <string name="settings_seventh_night">رات کا ساتواں حصہ</string>
+    <string name="settings_twilight_angle">شفق کا زاویہ</string>
+    <string name="settings_system">سسٹم</string>
+    <string name="settings_light">روشن</string>
+    <string name="settings_dark">گہرا</string>
+    <string name="settings_location">مقام</string>
+    <string name="settings_place">جگہ</string>
+    <string name="settings_timezone">ٹائم زون</string>
+    <string name="settings_method">طریقہ</string>
+    <string name="settings_day_adjustment">دن کی درستگی</string>
+    <string name="settings_minutes">%1$d منٹ</string>
+</resources>
