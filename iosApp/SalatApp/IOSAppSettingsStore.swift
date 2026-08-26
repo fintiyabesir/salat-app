@@ -55,8 +55,8 @@ final class IOSAppSettingsStore: ObservableObject {
         var copy = value
         transform(&copy)
         copy.hijriDayAdjustment = min(2, max(-2, copy.hijriDayAdjustment))
-        value = copy
         save(copy)
+        value = copy
     }
 
     private func save(_ value: IOSAppSettings) {
