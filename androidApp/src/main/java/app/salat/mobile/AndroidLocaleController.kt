@@ -3,6 +3,7 @@ package app.salat.mobile
 import android.app.LocaleManager
 import android.content.Context
 import android.content.res.Configuration
+import android.content.res.Resources
 import android.os.Build
 import android.os.LocaleList
 import java.util.Locale
@@ -16,7 +17,8 @@ object AndroidLocaleController {
             return
         }
 
-        val locale = if (tag.isBlank()) Locale.getDefault() else Locale.forLanguageTag(tag)
+        val systemLocale = Resources.getSystem().configuration.locales[0]
+        val locale = if (tag.isBlank()) systemLocale else Locale.forLanguageTag(tag)
         Locale.setDefault(locale)
         val resources = context.resources
         val configuration = Configuration(resources.configuration)
