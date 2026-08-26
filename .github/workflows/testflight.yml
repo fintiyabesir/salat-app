@@ -1,0 +1,314 @@
+name: TestFlight Release
+
+on:
+  push:
+    branches: [ main ]
+    paths:
+      - '.github/workflows/testflight.yml'
+      - 'iosApp/**'
+      - 'shared/**'
+      - 'resources/**'
+      - 'scripts/generate_app_icon.py'
+  pull_request:
+    branches: [ main ]
+  workflow_dispatch:
+    inputs:
+      build_number:
+        description: TestFlight build number
+        required: true
+        default: '1'
+        type: string
+      upload_to_testflight:
+        description: Sign, export and upload to TestFlight
+        required: true
+        default: false
+        type: boolean
+
+permissions:
+  contents: read
+
+jobs:
+  release-preflight:
+    if: github.event_name == 'workflow_dispatch' || github.event_name == 'push' || startsWith(github.head_ref, 'release/')
+    runs-on: macos-15
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Resolve build number
+        shell: bash
+        run: |
+          if [[ "$GITHUB_EVENT_NAME" == "workflow_dispatch" ]]; then
+            echo "BUILD_NUMBER=${{ inputs.build_number }}" >> "$GITHUB_ENV"
+          else
+            echo "BUILD_NUMBER=1" >> "$GITHUB_ENV"
+          fi
+          echo "MARKETING_VERSION=0.1.0" >> "$GITHUB_ENV"
+
+      - name: Select App Store compatible Xcode
+        run: |
+          sudo xcode-select -s /Applications/Xcode_26.3.app/Contents/Developer
+          xcodebuild -version
+          xcodebuild -version | grep -q '^Xcode 26\.'
+
+      - uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: '21'
+
+      - uses: android-actions/setup-android@v4
+        with:
+          packages: platform-tools
+
+      - name: Install Android SDK for KMP configuration
+        run: sdkmanager "platforms;android-36" "build-tools;36.0.0"
+
+      - uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: '9.5.1'
+
+      - name: Build release KMP framework for physical iOS devices
+        run: gradle :shared:linkReleaseFrameworkIosArm64 --stacktrace
+
+      - name: Install XcodeGen
+        run: brew install xcodegen
+
+      - name: Generate release Xcode project
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          source = Path('iosApp/project.yml').read_text(encoding='utf-8')
+          debug_framework = '../shared/build/bin/iosSimulatorArm64/debugFramework/SalatShared.framework'
+          release_framework = '../shared/build/bin/iosArm64/releaseFramework/SalatShared.framework'
+          if debug_framework not in source:
+              raise SystemExit('Expected simulator framework dependency was not found in project.yml')
+          Path('iosApp/project.release.generated.yml').write_text(
+              source.replace(debug_framework, release_framework), encoding='utf-8'
+          )
+          PY
+          xcodegen generate --spec "$GITHUB_WORKSPACE/iosApp/project.release.generated.yml" --project "$GITHUB_WORKSPACE/iosApp"
+
+      - name: Validate privacy manifests
+        run: |
+          plutil -lint iosApp/SalatApp/PrivacyInfo.xcprivacy
+          plutil -lint iosApp/SalatWidget/PrivacyInfo.xcprivacy
+          grep -q 'NSPrivacyAccessedAPICategoryUserDefaults' iosApp/SalatApp/PrivacyInfo.xcprivacy
+          grep -q 'CA92.1' iosApp/SalatApp/PrivacyInfo.xcprivacy
+          grep -q '1C8F.1' iosApp/SalatApp/PrivacyInfo.xcprivacy
+
+      - name: Build unsigned Release archive
+        run: |
+          set -o pipefail
+          xcodebuild \
+            -project iosApp/SalatApp.xcodeproj \
+            -scheme SalatApp \
+            -configuration Release \
+            -sdk iphoneos \
+            -destination 'generic/platform=iOS' \
+            -archivePath "$RUNNER_TEMP/Salat.xcarchive" \
+            CURRENT_PROJECT_VERSION="$BUILD_NUMBER" \
+            MARKETING_VERSION="$MARKETING_VERSION" \
+            CODE_SIGNING_ALLOWED=NO \
+            CODE_SIGNING_REQUIRED=NO \
+            clean archive
+
+      - name: Verify release archive contents
+        run: |
+          APP="$RUNNER_TEMP/Salat.xcarchive/Products/Applications/Salat.app"
+          WIDGET="$APP/PlugIns/SalatWidgetExtension.appex"
+          test -d "$APP"
+          test -d "$WIDGET"
+          test -f "$APP/PrivacyInfo.xcprivacy"
+          test -f "$WIDGET/PrivacyInfo.xcprivacy"
+          test -f "$APP/Assets.car"
+          test -f "$APP/city_catalog.tsv"
+          /usr/libexec/PlistBuddy -c 'Print :CFBundleIcons' "$APP/Info.plist" >/dev/null
+          test "$(/usr/libexec/PlistBuddy -c 'Print :CFBundleShortVersionString' "$APP/Info.plist")" = "$MARKETING_VERSION"
+          test "$(/usr/libexec/PlistBuddy -c 'Print :CFBundleVersion' "$APP/Info.plist")" = "$BUILD_NUMBER"
+          test "$(/usr/libexec/PlistBuddy -c 'Print :ITSAppUsesNonExemptEncryption' "$APP/Info.plist")" = "false"
+
+      - name: Package release preflight archive
+        run: ditto -c -k --sequesterRsrc --keepParent "$RUNNER_TEMP/Salat.xcarchive" "$RUNNER_TEMP/Salat-Release-Preflight.zip"
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: salat-ios-release-preflight
+          path: ${{ runner.temp }}/Salat-Release-Preflight.zip
+          retention-days: 7
+
+  testflight-upload:
+    if: github.event_name == 'workflow_dispatch' && inputs.upload_to_testflight == true
+    needs: release-preflight
+    runs-on: macos-15
+    env:
+      APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
+      APPLE_DISTRIBUTION_CERTIFICATE_BASE64: ${{ secrets.APPLE_DISTRIBUTION_CERTIFICATE_BASE64 }}
+      APPLE_DISTRIBUTION_CERTIFICATE_PASSWORD: ${{ secrets.APPLE_DISTRIBUTION_CERTIFICATE_PASSWORD }}
+      APP_STORE_CONNECT_API_KEY_ID: ${{ secrets.APP_STORE_CONNECT_API_KEY_ID }}
+      APP_STORE_CONNECT_ISSUER_ID: ${{ secrets.APP_STORE_CONNECT_ISSUER_ID }}
+      APP_STORE_CONNECT_API_PRIVATE_KEY_BASE64: ${{ secrets.APP_STORE_CONNECT_API_PRIVATE_KEY_BASE64 }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Check signing and App Store Connect secrets
+        shell: bash
+        run: |
+          missing=0
+          for name in \
+            APPLE_TEAM_ID \
+            APPLE_DISTRIBUTION_CERTIFICATE_BASE64 \
+            APPLE_DISTRIBUTION_CERTIFICATE_PASSWORD \
+            APP_STORE_CONNECT_API_KEY_ID \
+            APP_STORE_CONNECT_ISSUER_ID \
+            APP_STORE_CONNECT_API_PRIVATE_KEY_BASE64; do
+            if [[ -z "${!name}" ]]; then
+              echo "::error::$name is not configured in repository secrets"
+              missing=1
+            else
+              echo "$name is configured"
+            fi
+          done
+          exit "$missing"
+
+      - name: Resolve release version
+        run: |
+          echo "BUILD_NUMBER=${{ inputs.build_number }}" >> "$GITHUB_ENV"
+          echo "MARKETING_VERSION=0.1.0" >> "$GITHUB_ENV"
+
+      - name: Select Xcode 26.3
+        run: |
+          sudo xcode-select -s /Applications/Xcode_26.3.app/Contents/Developer
+          xcodebuild -version
+          xcodebuild -version | grep -q '^Xcode 26\.'
+
+      - uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: '21'
+
+      - uses: android-actions/setup-android@v4
+        with:
+          packages: platform-tools
+
+      - name: Install Android SDK for KMP configuration
+        run: sdkmanager "platforms;android-36" "build-tools;36.0.0"
+
+      - uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: '9.5.1'
+
+      - name: Build release KMP framework
+        run: gradle :shared:linkReleaseFrameworkIosArm64 --stacktrace
+
+      - name: Install XcodeGen
+        run: brew install xcodegen
+
+      - name: Generate release Xcode project
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          source = Path('iosApp/project.yml').read_text(encoding='utf-8')
+          source = source.replace(
+              '../shared/build/bin/iosSimulatorArm64/debugFramework/SalatShared.framework',
+              '../shared/build/bin/iosArm64/releaseFramework/SalatShared.framework'
+          )
+          Path('iosApp/project.release.generated.yml').write_text(source, encoding='utf-8')
+          PY
+          xcodegen generate --spec "$GITHUB_WORKSPACE/iosApp/project.release.generated.yml" --project "$GITHUB_WORKSPACE/iosApp"
+
+      - name: Install Apple distribution certificate
+        shell: bash
+        run: |
+          CERTIFICATE_PATH="$RUNNER_TEMP/distribution.p12"
+          KEYCHAIN_PATH="$RUNNER_TEMP/salat-signing.keychain-db"
+          KEYCHAIN_PASSWORD="$(uuidgen)"
+          echo "$APPLE_DISTRIBUTION_CERTIFICATE_BASE64" | base64 --decode > "$CERTIFICATE_PATH"
+          security create-keychain -p "$KEYCHAIN_PASSWORD" "$KEYCHAIN_PATH"
+          security set-keychain-settings -lut 21600 "$KEYCHAIN_PATH"
+          security unlock-keychain -p "$KEYCHAIN_PASSWORD" "$KEYCHAIN_PATH"
+          security import "$CERTIFICATE_PATH" -P "$APPLE_DISTRIBUTION_CERTIFICATE_PASSWORD" -A -t cert -f pkcs12 -k "$KEYCHAIN_PATH"
+          security set-key-partition-list -S apple-tool:,apple: -k "$KEYCHAIN_PASSWORD" "$KEYCHAIN_PATH"
+          security list-keychain -d user -s "$KEYCHAIN_PATH" login.keychain-db
+          echo "SIGNING_KEYCHAIN=$KEYCHAIN_PATH" >> "$GITHUB_ENV"
+
+      - name: Install App Store Connect API key
+        shell: bash
+        run: |
+          API_KEY_DIR="$RUNNER_TEMP/private_keys"
+          mkdir -p "$API_KEY_DIR"
+          API_KEY_PATH="$API_KEY_DIR/AuthKey_${APP_STORE_CONNECT_API_KEY_ID}.p8"
+          echo "$APP_STORE_CONNECT_API_PRIVATE_KEY_BASE64" | base64 --decode > "$API_KEY_PATH"
+          chmod 600 "$API_KEY_PATH"
+          echo "API_KEY_DIR=$API_KEY_DIR" >> "$GITHUB_ENV"
+          echo "API_KEY_PATH=$API_KEY_PATH" >> "$GITHUB_ENV"
+
+      - name: Archive signed App Store build
+        shell: bash
+        run: |
+          set -o pipefail
+          xcodebuild \
+            -project iosApp/SalatApp.xcodeproj \
+            -scheme SalatApp \
+            -configuration Release \
+            -sdk iphoneos \
+            -destination 'generic/platform=iOS' \
+            -archivePath "$RUNNER_TEMP/Salat.xcarchive" \
+            DEVELOPMENT_TEAM="$APPLE_TEAM_ID" \
+            CODE_SIGN_STYLE=Automatic \
+            CURRENT_PROJECT_VERSION="$BUILD_NUMBER" \
+            MARKETING_VERSION="$MARKETING_VERSION" \
+            -allowProvisioningUpdates \
+            -authenticationKeyPath "$API_KEY_PATH" \
+            -authenticationKeyID "$APP_STORE_CONNECT_API_KEY_ID" \
+            -authenticationKeyIssuerID "$APP_STORE_CONNECT_ISSUER_ID" \
+            clean archive
+
+      - name: Export signed IPA
+        shell: bash
+        run: |
+          cp iosApp/ExportOptions-AppStore.plist "$RUNNER_TEMP/ExportOptions.plist"
+          /usr/libexec/PlistBuddy -c "Add :teamID string $APPLE_TEAM_ID" "$RUNNER_TEMP/ExportOptions.plist"
+          xcodebuild \
+            -exportArchive \
+            -archivePath "$RUNNER_TEMP/Salat.xcarchive" \
+            -exportPath "$RUNNER_TEMP/export" \
+            -exportOptionsPlist "$RUNNER_TEMP/ExportOptions.plist" \
+            -allowProvisioningUpdates \
+            -authenticationKeyPath "$API_KEY_PATH" \
+            -authenticationKeyID "$APP_STORE_CONNECT_API_KEY_ID" \
+            -authenticationKeyIssuerID "$APP_STORE_CONNECT_ISSUER_ID"
+          IPA="$(find "$RUNNER_TEMP/export" -maxdepth 1 -name '*.ipa' -print -quit)"
+          test -n "$IPA"
+          echo "IPA_PATH=$IPA" >> "$GITHUB_ENV"
+
+      - name: Validate IPA with App Store Connect
+        env:
+          API_PRIVATE_KEYS_DIR: ${{ runner.temp }}/private_keys
+        run: |
+          xcrun altool --validate-app \
+            --type ios \
+            --file "$IPA_PATH" \
+            --apiKey "$APP_STORE_CONNECT_API_KEY_ID" \
+            --apiIssuer "$APP_STORE_CONNECT_ISSUER_ID"
+
+      - name: Upload Build to TestFlight
+        env:
+          API_PRIVATE_KEYS_DIR: ${{ runner.temp }}/private_keys
+        run: |
+          xcrun altool --upload-app \
+            --type ios \
+            --file "$IPA_PATH" \
+            --apiKey "$APP_STORE_CONNECT_API_KEY_ID" \
+            --apiIssuer "$APP_STORE_CONNECT_ISSUER_ID"
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: salat-ios-testflight-ipa-${{ inputs.build_number }}
+          path: ${{ env.IPA_PATH }}
+          retention-days: 7
+
+      - name: Remove temporary signing keychain
+        if: always()
+        run: |
+          if [[ -n "${SIGNING_KEYCHAIN:-}" && -f "$SIGNING_KEYCHAIN" ]]; then
+            security delete-keychain "$SIGNING_KEYCHAIN" || true
+          fi
