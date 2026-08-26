@@ -1,0 +1,49 @@
+name: SalatApp
+options:
+  minimumXcodeGenVersion: 2.42.0
+  createIntermediateGroups: true
+settings:
+  base:
+    IPHONEOS_DEPLOYMENT_TARGET: "17.0"
+    SWIFT_VERSION: "5.0"
+    CURRENT_PROJECT_VERSION: "1"
+    MARKETING_VERSION: "0.1.0"
+
+targets:
+  SalatApp:
+    type: application
+    platform: iOS
+    deploymentTarget: "17.0"
+    sources:
+      - path: SalatApp
+        excludes:
+          - Info.plist
+    info:
+      path: SalatApp/Info.plist
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: app.salat.mobile
+        PRODUCT_NAME: Salat
+        GENERATE_INFOPLIST_FILE: NO
+        TARGETED_DEVICE_FAMILY: "1,2"
+        SUPPORTS_MACCATALYST: NO
+        CODE_SIGN_STYLE: Automatic
+    dependencies:
+      - framework: ../shared/build/bin/iosSimulatorArm64/debugFramework/SalatShared.framework
+        embed: false
+
+schemes:
+  SalatApp:
+    build:
+      targets:
+        SalatApp: all
+    run:
+      config: Debug
+    test:
+      config: Debug
+    profile:
+      config: Release
+    analyze:
+      config: Debug
+    archive:
+      config: Release
