@@ -1,0 +1,9 @@
+<resources>
+    <string name="app_name">Salat</string><string name="brand_name">SALAT</string>
+    <string name="location_title">您所在位置的禮拜時間</string><string name="location_privacy">您的位置僅在本裝置上用於計算禮拜時間和朝向。Salat 不會把您的位置傳送到伺服器。</string>
+    <string name="use_current_location">使用目前位置</string><string name="location_unavailable">無法取得位置。請手動選擇城市。</string>
+    <string name="next_prayer">下一次禮拜</string><string name="today">今天</string><string name="calendar">日曆</string><string name="qibla">朝向</string><string name="settings">設定</string><string name="notifications">通知</string>
+    <string name="prayer_fajr">晨禮</string><string name="prayer_sunrise">日出</string><string name="prayer_dhuhr">晌禮</string><string name="prayer_asr">晡禮</string><string name="prayer_maghrib">昏禮</string><string name="prayer_isha">宵禮</string>
+    <string name="prayer_in_minutes">距離%1$s還有%2$d分鐘</string><string name="prayer_time_now">%1$s時間已到</string>
+    <string name="notification_at_time">禮拜時間</string><string name="notification_minutes_before">提前%1$d分鐘</string><string name="notification_sound_system">系統聲音</string><string name="notification_sound_silent">靜音</string><string name="notification_sound_short_adhan">短宣禮聲</string>
+</resources>
