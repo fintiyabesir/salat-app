@@ -44,7 +44,7 @@ jobs:
           PY
           node --check /tmp/salat-prototype.js
 
-  ios-source:
+  ios-app:
     runs-on: macos-15
     steps:
       - uses: actions/checkout@v4
@@ -62,14 +62,23 @@ jobs:
           gradle-version: '9.5.1'
       - name: Build shared iOS simulator framework
         run: gradle :shared:linkDebugFrameworkIosSimulatorArm64 --stacktrace
-      - name: Typecheck SwiftUI source against shared framework
+      - name: Install XcodeGen
+        run: brew install xcodegen
+      - name: Generate Xcode project
+        run: xcodegen generate --spec iosApp/project.yml --project iosApp
+      - name: Build iOS simulator app
         run: |
-          SDK="$(xcrun --sdk iphonesimulator --show-sdk-path)"
-          FRAMEWORK_DIR="$PWD/shared/build/bin/iosSimulatorArm64/debugFramework"
-          xcrun swiftc \
-            -typecheck \
-            -sdk "$SDK" \
-            -target arm64-apple-ios17.0-simulator \
-            -F "$FRAMEWORK_DIR" \
-            -framework SalatShared \
-            iosApp/SalatApp/*.swift
+          set -o pipefail
+          xcodebuild \
+            -project iosApp/SalatApp.xcodeproj \
+            -scheme SalatApp \
+            -configuration Debug \
+            -sdk iphonesimulator \
+            -destination 'generic/platform=iOS Simulator' \
+            -derivedDataPath "$RUNNER_TEMP/SalatDerivedData" \
+            CODE_SIGNING_ALLOWED=NO \
+            build
+      - name: Verify built app bundle
+        run: |
+          test -d "$RUNNER_TEMP/SalatDerivedData/Build/Products/Debug-iphonesimulator/Salat.app"
+          test -f "$RUNNER_TEMP/SalatDerivedData/Build/Products/Debug-iphonesimulator/Salat.app/Info.plist"
