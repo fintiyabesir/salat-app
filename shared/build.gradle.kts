@@ -6,7 +6,7 @@ plugins {
 kotlin {
     android {
         namespace = "app.salat.shared"
-        compileSdk = 37
+        compileSdk = 36
         minSdk = 26
     }
 
