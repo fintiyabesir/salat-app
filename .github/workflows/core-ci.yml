@@ -41,3 +41,33 @@ jobs:
           pathlib.Path('/tmp/salat-prototype.js').write_text(script.group(1), encoding='utf-8')
           PY
           node --check /tmp/salat-prototype.js
+
+  ios-source:
+    runs-on: macos-15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: '21'
+      - uses: android-actions/setup-android@v4
+        with:
+          packages: platform-tools
+      - name: Install Android compile SDK for KMP project configuration
+        run: sdkmanager "platforms;android-36" "build-tools;36.0.0"
+      - uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: '9.5.1'
+      - name: Build shared iOS simulator framework
+        run: gradle :shared:linkDebugFrameworkIosSimulatorArm64 --stacktrace
+      - name: Typecheck SwiftUI source against shared framework
+        run: |
+          SDK="$(xcrun --sdk iphonesimulator --show-sdk-path)"
+          FRAMEWORK_DIR="$PWD/shared/build/bin/iosSimulatorArm64/debugFramework"
+          xcrun swiftc \
+            -typecheck \
+            -sdk "$SDK" \
+            -target arm64-apple-ios17.0-simulator \
+            -F "$FRAMEWORK_DIR" \
+            -framework SalatShared \
+            iosApp/SalatApp/*.swift
