@@ -5,7 +5,9 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -14,6 +16,9 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.foundation.lazy.grid.items as gridItems
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.IconButton
@@ -210,35 +215,56 @@ private fun SalatCalendarScreen(
         }
     }
 
-    LazyColumn(
-        modifier = Modifier.fillMaxSize().padding(horizontal = 18.dp),
-        verticalArrangement = Arrangement.spacedBy(10.dp)
-    ) {
-        item { Spacer(Modifier.height(6.dp)) }
-        items(days) { item ->
-            Column(
-                Modifier.fillMaxWidth()
-                    .background(if (dark) ShellCardDark else Color.White.copy(alpha = 0.72f), RoundedCornerShape(22.dp))
-                    .padding(18.dp)
+    BoxWithConstraints(Modifier.fillMaxSize()) {
+        if (maxWidth >= 700.dp) {
+            LazyVerticalGrid(
+                columns = GridCells.Fixed(2),
+                modifier = Modifier.fillMaxSize(),
+                contentPadding = PaddingValues(horizontal = 28.dp, vertical = 14.dp),
+                horizontalArrangement = Arrangement.spacedBy(16.dp),
+                verticalArrangement = Arrangement.spacedBy(16.dp)
             ) {
-                Text(
-                    item.date.format(DateTimeFormatter.ofPattern("EEEE, d MMMM", locale)),
-                    fontSize = 18.sp,
-                    fontWeight = FontWeight.SemiBold
-                )
-                Spacer(Modifier.height(10.dp))
-                item.rows.forEach { (prayer, time) ->
-                    Row(
-                        Modifier.fillMaxWidth().padding(vertical = 4.dp),
-                        horizontalArrangement = Arrangement.SpaceBetween
-                    ) {
-                        Text(prayer.localizedLabel())
-                        Text(time, color = MaterialTheme.colorScheme.primary, fontWeight = FontWeight.Medium)
-                    }
+                gridItems(days, key = { it.date }) { item ->
+                    CalendarDayCard(item, dark, locale)
                 }
             }
+        } else {
+            LazyColumn(
+                modifier = Modifier.fillMaxSize().padding(horizontal = 18.dp),
+                verticalArrangement = Arrangement.spacedBy(10.dp)
+            ) {
+                item { Spacer(Modifier.height(6.dp)) }
+                items(days, key = { it.date }) { item ->
+                    CalendarDayCard(item, dark, locale)
+                }
+                item { Spacer(Modifier.height(12.dp)) }
+            }
         }
-        item { Spacer(Modifier.height(12.dp)) }
+    }
+}
+
+@Composable
+private fun CalendarDayCard(item: CalendarDayUi, dark: Boolean, locale: java.util.Locale) {
+    Column(
+        Modifier.fillMaxWidth()
+            .background(if (dark) ShellCardDark else Color.White.copy(alpha = 0.72f), RoundedCornerShape(22.dp))
+            .padding(18.dp)
+    ) {
+        Text(
+            item.date.format(DateTimeFormatter.ofPattern("EEEE, d MMMM", locale)),
+            fontSize = 18.sp,
+            fontWeight = FontWeight.SemiBold
+        )
+        Spacer(Modifier.height(10.dp))
+        item.rows.forEach { (prayer, time) ->
+            Row(
+                Modifier.fillMaxWidth().padding(vertical = 4.dp),
+                horizontalArrangement = Arrangement.SpaceBetween
+            ) {
+                Text(prayer.localizedLabel())
+                Text(time, color = MaterialTheme.colorScheme.primary, fontWeight = FontWeight.Medium)
+            }
+        }
     }
 }
 
@@ -267,39 +293,77 @@ private fun SalatQiblaScreen(location: ResolvedLocation) {
         wasAligned = aligned
     }
 
-    Column(
-        Modifier.fillMaxSize().padding(horizontal = 24.dp, vertical = 26.dp),
-        horizontalAlignment = Alignment.CenterHorizontally
-    ) {
-        Text(stringResource(R.string.qibla), fontSize = 28.sp, fontWeight = FontWeight.SemiBold)
-        Spacer(Modifier.height(8.dp))
-        Text("${qibla.toInt()}°", color = MaterialTheme.colorScheme.primary, fontSize = 18.sp)
-        Spacer(Modifier.height(54.dp))
+    BoxWithConstraints(Modifier.fillMaxSize()) {
+        if (maxWidth >= 700.dp) {
+            Row(
+                Modifier.fillMaxSize().padding(horizontal = 48.dp, vertical = 38.dp),
+                horizontalArrangement = Arrangement.spacedBy(56.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Column(
+                    Modifier.weight(1f),
+                    horizontalAlignment = Alignment.Start
+                ) {
+                    Text(stringResource(R.string.qibla), fontSize = 34.sp, fontWeight = FontWeight.SemiBold)
+                    Spacer(Modifier.height(8.dp))
+                    Text(location.displayName, color = MaterialTheme.colorScheme.onSurfaceVariant, fontSize = 20.sp)
+                    Spacer(Modifier.height(18.dp))
+                    Text("${qibla.toInt()}°", color = MaterialTheme.colorScheme.primary, fontSize = 54.sp, fontWeight = FontWeight.Light)
+                    Spacer(Modifier.height(24.dp))
+                    QiblaStatus(provider.isAvailable, heading, aligned, delta)
+                }
 
-        Box(
-            Modifier
-                .background(
-                    if (aligned) MaterialTheme.colorScheme.secondaryContainer else MaterialTheme.colorScheme.surfaceVariant,
-                    RoundedCornerShape(120.dp)
-                )
-                .padding(64.dp),
-            contentAlignment = Alignment.Center
-        ) {
-            Text(
-                "▲",
-                modifier = Modifier.rotate(delta ?: 0f),
-                color = MaterialTheme.colorScheme.primary,
-                fontSize = 72.sp
+                Box(
+                    Modifier.weight(1f),
+                    contentAlignment = Alignment.Center
+                ) {
+                    QiblaCompass(aligned = aligned, delta = delta, wide = true)
+                }
+            }
+        } else {
+            Column(
+                Modifier.fillMaxSize().padding(horizontal = 24.dp, vertical = 26.dp),
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                Text(stringResource(R.string.qibla), fontSize = 28.sp, fontWeight = FontWeight.SemiBold)
+                Spacer(Modifier.height(8.dp))
+                Text("${qibla.toInt()}°", color = MaterialTheme.colorScheme.primary, fontSize = 18.sp)
+                Spacer(Modifier.height(54.dp))
+                QiblaCompass(aligned = aligned, delta = delta, wide = false)
+                Spacer(Modifier.height(34.dp))
+                QiblaStatus(provider.isAvailable, heading, aligned, delta)
+            }
+        }
+    }
+}
+
+@Composable
+private fun QiblaCompass(aligned: Boolean, delta: Float?, wide: Boolean) {
+    Box(
+        Modifier
+            .background(
+                if (aligned) MaterialTheme.colorScheme.secondaryContainer else MaterialTheme.colorScheme.surfaceVariant,
+                RoundedCornerShape(if (wide) 170.dp else 120.dp)
             )
-        }
+            .padding(if (wide) 86.dp else 64.dp),
+        contentAlignment = Alignment.Center
+    ) {
+        Text(
+            "▲",
+            modifier = Modifier.rotate(delta ?: 0f),
+            color = MaterialTheme.colorScheme.primary,
+            fontSize = if (wide) 92.sp else 72.sp
+        )
+    }
+}
 
-        Spacer(Modifier.height(34.dp))
-        when {
-            !provider.isAvailable -> Text(stringResource(R.string.qibla_compass_unavailable), color = MaterialTheme.colorScheme.onSurfaceVariant)
-            heading == null -> Text(stringResource(R.string.qibla_calibrating), color = MaterialTheme.colorScheme.onSurfaceVariant)
-            aligned -> Text(stringResource(R.string.qibla_aligned), color = MaterialTheme.colorScheme.primary, fontWeight = FontWeight.SemiBold)
-            else -> Text("${abs(delta ?: 0f).toInt()}°", color = MaterialTheme.colorScheme.onSurfaceVariant)
-        }
+@Composable
+private fun QiblaStatus(providerAvailable: Boolean, heading: Float?, aligned: Boolean, delta: Float?) {
+    when {
+        !providerAvailable -> Text(stringResource(R.string.qibla_compass_unavailable), color = MaterialTheme.colorScheme.onSurfaceVariant)
+        heading == null -> Text(stringResource(R.string.qibla_calibrating), color = MaterialTheme.colorScheme.onSurfaceVariant)
+        aligned -> Text(stringResource(R.string.qibla_aligned), color = MaterialTheme.colorScheme.primary, fontWeight = FontWeight.SemiBold)
+        else -> Text("${abs(delta ?: 0f).toInt()}°", color = MaterialTheme.colorScheme.onSurfaceVariant)
     }
 }
 
