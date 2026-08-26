@@ -1,33 +1,16 @@
 import SwiftUI
 
-@MainActor
 struct TodayView: View {
-    @StateObject private var locationModel = IOSLocationModel()
+    let location: PrayerLocation
     @State private var selectedPrayer: PrayerDisplay?
-    private let notificationCoordinator = IOSPrayerNotificationCoordinator()
 
     var body: some View {
-        NavigationStack {
-            Group {
-                if let location = locationModel.location {
-                    prayerContent(SharedPrayerProvider().today(location: location))
-                } else {
-                    locationStartContent
-                }
-            }
+        prayerContent(SharedPrayerProvider().today(location: location))
             .background(Color(red: 0.98, green: 0.97, blue: 0.95))
-            .onChange(of: locationModel.location) { _, location in
-                if let location {
-                    notificationCoordinator.rebuild(location: location)
-                }
-            }
-        }
-        .sheet(item: $selectedPrayer) { prayer in
-            if let location = locationModel.location {
+            .sheet(item: $selectedPrayer) { prayer in
                 PrayerNotificationSettingsView(prayer: prayer, location: location)
                     .presentationDetents([.medium, .large])
             }
-        }
     }
 
     @ViewBuilder
@@ -83,44 +66,5 @@ struct TodayView: View {
             }
             .padding(22)
         }
-    }
-
-    private var locationStartContent: some View {
-        VStack(alignment: .leading, spacing: 18) {
-            Spacer()
-            Text(L10n.text("brand_name"))
-                .font(.caption.weight(.semibold))
-                .tracking(3)
-                .foregroundStyle(Color(red: 0.27, green: 0.48, blue: 0.41))
-            Text(L10n.text("location_title"))
-                .font(.system(size: 34, weight: .medium))
-            Text(L10n.text("location_privacy"))
-                .foregroundStyle(.secondary)
-            Button {
-                locationModel.requestLocation()
-            } label: {
-                HStack {
-                    Spacer()
-                    if locationModel.isResolving {
-                        ProgressView().tint(.white)
-                    } else {
-                        Text(L10n.text("use_current_location"))
-                    }
-                    Spacer()
-                }
-                .frame(height: 54)
-            }
-            .buttonStyle(.borderedProminent)
-            .tint(Color(red: 0.27, green: 0.48, blue: 0.41))
-            .disabled(locationModel.isResolving)
-
-            if locationModel.errorMessage != nil {
-                Text(L10n.text("location_unavailable"))
-                    .foregroundStyle(Color(red: 0.60, green: 0.35, blue: 0.27))
-                    .font(.footnote)
-            }
-            Spacer()
-        }
-        .padding(26)
     }
 }
