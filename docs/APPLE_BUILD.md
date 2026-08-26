@@ -9,10 +9,11 @@ The macOS job:
 1. builds the Kotlin Multiplatform `SalatShared` framework for Apple Silicon iOS Simulator;
 2. generates a deterministic Xcode project from `iosApp/project.yml` using XcodeGen;
 3. invokes `xcodebuild` for the `SalatApp` scheme and a generic iOS Simulator destination;
-4. disables code signing for CI simulator builds;
-5. verifies that the resulting `Salat.app` bundle and its `Info.plist` exist.
+4. restricts the simulator app build to `arm64`, matching the KMP `iosSimulatorArm64` framework slice and GitHub's Apple Silicon runner;
+5. disables code signing for CI simulator builds;
+6. verifies that the resulting `Salat.app` bundle and its `Info.plist` exist.
 
-This catches Xcode target configuration, resource bundling, localization, Swift compilation, framework linking, and plist issues that a standalone Swift typecheck cannot catch.
+This catches Xcode target configuration, resource bundling, localization, Swift compilation, framework linking, architecture compatibility, and plist issues that a standalone Swift typecheck cannot catch.
 
 ## Device / TestFlight pipeline
 
