@@ -1,0 +1,4 @@
+<resources>
+    <string name="widget_description">الصلاة القادمة والعد التنازلي</string>
+    <string name="widget_open_app_hint">افتح Salat لتحديث مواقيت الصلاة.</string>
+</resources>
