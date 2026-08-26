@@ -1,0 +1,4 @@
+"qibla_compass_unavailable" = "Pusula sensörü kullanılamıyor";
+"qibla_calibrating" = "Pusula kalibre ediliyor…";
+"qibla_aligned" = "Kıble yönüyle hizalandı";
+"qibla_accuracy_hint" = "Pusula doğruluğunu artırmak için telefonu sekiz çizerek hareket ettirin.";
