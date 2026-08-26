@@ -1,0 +1,9 @@
+<resources>
+    <string name="app_name">Salat</string><string name="brand_name">SALAT</string>
+    <string name="location_title">مواقيت الصلاة حسب موقعك</string><string name="location_privacy">يُستخدم موقعك على هذا الجهاز لحساب مواقيت الصلاة والقبلة. لا يرسل Salat موقعك إلى أي خادم.</string>
+    <string name="use_current_location">استخدام موقعي الحالي</string><string name="location_unavailable">تعذر تحديد الموقع. اختر مدينة يدويًا.</string>
+    <string name="next_prayer">الصلاة القادمة</string><string name="today">اليوم</string><string name="calendar">التقويم</string><string name="qibla">القبلة</string><string name="settings">الإعدادات</string><string name="notifications">الإشعارات</string>
+    <string name="prayer_fajr">الفجر</string><string name="prayer_sunrise">الشروق</string><string name="prayer_dhuhr">الظهر</string><string name="prayer_asr">العصر</string><string name="prayer_maghrib">المغرب</string><string name="prayer_isha">العشاء</string>
+    <string name="prayer_in_minutes">تبقى %2$d دقيقة على %1$s</string><string name="prayer_time_now">حان وقت %1$s</string>
+    <string name="notification_at_time">عند دخول الوقت</string><string name="notification_minutes_before">قبل %1$d دقيقة</string><string name="notification_sound_system">صوت النظام</string><string name="notification_sound_silent">صامت</string><string name="notification_sound_short_adhan">أذان قصير</string>
+</resources>
