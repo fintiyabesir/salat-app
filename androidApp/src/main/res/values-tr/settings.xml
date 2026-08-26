@@ -1,0 +1,25 @@
+<resources>
+    <string name="settings_calculation_method">Hesaplama yöntemi</string>
+    <string name="settings_asr_method">İkindi yöntemi</string>
+    <string name="settings_high_latitude">Yüksek enlem</string>
+    <string name="settings_prayer_adjustments">Vakit düzeltmeleri</string>
+    <string name="settings_hijri_calendar">Hicri takvim</string>
+    <string name="settings_hijri_day_adjustment">Hicri gün düzeltmesi</string>
+    <string name="settings_language">Dil</string>
+    <string name="settings_appearance">Görünüm</string>
+    <string name="settings_automatic">Otomatik</string>
+    <string name="settings_standard_shafi">Standart / Şafii</string>
+    <string name="settings_hanafi">Hanefi</string>
+    <string name="settings_middle_night">Gecenin yarısı</string>
+    <string name="settings_seventh_night">Gecenin yedide biri</string>
+    <string name="settings_twilight_angle">Alacakaranlık açısı</string>
+    <string name="settings_system">Sistem</string>
+    <string name="settings_light">Açık</string>
+    <string name="settings_dark">Koyu</string>
+    <string name="settings_location">Konum</string>
+    <string name="settings_place">Yer</string>
+    <string name="settings_timezone">Saat dilimi</string>
+    <string name="settings_method">Yöntem</string>
+    <string name="settings_day_adjustment">Gün düzeltmesi</string>
+    <string name="settings_minutes">%1$d dk</string>
+</resources>

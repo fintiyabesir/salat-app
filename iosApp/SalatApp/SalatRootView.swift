@@ -3,7 +3,9 @@ import SwiftUI
 @MainActor
 struct SalatRootView: View {
     @StateObject private var locationModel = IOSLocationModel()
+    @StateObject private var settingsStore = IOSAppSettingsStore()
     @State private var showSettings = false
+    @State private var showCityPicker = false
     private let notificationCoordinator = IOSPrayerNotificationCoordinator()
 
     var body: some View {
@@ -15,10 +17,15 @@ struct SalatRootView: View {
                     locationStartContent
                 }
             }
-            .background(Color(red: 0.98, green: 0.97, blue: 0.95))
+            .background(Color(uiColor: .systemBackground))
             .toolbar {
                 if locationModel.location != nil {
-                    ToolbarItem(placement: .topBarTrailing) {
+                    ToolbarItemGroup(placement: .topBarTrailing) {
+                        Button {
+                            showCityPicker = true
+                        } label: {
+                            Image(systemName: "location.magnifyingglass")
+                        }
                         Button {
                             showSettings = true
                         } label: {
@@ -29,27 +36,40 @@ struct SalatRootView: View {
             }
             .onChange(of: locationModel.location) { _, location in
                 if let location {
-                    notificationCoordinator.rebuild(location: location)
+                    notificationCoordinator.rebuild(location: location, appSettings: settingsStore.value)
+                }
+            }
+            .onChange(of: settingsStore.value) { _, settings in
+                if let location = locationModel.location {
+                    notificationCoordinator.rebuild(location: location, appSettings: settings)
                 }
             }
             .onAppear {
                 locationModel.resolveIfAlreadyAuthorized()
             }
         }
+        .preferredColorScheme(preferredColorScheme)
+        .environment(\.locale, L10n.selectedLocale)
         .sheet(isPresented: $showSettings) {
-            SettingsPreviewView(location: locationModel.location)
+            IOSSettingsView(location: locationModel.location, store: settingsStore)
+        }
+        .sheet(isPresented: $showCityPicker) {
+            IOSManualCityPicker(
+                onSelected: { locationModel.useManualLocation($0) },
+                onUseDeviceLocation: { locationModel.requestLocation() }
+            )
         }
     }
 
     @ViewBuilder
     private func mainTabs(_ location: PrayerLocation) -> some View {
         TabView {
-            TodayView(location: location)
+            TodayView(location: location, settings: settingsStore.value)
                 .tabItem {
                     Label(L10n.text("today"), systemImage: "clock")
                 }
 
-            CalendarView(location: location)
+            CalendarView(location: location, settings: settingsStore.value)
                 .tabItem {
                     Label(L10n.text("calendar"), systemImage: "calendar")
                 }
@@ -62,13 +82,21 @@ struct SalatRootView: View {
         .tint(Color(red: 0.27, green: 0.48, blue: 0.41))
     }
 
+    private var preferredColorScheme: ColorScheme? {
+        switch settingsStore.value.appearance {
+        case "LIGHT": return .light
+        case "DARK": return .dark
+        default: return nil
+        }
+    }
+
     private var locationStartContent: some View {
         VStack(alignment: .leading, spacing: 18) {
             Spacer()
             Text(L10n.text("brand_name"))
                 .font(.caption.weight(.semibold))
                 .tracking(3)
-                .foregroundStyle(Color(red: 0.27, green: 0.48, blue: 0.41))
+                .foregroundStyle(.tint)
             Text(L10n.text("location_title"))
                 .font(.system(size: 34, weight: .medium))
             Text(L10n.text("location_privacy"))
@@ -92,6 +120,18 @@ struct SalatRootView: View {
             .tint(Color(red: 0.27, green: 0.48, blue: 0.41))
             .disabled(locationModel.isResolving)
 
+            Button {
+                showCityPicker = true
+            } label: {
+                HStack {
+                    Spacer()
+                    Text(L10n.text("location_choose_city"))
+                    Spacer()
+                }
+                .frame(height: 52)
+            }
+            .buttonStyle(.bordered)
+
             if locationModel.errorMessage != nil {
                 Text(L10n.text("location_unavailable"))
                     .foregroundStyle(Color(red: 0.60, green: 0.35, blue: 0.27))
@@ -100,32 +140,5 @@ struct SalatRootView: View {
             Spacer()
         }
         .padding(26)
-    }
-}
-
-private struct SettingsPreviewView: View {
-    let location: PrayerLocation?
-    @Environment(\.dismiss) private var dismiss
-
-    var body: some View {
-        NavigationStack {
-            Form {
-                if let location {
-                    Section(L10n.text("settings")) {
-                        LabeledContent(L10n.text("today"), value: location.displayName)
-                        LabeledContent("Timezone", value: location.timeZoneId)
-                    }
-                }
-                Section {
-                    Label(L10n.text("notifications"), systemImage: "bell")
-                }
-            }
-            .navigationTitle(L10n.text("settings"))
-            .toolbar {
-                ToolbarItem(placement: .topBarTrailing) {
-                    Button("Done") { dismiss() }
-                }
-            }
-        }
     }
 }

@@ -1,0 +1,6 @@
+<resources>
+    <string name="location_choose_city">একটি শহর বেছে নিন</string>
+    <string name="location_search_city">শহর বা দেশ খুঁজুন</string>
+    <string name="location_no_city_results">স্টার্টার ক্যাটালগে মিল থাকা শহর নেই।</string>
+    <string name="location_use_device">ডিভাইসের অবস্থান ব্যবহার করুন</string>
+</resources>

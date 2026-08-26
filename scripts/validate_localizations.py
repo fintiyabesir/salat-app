@@ -26,19 +26,29 @@ RTL = {"ar", "fa", "ur"}
 
 
 def android_keys(directory: str) -> set[str]:
-    path = ANDROID_RES / directory / "strings.xml"
-    if not path.exists():
-        raise AssertionError(f"missing Android localization: {path}")
-    root = ET.parse(path).getroot()
-    return {node.attrib["name"] for node in root.findall("string")}
+    folder = ANDROID_RES / directory
+    if not folder.exists():
+        raise AssertionError(f"missing Android localization directory: {folder}")
+    keys: set[str] = set()
+    for path in sorted(folder.glob("*.xml")):
+        root = ET.parse(path).getroot()
+        keys.update(node.attrib["name"] for node in root.findall("string") if "name" in node.attrib)
+    if not keys:
+        raise AssertionError(f"no Android string resources found in {folder}")
+    return keys
 
 
 def ios_keys(locale: str) -> set[str]:
-    path = IOS_ROOT / f"{locale}.lproj" / "Localizable.strings"
-    if not path.exists():
-        raise AssertionError(f"missing iOS localization: {path}")
-    text = path.read_text(encoding="utf-8")
-    return set(re.findall(r'^\s*"([^"]+)"\s*=', text, flags=re.MULTILINE))
+    folder = IOS_ROOT / f"{locale}.lproj"
+    if not folder.exists():
+        raise AssertionError(f"missing iOS localization directory: {folder}")
+    keys: set[str] = set()
+    for path in sorted(folder.glob("*.strings")):
+        text = path.read_text(encoding="utf-8")
+        keys.update(re.findall(r'^\s*"([^"]+)"\s*=', text, flags=re.MULTILINE))
+    if not keys:
+        raise AssertionError(f"no iOS localization strings found in {folder}")
+    return keys
 
 
 def assert_equal(reference: set[str], actual: set[str], label: str) -> None:
@@ -60,6 +70,8 @@ def main() -> int:
     manifest = (ROOT / "androidApp" / "src" / "main" / "AndroidManifest.xml").read_text(encoding="utf-8")
     if 'android:supportsRtl="true"' not in manifest:
         raise AssertionError("Android manifest must enable supportsRtl=true")
+    if 'android:localeConfig="@xml/locales_config"' not in manifest:
+        raise AssertionError("Android manifest must declare localeConfig")
 
     missing_rtl_android = [locale for locale in RTL if f"values-{locale}" not in ANDROID_LOCALES]
     missing_rtl_ios = [locale for locale in RTL if locale not in IOS_LOCALES]

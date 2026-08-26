@@ -1,0 +1,25 @@
+<resources>
+    <string name="settings_calculation_method">হিসাবের পদ্ধতি</string>
+    <string name="settings_asr_method">আসরের পদ্ধতি</string>
+    <string name="settings_high_latitude">উচ্চ অক্ষাংশ</string>
+    <string name="settings_prayer_adjustments">নামাজের সময় সমন্বয়</string>
+    <string name="settings_hijri_calendar">হিজরি ক্যালেন্ডার</string>
+    <string name="settings_hijri_day_adjustment">হিজরি দিনের সমন্বয়</string>
+    <string name="settings_language">ভাষা</string>
+    <string name="settings_appearance">চেহারা</string>
+    <string name="settings_automatic">স্বয়ংক্রিয়</string>
+    <string name="settings_standard_shafi">স্ট্যান্ডার্ড / শাফেয়ি</string>
+    <string name="settings_hanafi">হানাফি</string>
+    <string name="settings_middle_night">রাতের মধ্যভাগ</string>
+    <string name="settings_seventh_night">রাতের এক-সপ্তমাংশ</string>
+    <string name="settings_twilight_angle">গোধূলি কোণ</string>
+    <string name="settings_system">সিস্টেম</string>
+    <string name="settings_light">হালকা</string>
+    <string name="settings_dark">গাঢ়</string>
+    <string name="settings_location">অবস্থান</string>
+    <string name="settings_place">স্থান</string>
+    <string name="settings_timezone">সময় অঞ্চল</string>
+    <string name="settings_method">পদ্ধতি</string>
+    <string name="settings_day_adjustment">দিনের সমন্বয়</string>
+    <string name="settings_minutes">%1$d মিনিট</string>
+</resources>

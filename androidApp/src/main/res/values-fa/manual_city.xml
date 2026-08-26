@@ -1,0 +1,6 @@
+<resources>
+    <string name="location_choose_city">انتخاب شهر</string>
+    <string name="location_search_city">جست‌وجوی شهر یا کشور</string>
+    <string name="location_no_city_results">شهر مطابقی در فهرست اولیه پیدا نشد.</string>
+    <string name="location_use_device">استفاده از موقعیت دستگاه</string>
+</resources>

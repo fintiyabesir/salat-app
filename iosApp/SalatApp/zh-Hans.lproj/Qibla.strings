@@ -1,0 +1,4 @@
+"qibla_compass_unavailable" = "指南针传感器不可用";
+"qibla_calibrating" = "正在校准指南针…";
+"qibla_aligned" = "已对准朝向";
+"qibla_accuracy_hint" = "以“8”字形移动手机以提高指南针精度。";

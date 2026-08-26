@@ -1,0 +1,4 @@
+"qibla_compass_unavailable" = "مستشعر البوصلة غير متاح";
+"qibla_calibrating" = "جارٍ معايرة البوصلة…";
+"qibla_aligned" = "تمت المحاذاة مع القبلة";
+"qibla_accuracy_hint" = "حرّك الهاتف على شكل رقم ثمانية لتحسين دقة البوصلة.";

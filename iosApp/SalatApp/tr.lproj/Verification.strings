@@ -1,0 +1,4 @@
+"verification_official_source" = "Resmî referans";
+"verification_adapter_ready" = "Resmî kaynak adaptörü hazır. Bugünün vakitleri bu cihazda henüz karşılaştırılmadı.";
+"verification_reference_only" = "Resmî referans tanımlı. Canlı karşılaştırma henüz etkin değil.";
+"verification_local_only" = "Henüz resmî referans tanımlı değil. Yerel hesaplama kullanılıyor.";

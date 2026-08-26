@@ -19,6 +19,11 @@ class ManualCityCatalogTest {
         assertEquals("tr-ist", catalog.search("istan").single().id)
     }
 
+    @Test fun blank_search_lists_bundled_cities_for_initial_picker_state() {
+        assertEquals(listOf("tr-ist", "my-kul"), catalog.search("").map { it.id })
+        assertEquals(listOf("tr-ist"), catalog.search("", limit = 1).map { it.id })
+    }
+
     @Test fun converts_manual_city_to_resolved_location() {
         val location = catalog.byId("tr-ist")!!.asResolvedLocation()
         assertEquals(LocationSource.MANUAL_CITY, location.source)

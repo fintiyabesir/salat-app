@@ -11,6 +11,7 @@ private struct CalendarDayDisplay: Identifiable {
 
 struct CalendarView: View {
     let location: PrayerLocation
+    let settings: IOSAppSettings
 
     var body: some View {
         ScrollView {
@@ -26,7 +27,7 @@ struct CalendarView: View {
                                 Spacer()
                                 Text(prayer.time)
                                     .fontWeight(.medium)
-                                    .foregroundStyle(Color(red: 0.27, green: 0.48, blue: 0.41))
+                                    .foregroundStyle(.tint)
                             }
                             .padding(.vertical, 3)
                         }
@@ -34,7 +35,7 @@ struct CalendarView: View {
                     .padding(18)
                     .frame(maxWidth: .infinity, alignment: .leading)
                     .background(
-                        Color.white.opacity(0.72),
+                        Color(uiColor: .secondarySystemBackground),
                         in: RoundedRectangle(cornerRadius: 22)
                     )
                 }
@@ -42,7 +43,7 @@ struct CalendarView: View {
             .padding(.horizontal, 18)
             .padding(.vertical, 10)
         }
-        .background(Color(red: 0.98, green: 0.97, blue: 0.95))
+        .background(Color(uiColor: .systemBackground))
         .navigationTitle(L10n.text("calendar"))
     }
 
@@ -51,20 +52,30 @@ struct CalendarView: View {
         var calendar = Calendar(identifier: .gregorian)
         calendar.timeZone = timeZone
         let start = calendar.startOfDay(for: Date())
+        let calculation = settings.calculation
 
         return (0..<30).compactMap { offset in
             guard let date = calendar.date(byAdding: .day, value: offset, to: start) else { return nil }
             let components = calendar.dateComponents([.year, .month, .day], from: date)
             guard let year = components.year, let month = components.month, let day = components.day else { return nil }
 
-            let snapshot = SalatApi.shared.calculateDaySnapshot(
+            let snapshot = SalatApi.shared.calculateDaySnapshotConfigured(
                 year: Int32(year),
                 month: Int32(month),
                 day: Int32(day),
                 latitude: location.latitude,
                 longitude: location.longitude,
                 timeZoneId: timeZone.identifier,
-                countryCode: location.countryCode
+                countryCode: location.countryCode,
+                methodOverride: calculation.methodOverride,
+                madhabOverride: calculation.madhabOverride,
+                highLatitudeRule: calculation.highLatitudeRule,
+                fajrAdjustment: Int32(calculation.fajrAdjustment),
+                sunriseAdjustment: Int32(calculation.sunriseAdjustment),
+                dhuhrAdjustment: Int32(calculation.dhuhrAdjustment),
+                asrAdjustment: Int32(calculation.asrAdjustment),
+                maghribAdjustment: Int32(calculation.maghribAdjustment),
+                ishaAdjustment: Int32(calculation.ishaAdjustment)
             )
 
             let prayers = [
@@ -77,7 +88,7 @@ struct CalendarView: View {
             ]
 
             let formatter = DateFormatter()
-            formatter.locale = .current
+            formatter.locale = L10n.selectedLocale
             formatter.timeZone = timeZone
             formatter.setLocalizedDateFormatFromTemplate("EEEE d MMMM")
 
@@ -91,7 +102,7 @@ struct CalendarView: View {
 
     private func prayer(_ id: String, _ epochMillis: Int64, _ timeZone: TimeZone) -> PrayerDisplay {
         let formatter = DateFormatter()
-        formatter.locale = .current
+        formatter.locale = L10n.selectedLocale
         formatter.timeZone = timeZone
         formatter.dateFormat = "HH:mm"
         let date = Date(timeIntervalSince1970: Double(epochMillis) / 1000.0)

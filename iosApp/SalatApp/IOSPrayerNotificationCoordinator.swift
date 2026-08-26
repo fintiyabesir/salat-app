@@ -19,6 +19,7 @@ final class IOSPrayerNotificationCoordinator {
 
     func rebuild(
         location: PrayerLocation,
+        appSettings: IOSAppSettings = .defaults,
         horizonDays: Int = 7,
         now: Date = Date(),
         completion: ((Error?) -> Void)? = nil
@@ -41,7 +42,7 @@ final class IOSPrayerNotificationCoordinator {
         var alerts: [IOSPrayerAlert] = []
         for offset in 0..<count {
             guard let dayDate = calendar.date(byAdding: .day, value: offset, to: start) else { continue }
-            let day = provider.today(location: location, now: dayDate)
+            let day = provider.today(location: location, settings: appSettings, now: dayDate)
             let dateKey = formatter.string(from: dayDate)
 
             for prayer in day.prayers {

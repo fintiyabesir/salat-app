@@ -1,7 +1,9 @@
 package app.salat.domain
 
 import app.salat.model.CalculationMethodId
+import app.salat.model.CalculationPreferences
 import app.salat.model.CalculationProfile
+import app.salat.model.MadhabId
 
 /**
  * Conservative fallback mapping for local astronomical calculation.
@@ -22,6 +24,41 @@ object RegionalCalculationProfileResolver {
             "KW" -> CalculationMethodId.KUWAIT
             else -> CalculationMethodId.MUSLIM_WORLD_LEAGUE
         }
-        return CalculationProfile(id = "auto-${cc.lowercase()}-${method.name.lowercase()}", method = method)
+        val madhab = when (cc) {
+            // Pakistan commonly follows the Hanafi Asr convention. Diyanet/Turkey uses asr-i awwal.
+            "PK" -> MadhabId.HANAFI
+            else -> MadhabId.SHAFI
+        }
+        return CalculationProfile(
+            id = "auto-${cc.lowercase()}-${method.name.lowercase()}-${madhab.name.lowercase()}",
+            method = method,
+            madhab = madhab
+        )
+    }
+
+    fun resolve(countryCode: String, preferences: CalculationPreferences): CalculationProfile {
+        val base = resolve(countryCode)
+        if (preferences.isDefault()) return base
+
+        val method = preferences.methodOverride ?: base.method
+        val madhab = preferences.madhabOverride ?: base.madhab
+        val adjustments = preferences.adjustments
+        val highLatitude = preferences.highLatitudeRule
+        val adjustmentKey = listOf(
+            adjustments.fajr,
+            adjustments.sunrise,
+            adjustments.dhuhr,
+            adjustments.asr,
+            adjustments.maghrib,
+            adjustments.isha
+        ).joinToString("_")
+
+        return CalculationProfile(
+            id = "custom-${countryCode.uppercase().lowercase()}-${method.name.lowercase()}-${madhab.name.lowercase()}-${highLatitude.name.lowercase()}-$adjustmentKey",
+            method = method,
+            madhab = madhab,
+            highLatitudeRule = highLatitude,
+            adjustments = adjustments
+        )
     }
 }

@@ -12,13 +12,15 @@ import kotlin.time.Instant
 class AndroidPrayerNotificationCoordinator(context: Context) {
     private val appContext = context.applicationContext
     private val engine = SalatEngine()
-    private val settingsStore = AndroidPrayerNotificationSettingsStore(appContext)
+    private val notificationSettingsStore = AndroidPrayerNotificationSettingsStore(appContext)
+    private val appSettingsStore = AndroidAppSettingsStore(appContext)
     private val scheduler = AndroidPrayerNotificationScheduler(appContext)
     private val replanStore = PrayerScheduleReplanStore(appContext)
 
     fun rebuild(location: ResolvedLocation, horizonDays: Int = DEFAULT_HORIZON_DAYS) {
         val zone = ZoneId.of(location.timeZoneId)
         val start = LocalDate.now(zone)
+        val calculationPreferences = appSettingsStore.load().calculation
         val days = (0 until horizonDays.coerceIn(1, 10)).map { offset ->
             val date = start.plusDays(offset.toLong())
             engine.calculateDay(
@@ -28,13 +30,14 @@ class AndroidPrayerNotificationCoordinator(context: Context) {
                 latitude = location.point.latitude,
                 longitude = location.point.longitude,
                 timeZoneId = location.timeZoneId,
-                countryCode = location.countryCode ?: "ZZ"
+                countryCode = location.countryCode ?: "ZZ",
+                preferences = calculationPreferences
             )
         }
 
         val plan = PrayerNotificationPlanner.plan(
             days = days,
-            settings = settingsStore.load(),
+            settings = notificationSettingsStore.load(),
             now = Instant.fromEpochMilliseconds(System.currentTimeMillis())
         )
         scheduler.reschedule(plan)

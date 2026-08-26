@@ -12,27 +12,42 @@ struct TodayPrayerDisplay {
     let locationName: String
     let regionText: String
     let dateText: String
+    let hijriDateText: String
     let prayers: [PrayerDisplay]
     let nextPrayer: PrayerDisplay
 }
 
 /// Formats KMP prayer snapshots for SwiftUI. Prayer calculation remains entirely
-/// in the shared Kotlin/Adhan engine; Swift only supplies location and presentation.
+/// in the shared Kotlin/Adhan engine; Swift only supplies location, preferences and presentation.
 struct SharedPrayerProvider {
-    func today(location: PrayerLocation, now: Date = Date()) -> TodayPrayerDisplay {
+    func today(
+        location: PrayerLocation,
+        settings: IOSAppSettings = .defaults,
+        now: Date = Date()
+    ) -> TodayPrayerDisplay {
         let timeZone = TimeZone(identifier: location.timeZoneId) ?? .current
         var calendar = Calendar(identifier: .gregorian)
         calendar.timeZone = timeZone
         let components = calendar.dateComponents([.year, .month, .day], from: now)
 
-        let snapshot = SalatApi.shared.calculateDaySnapshot(
+        let calculation = settings.calculation
+        let snapshot = SalatApi.shared.calculateDaySnapshotConfigured(
             year: Int32(components.year!),
             month: Int32(components.month!),
             day: Int32(components.day!),
             latitude: location.latitude,
             longitude: location.longitude,
             timeZoneId: timeZone.identifier,
-            countryCode: location.countryCode
+            countryCode: location.countryCode,
+            methodOverride: calculation.methodOverride,
+            madhabOverride: calculation.madhabOverride,
+            highLatitudeRule: calculation.highLatitudeRule,
+            fajrAdjustment: Int32(calculation.fajrAdjustment),
+            sunriseAdjustment: Int32(calculation.sunriseAdjustment),
+            dhuhrAdjustment: Int32(calculation.dhuhrAdjustment),
+            asrAdjustment: Int32(calculation.asrAdjustment),
+            maghribAdjustment: Int32(calculation.maghribAdjustment),
+            ishaAdjustment: Int32(calculation.ishaAdjustment)
         )
 
         let rows = [
@@ -48,8 +63,14 @@ struct SharedPrayerProvider {
 
         let dateFormatter = DateFormatter()
         dateFormatter.timeZone = timeZone
-        dateFormatter.locale = .current
+        dateFormatter.locale = L10n.selectedLocale
         dateFormatter.setLocalizedDateFormatFromTemplate("d MMM yyyy")
+        let hijriDate = IOSHijriFormatter.format(
+            date: now,
+            timeZone: timeZone,
+            method: settings.hijriMethod,
+            dayAdjustment: settings.hijriDayAdjustment
+        )
 
         let region = [location.regionName, location.countryCode]
             .compactMap { $0 }
@@ -63,6 +84,7 @@ struct SharedPrayerProvider {
             locationName: location.displayName,
             regionText: region,
             dateText: dateFormatter.string(from: now),
+            hijriDateText: hijriDate,
             prayers: rows,
             nextPrayer: next
         )
@@ -71,7 +93,7 @@ struct SharedPrayerProvider {
     private func format(_ epochMillis: Int64, _ timeZone: TimeZone) -> String {
         let formatter = DateFormatter()
         formatter.timeZone = timeZone
-        formatter.locale = .current
+        formatter.locale = L10n.selectedLocale
         formatter.dateFormat = "HH:mm"
         return formatter.string(from: Date(timeIntervalSince1970: Double(epochMillis) / 1000.0))
     }

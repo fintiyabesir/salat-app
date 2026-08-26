@@ -1,0 +1,25 @@
+<resources>
+    <string name="settings_calculation_method">Kaedah pengiraan</string>
+    <string name="settings_asr_method">Kaedah Asar</string>
+    <string name="settings_high_latitude">Latitud tinggi</string>
+    <string name="settings_prayer_adjustments">Pelarasan waktu solat</string>
+    <string name="settings_hijri_calendar">Kalendar Hijri</string>
+    <string name="settings_hijri_day_adjustment">Pelarasan hari Hijri</string>
+    <string name="settings_language">Bahasa</string>
+    <string name="settings_appearance">Paparan</string>
+    <string name="settings_automatic">Automatik</string>
+    <string name="settings_standard_shafi">Standard / Syafii</string>
+    <string name="settings_hanafi">Hanafi</string>
+    <string name="settings_middle_night">Pertengahan malam</string>
+    <string name="settings_seventh_night">Satu pertujuh malam</string>
+    <string name="settings_twilight_angle">Sudut senja</string>
+    <string name="settings_system">Sistem</string>
+    <string name="settings_light">Cerah</string>
+    <string name="settings_dark">Gelap</string>
+    <string name="settings_location">Lokasi</string>
+    <string name="settings_place">Tempat</string>
+    <string name="settings_timezone">Zon waktu</string>
+    <string name="settings_method">Kaedah</string>
+    <string name="settings_day_adjustment">Pelarasan hari</string>
+    <string name="settings_minutes">%1$d min</string>
+</resources>

@@ -1,0 +1,6 @@
+<resources>
+    <string name="qibla_compass_unavailable">مستشعر البوصلة غير متاح</string>
+    <string name="qibla_calibrating">جارٍ معايرة البوصلة…</string>
+    <string name="qibla_aligned">تمت المحاذاة مع القبلة</string>
+    <string name="qibla_accuracy_hint">حرّك الهاتف على شكل رقم ثمانية لتحسين دقة البوصلة.</string>
+</resources>

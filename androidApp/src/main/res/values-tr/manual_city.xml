@@ -1,0 +1,6 @@
+<resources>
+    <string name="location_choose_city">Şehir seç</string>
+    <string name="location_search_city">Şehir veya ülke ara</string>
+    <string name="location_no_city_results">Başlangıç kataloğunda eşleşen şehir bulunamadı.</string>
+    <string name="location_use_device">Cihaz konumunu kullan</string>
+</resources>

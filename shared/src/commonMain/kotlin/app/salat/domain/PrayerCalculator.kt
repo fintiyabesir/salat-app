@@ -3,11 +3,13 @@ package app.salat.domain
 import app.salat.model.CalculationMethodId
 import app.salat.model.CalculationProfile
 import app.salat.model.GeoPoint
+import app.salat.model.HighLatitudeRuleId
 import app.salat.model.MadhabId
 import app.salat.model.PrayerDay
 import com.batoulapps.adhan2.CalculationMethod
 import com.batoulapps.adhan2.CalculationParameters
 import com.batoulapps.adhan2.Coordinates
+import com.batoulapps.adhan2.HighLatitudeRule
 import com.batoulapps.adhan2.Madhab
 import com.batoulapps.adhan2.PrayerAdjustments as AdhanPrayerAdjustments
 import com.batoulapps.adhan2.PrayerTimes
@@ -31,6 +33,7 @@ class AdhanPrayerCalculator : PrayerCalculator {
                 MadhabId.HANAFI -> Madhab.HANAFI
                 MadhabId.SHAFI -> Madhab.SHAFI
             },
+            highLatitudeRule = profile.highLatitudeRule.toAdhanRule(),
             prayerAdjustments = AdhanPrayerAdjustments(
                 fajr = profile.adjustments.fajr,
                 sunrise = profile.adjustments.sunrise,
@@ -55,6 +58,13 @@ class AdhanPrayerCalculator : PrayerCalculator {
             isha = calculated.isha,
             calculationProfile = profile.id
         )
+    }
+
+    private fun HighLatitudeRuleId.toAdhanRule(): HighLatitudeRule? = when (this) {
+        HighLatitudeRuleId.AUTOMATIC -> null
+        HighLatitudeRuleId.MIDDLE_OF_THE_NIGHT -> HighLatitudeRule.MIDDLE_OF_THE_NIGHT
+        HighLatitudeRuleId.SEVENTH_OF_THE_NIGHT -> HighLatitudeRule.SEVENTH_OF_THE_NIGHT
+        HighLatitudeRuleId.TWILIGHT_ANGLE -> HighLatitudeRule.TWILIGHT_ANGLE
     }
 
     private fun CalculationMethodId.toAdhanParameters(): CalculationParameters = when (this) {

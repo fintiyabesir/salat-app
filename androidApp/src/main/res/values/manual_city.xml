@@ -1,0 +1,6 @@
+<resources>
+    <string name="location_choose_city">Choose a city</string>
+    <string name="location_search_city">Search city or country</string>
+    <string name="location_no_city_results">No matching cities in the starter catalog.</string>
+    <string name="location_use_device">Use device location</string>
+</resources>
