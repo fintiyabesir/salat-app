@@ -179,14 +179,16 @@ def enrich_aliases(cities: list[City], zip_path: Path, alias_limit: int) -> list
 def write(cities: list[City], output: Path, dataset: str) -> dict[str, object]:
     output.parent.mkdir(parents=True, exist_ok=True)
     with output.open("w", encoding="utf-8", newline="\n") as target:
-        target.write(f"#salat-city-catalog-v1\tdataset={dataset}\tlicense=CC-BY-4.0\tsource=GeoNames\n")
+        target.write(f"#salat-city-catalog-v2\tdataset={dataset}\tlicense=CC-BY-4.0\tsource=GeoNames\n")
         for c in cities:
-            target.write("\t".join([c.id, c.name, c.cc, c.country, c.region, c.lat, c.lon, c.timezone, str(c.population), "|".join(c.aliases)]) + "\n")
+            # Population is used only to establish deterministic relevance order above;
+            # it is intentionally omitted from the runtime bundle.
+            target.write("\t".join([c.id, c.name, c.cc, c.country, c.region, c.lat, c.lon, c.timezone, "|".join(c.aliases)]) + "\n")
     zipped = output.with_suffix(output.suffix + ".gz")
     with output.open("rb") as source, gzip.GzipFile(filename="", mode="wb", fileobj=zipped.open("wb"), compresslevel=9, mtime=0) as target:
         while chunk := source.read(1024 * 1024):
             target.write(chunk)
-    return {"dataset": dataset, "records": len(cities), "raw_bytes": output.stat().st_size, "gzip_bytes": zipped.stat().st_size, "sha256": hashlib.sha256(output.read_bytes()).hexdigest()}
+    return {"dataset": dataset, "format": "salat-city-catalog-v2", "records": len(cities), "raw_bytes": output.stat().st_size, "gzip_bytes": zipped.stat().st_size, "sha256": hashlib.sha256(output.read_bytes()).hexdigest()}
 
 
 def benchmark(cities: list[City]) -> dict[str, object]:
