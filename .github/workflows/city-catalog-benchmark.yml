@@ -3,6 +3,7 @@ name: City Catalog Benchmark
 on:
   workflow_dispatch:
   pull_request:
+    types: [opened, reopened]
     branches: [ main ]
     paths:
       - 'scripts/process_geonames_cities.py'
