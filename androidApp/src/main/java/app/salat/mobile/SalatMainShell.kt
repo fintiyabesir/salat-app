@@ -99,7 +99,7 @@ fun SalatMainShell(location: ResolvedLocation) {
         ) { padding ->
             Box(Modifier.fillMaxSize().padding(padding)) {
                 when (section) {
-                    MainSection.TODAY -> SalatTodayScreen(location)
+                    MainSection.TODAY -> AdaptiveTodayScreen(location)
                     MainSection.CALENDAR -> SalatCalendarScreen(location)
                     MainSection.QIBLA -> SalatQiblaScreen(location)
                 }
