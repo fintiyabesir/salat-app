@@ -16,7 +16,7 @@ struct TodayView: View {
                 }
             }
             .background(Color(red: 0.98, green: 0.97, blue: 0.95))
-            .onChange(of: locationModel.location) { location in
+            .onChange(of: locationModel.location) { _, location in
                 if let location {
                     notificationCoordinator.rebuild(location: location)
                 }
