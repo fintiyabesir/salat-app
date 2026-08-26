@@ -20,18 +20,27 @@ class CalculationPreferencesTest {
     }
 
     @Test
+    fun turkey_and_karachi_profiles_default_to_hanafi_asr() {
+        val turkey = RegionalCalculationProfileResolver.resolve("TR")
+        val pakistan = RegionalCalculationProfileResolver.resolve("PK")
+        assertEquals(MadhabId.HANAFI, turkey.madhab)
+        assertEquals(MadhabId.HANAFI, pakistan.madhab)
+        assertTrue(turkey.id.endsWith("-hanafi"))
+    }
+
+    @Test
     fun explicit_preferences_create_distinct_profile() {
         val resolved = RegionalCalculationProfileResolver.resolve(
             "TR",
             CalculationPreferences(
                 methodOverride = CalculationMethodId.MUSLIM_WORLD_LEAGUE,
-                madhabOverride = MadhabId.HANAFI,
+                madhabOverride = MadhabId.SHAFI,
                 highLatitudeRule = HighLatitudeRuleId.TWILIGHT_ANGLE,
                 adjustments = PrayerAdjustments(fajr = 2, isha = -1)
             )
         )
         assertEquals(CalculationMethodId.MUSLIM_WORLD_LEAGUE, resolved.method)
-        assertEquals(MadhabId.HANAFI, resolved.madhab)
+        assertEquals(MadhabId.SHAFI, resolved.madhab)
         assertEquals(HighLatitudeRuleId.TWILIGHT_ANGLE, resolved.highLatitudeRule)
         assertTrue(resolved.id.startsWith("custom-tr-"))
     }
