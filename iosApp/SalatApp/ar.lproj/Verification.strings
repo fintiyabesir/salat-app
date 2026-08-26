@@ -1,0 +1,4 @@
+"verification_official_source" = "المرجع الرسمي";
+"verification_adapter_ready" = "موصل المصدر الرسمي متاح. لم تتم مقارنة مواقيت اليوم على هذا الجهاز بعد.";
+"verification_reference_only" = "تم إعداد المرجع الرسمي. المقارنة المباشرة غير مفعّلة بعد.";
+"verification_local_only" = "لا يوجد مرجع رسمي مُعدّ بعد. يتم استخدام الحساب المحلي.";
