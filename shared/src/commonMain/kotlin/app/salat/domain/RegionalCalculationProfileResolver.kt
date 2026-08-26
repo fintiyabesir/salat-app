@@ -25,8 +25,8 @@ object RegionalCalculationProfileResolver {
             else -> CalculationMethodId.MUSLIM_WORLD_LEAGUE
         }
         val madhab = when (cc) {
-            // Diyanet/Turkey and the Karachi convention are normally paired with Hanafi Asr.
-            "TR", "PK" -> MadhabId.HANAFI
+            // Pakistan commonly follows the Hanafi Asr convention. Diyanet/Turkey uses asr-i awwal.
+            "PK" -> MadhabId.HANAFI
             else -> MadhabId.SHAFI
         }
         return CalculationProfile(
