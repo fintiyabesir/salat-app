@@ -16,7 +16,7 @@ struct SalatRootView: View {
                     locationStartContent
                 }
             }
-            .background(Color(red: 0.98, green: 0.97, blue: 0.95))
+            .background(Color(uiColor: .systemBackground))
             .toolbar {
                 if locationModel.location != nil {
                     ToolbarItem(placement: .topBarTrailing) {
@@ -43,7 +43,7 @@ struct SalatRootView: View {
             }
         }
         .preferredColorScheme(preferredColorScheme)
-        .environment(\.locale, Locale(identifier: settingsStore.value.languageTag ?? Locale.current.identifier))
+        .environment(\.locale, L10n.selectedLocale)
         .sheet(isPresented: $showSettings) {
             IOSSettingsView(location: locationModel.location, store: settingsStore)
         }
@@ -84,7 +84,7 @@ struct SalatRootView: View {
             Text(L10n.text("brand_name"))
                 .font(.caption.weight(.semibold))
                 .tracking(3)
-                .foregroundStyle(Color(red: 0.27, green: 0.48, blue: 0.41))
+                .foregroundStyle(.tint)
             Text(L10n.text("location_title"))
                 .font(.system(size: 34, weight: .medium))
             Text(L10n.text("location_privacy"))
