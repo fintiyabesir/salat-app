@@ -2,6 +2,7 @@ import SalatShared
 import SwiftUI
 import UIKit
 
+@MainActor
 struct QiblaView: View {
     let location: PrayerLocation
 
