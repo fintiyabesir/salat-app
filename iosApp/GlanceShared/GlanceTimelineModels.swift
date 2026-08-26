@@ -20,13 +20,20 @@ struct GlanceTimelinePayload: Codable {
         let millis = Int64(date.timeIntervalSince1970 * 1000.0)
         return events.first(where: { $0.epochMillis > millis })
     }
+
+    func events(on date: Date) -> [GlancePrayerEvent] {
+        var calendar = Calendar(identifier: .gregorian)
+        calendar.timeZone = TimeZone(identifier: timeZoneId) ?? .current
+        return events.filter { calendar.isDate($0.date, inSameDayAs: date) }
+    }
 }
 
 enum GlanceTimelinePersistence {
-    static let appGroup = "group.app.salat.mobile"
+    static let phoneAppGroup = "group.app.salat.mobile"
+    static let watchAppGroup = "group.app.salat.mobile.watch"
     static let storageKey = "salat.glance.timeline.v1"
 
-    static func save(_ payload: GlanceTimelinePayload) -> Bool {
+    static func save(_ payload: GlanceTimelinePayload, appGroup: String = phoneAppGroup) -> Bool {
         guard let data = try? JSONEncoder().encode(payload),
               let defaults = UserDefaults(suiteName: appGroup) else {
             return false
@@ -35,7 +42,7 @@ enum GlanceTimelinePersistence {
         return true
     }
 
-    static func load() -> GlanceTimelinePayload? {
+    static func load(appGroup: String = phoneAppGroup) -> GlanceTimelinePayload? {
         guard let defaults = UserDefaults(suiteName: appGroup),
               let data = defaults.data(forKey: storageKey) else {
             return nil

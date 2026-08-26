@@ -3,6 +3,7 @@ import WidgetKit
 
 final class IOSGlanceTimelineStore {
     private let provider = SharedPrayerProvider()
+    private let watchBridge = IOSWatchTimelineBridge.shared
 
     func rebuild(
         location: PrayerLocation,
@@ -36,6 +37,7 @@ final class IOSGlanceTimelineStore {
             events: events.sorted(by: { $0.epochMillis < $1.epochMillis })
         )
 
+        watchBridge.publish(payload)
         if GlanceTimelinePersistence.save(payload) {
             WidgetCenter.shared.reloadAllTimelines()
         }

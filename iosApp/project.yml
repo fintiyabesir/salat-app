@@ -5,6 +5,7 @@ options:
 settings:
   base:
     IPHONEOS_DEPLOYMENT_TARGET: "17.0"
+    WATCHOS_DEPLOYMENT_TARGET: "10.0"
     SWIFT_VERSION: "5.0"
     CURRENT_PROJECT_VERSION: "1"
     MARKETING_VERSION: "0.1.0"
@@ -40,6 +41,8 @@ targets:
       - framework: ../shared/build/bin/iosSimulatorArm64/debugFramework/SalatShared.framework
         embed: false
       - target: SalatWidgetExtension
+      - target: SalatWatch
+        embed: true
 
   SalatWidgetExtension:
     type: app-extension
@@ -67,11 +70,76 @@ targets:
         ARCHS: arm64
         ONLY_ACTIVE_ARCH: YES
 
+  SalatWatch:
+    type: application
+    platform: watchOS
+    deploymentTarget: "10.0"
+    sources:
+      - path: SalatWatch
+        excludes:
+          - Info.plist
+          - SalatWatch.entitlements
+      - path: GlanceShared
+    info:
+      path: SalatWatch/Info.plist
+    entitlements:
+      path: SalatWatch/SalatWatch.entitlements
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: app.salat.mobile.watchapp
+        PRODUCT_NAME: SalatWatch
+        GENERATE_INFOPLIST_FILE: NO
+        SKIP_INSTALL: YES
+        CODE_SIGN_STYLE: Automatic
+        ARCHS: arm64
+        ONLY_ACTIVE_ARCH: YES
+    dependencies:
+      - target: SalatWatchComplication
+
+  SalatWatchComplication:
+    type: app-extension
+    platform: watchOS
+    deploymentTarget: "10.0"
+    sources:
+      - path: SalatWatchComplication
+        excludes:
+          - Info.plist
+          - SalatWatchComplication.entitlements
+      - path: GlanceShared
+    info:
+      path: SalatWatchComplication/Info.plist
+    entitlements:
+      path: SalatWatchComplication/SalatWatchComplication.entitlements
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: app.salat.mobile.watchapp.complication
+        PRODUCT_NAME: SalatWatchComplication
+        GENERATE_INFOPLIST_FILE: NO
+        SKIP_INSTALL: YES
+        APPLICATION_EXTENSION_API_ONLY: YES
+        CODE_SIGN_STYLE: Automatic
+        ARCHS: arm64
+        ONLY_ACTIVE_ARCH: YES
+
 schemes:
   SalatApp:
     build:
       targets:
         SalatApp: all
+    run:
+      config: Debug
+    test:
+      config: Debug
+    profile:
+      config: Release
+    analyze:
+      config: Debug
+    archive:
+      config: Release
+  SalatWatch:
+    build:
+      targets:
+        SalatWatch: all
     run:
       config: Debug
     test:
