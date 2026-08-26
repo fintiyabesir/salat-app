@@ -3,6 +3,7 @@ package app.salat.domain
 import app.salat.model.CalculationMethodId
 import app.salat.model.CalculationPreferences
 import app.salat.model.CalculationProfile
+import app.salat.model.MadhabId
 
 /**
  * Conservative fallback mapping for local astronomical calculation.
@@ -23,7 +24,16 @@ object RegionalCalculationProfileResolver {
             "KW" -> CalculationMethodId.KUWAIT
             else -> CalculationMethodId.MUSLIM_WORLD_LEAGUE
         }
-        return CalculationProfile(id = "auto-${cc.lowercase()}-${method.name.lowercase()}", method = method)
+        val madhab = when (cc) {
+            // Diyanet/Turkey and the Karachi convention are normally paired with Hanafi Asr.
+            "TR", "PK" -> MadhabId.HANAFI
+            else -> MadhabId.SHAFI
+        }
+        return CalculationProfile(
+            id = "auto-${cc.lowercase()}-${method.name.lowercase()}-${madhab.name.lowercase()}",
+            method = method,
+            madhab = madhab
+        )
     }
 
     fun resolve(countryCode: String, preferences: CalculationPreferences): CalculationProfile {
