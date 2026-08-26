@@ -1,0 +1,25 @@
+<resources>
+    <string name="settings_calculation_method">計算方法</string>
+    <string name="settings_asr_method">晡禮方法</string>
+    <string name="settings_high_latitude">高緯度</string>
+    <string name="settings_prayer_adjustments">禮拜時間調整</string>
+    <string name="settings_hijri_calendar">伊斯蘭曆</string>
+    <string name="settings_hijri_day_adjustment">伊斯蘭曆日期調整</string>
+    <string name="settings_language">語言</string>
+    <string name="settings_appearance">外觀</string>
+    <string name="settings_automatic">自動</string>
+    <string name="settings_standard_shafi">標準 / 沙斐儀</string>
+    <string name="settings_hanafi">哈乃斐</string>
+    <string name="settings_middle_night">夜間中點</string>
+    <string name="settings_seventh_night">夜間七分之一</string>
+    <string name="settings_twilight_angle">暮光角度</string>
+    <string name="settings_system">跟隨系統</string>
+    <string name="settings_light">淺色</string>
+    <string name="settings_dark">深色</string>
+    <string name="settings_location">位置</string>
+    <string name="settings_place">地點</string>
+    <string name="settings_timezone">時區</string>
+    <string name="settings_method">方法</string>
+    <string name="settings_day_adjustment">日期調整</string>
+    <string name="settings_minutes">%1$d 分鐘</string>
+</resources>
