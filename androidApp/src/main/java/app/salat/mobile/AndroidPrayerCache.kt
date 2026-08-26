@@ -29,6 +29,7 @@ class AndroidPrayerCache(context: Context) :
                 calculation_profile TEXT NOT NULL,
                 fetched_at INTEGER NOT NULL,
                 refresh_after INTEGER NOT NULL,
+                comparison_profile TEXT,
                 max_delta_minutes INTEGER,
                 PRIMARY KEY (source_id, location_key, prayer_date)
             )
@@ -109,9 +110,13 @@ class AndroidPrayerCache(context: Context) :
         sourceId: String,
         locationKey: String,
         date: LocalDate,
+        calculationProfile: String,
         maxDeltaMinutes: Int
     ) {
-        val values = ContentValues().apply { put("max_delta_minutes", maxDeltaMinutes) }
+        val values = ContentValues().apply {
+            put("comparison_profile", calculationProfile)
+            put("max_delta_minutes", maxDeltaMinutes)
+        }
         writableDatabase.update(
             "official_prayer_cache",
             values,
@@ -122,10 +127,10 @@ class AndroidPrayerCache(context: Context) :
 
     private companion object {
         const val DATABASE_NAME = "salat_cache.db"
-        const val DATABASE_VERSION = 2
+        const val DATABASE_VERSION = 3
         val COLUMNS = arrayOf(
             "prayer_date", "fajr", "sunrise", "dhuhr", "asr", "maghrib", "isha",
-            "calculation_profile", "fetched_at", "refresh_after", "max_delta_minutes"
+            "calculation_profile", "fetched_at", "refresh_after", "comparison_profile", "max_delta_minutes"
         )
     }
 }
