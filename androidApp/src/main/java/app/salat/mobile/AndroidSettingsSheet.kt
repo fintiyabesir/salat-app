@@ -30,6 +30,8 @@ import app.salat.model.MadhabId
 import app.salat.model.PrayerAdjustments
 import app.salat.model.PrayerName
 import app.salat.model.ResolvedLocation
+import app.salat.verification.OfficialSourceIntegrationStatus
+import app.salat.verification.OfficialSourceReferenceResolver
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -40,6 +42,7 @@ fun AndroidSettingsSheet(
     onDismiss: () -> Unit
 ) {
     val autoMethod = RegionalCalculationProfileResolver.resolve(location.countryCode ?: "ZZ").method
+    val officialSource = OfficialSourceReferenceResolver.resolve(location.countryCode)
 
     ModalBottomSheet(onDismissRequest = onDismiss) {
         Column(
@@ -48,7 +51,24 @@ fun AndroidSettingsSheet(
                 .padding(horizontal = 22.dp, vertical = 8.dp)
         ) {
             Text(stringResource(R.string.settings), fontSize = 28.sp, fontWeight = FontWeight.SemiBold)
-            Spacer(Modifier.height(24.dp))
+            Spacer(Modifier.height(12.dp))
+
+            SettingsHeading(stringResource(R.string.settings_location))
+            Text(location.displayName, fontWeight = FontWeight.Medium)
+            Text(location.timeZoneId, fontSize = 13.sp)
+
+            SettingsHeading(stringResource(R.string.verification_official_source))
+            if (officialSource != null) {
+                Text(officialSource.displayName, fontWeight = FontWeight.Medium)
+            }
+            Text(
+                when (officialSource?.status ?: OfficialSourceIntegrationStatus.LOCAL_ONLY) {
+                    OfficialSourceIntegrationStatus.ADAPTER_AVAILABLE -> stringResource(R.string.verification_adapter_ready)
+                    OfficialSourceIntegrationStatus.REFERENCE_CONFIGURED -> stringResource(R.string.verification_reference_only)
+                    OfficialSourceIntegrationStatus.LOCAL_ONLY -> stringResource(R.string.verification_local_only)
+                },
+                fontSize = 13.sp
+            )
 
             SettingsHeading(stringResource(R.string.settings_calculation_method))
             ChipFlow(
