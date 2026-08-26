@@ -7,6 +7,7 @@ import kotlin.test.assertEquals
 class RegionalCalculationProfileResolverTest {
     @Test fun known_regions_select_expected_fallbacks() {
         assertEquals(CalculationMethodId.TURKEY, RegionalCalculationProfileResolver.resolve("TR").method)
+        assertEquals(CalculationMethodId.MALAYSIA, RegionalCalculationProfileResolver.resolve("MY").method)
         assertEquals(CalculationMethodId.SINGAPORE, RegionalCalculationProfileResolver.resolve("SG").method)
         assertEquals(CalculationMethodId.EGYPTIAN, RegionalCalculationProfileResolver.resolve("EG").method)
         assertEquals(CalculationMethodId.UMM_AL_QURA, RegionalCalculationProfileResolver.resolve("SA").method)
