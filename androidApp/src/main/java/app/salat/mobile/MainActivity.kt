@@ -18,6 +18,7 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -55,44 +56,68 @@ private fun SalatApp(
     var location by remember { mutableStateOf<ResolvedLocation?>(null) }
     var resolving by remember { mutableStateOf(false) }
     var locationError by remember { mutableStateOf(false) }
+    var showCityPicker by remember { mutableStateOf(false) }
 
-    fun resolve() {
+    fun applyLocation(resolved: ResolvedLocation?) {
+        location = resolved
+        resolving = false
+        locationError = resolved == null
+        if (resolved != null) notificationCoordinator.rebuild(resolved)
+    }
+
+    fun resolveDeviceLocation() {
         resolving = true
         locationError = false
-        resolver.resolve { resolved ->
-            location = resolved
-            resolving = false
-            locationError = resolved == null
-            if (resolved != null) notificationCoordinator.rebuild(resolved)
-        }
+        resolver.resolve(::applyLocation)
     }
 
     val permissionLauncher = rememberLauncherForActivityResult(
         ActivityResultContracts.RequestMultiplePermissions()
     ) { grants ->
-        if (grants.values.any { it }) resolve() else locationError = true
+        if (grants.values.any { it }) resolveDeviceLocation() else locationError = true
+    }
+
+    fun requestOrResolveDeviceLocation() {
+        if (resolver.hasPermission()) resolveDeviceLocation()
+        else permissionLauncher.launch(
+            arrayOf(
+                Manifest.permission.ACCESS_FINE_LOCATION,
+                Manifest.permission.ACCESS_COARSE_LOCATION
+            )
+        )
     }
 
     LaunchedEffect(Unit) {
-        if (resolver.hasPermission()) resolve()
+        if (resolver.hasPermission()) resolveDeviceLocation()
     }
 
     if (location == null) {
         LocationStartScreen(
             resolving = resolving,
             showError = locationError,
-            onUseLocation = {
-                if (resolver.hasPermission()) resolve()
-                else permissionLauncher.launch(
-                    arrayOf(
-                        Manifest.permission.ACCESS_FINE_LOCATION,
-                        Manifest.permission.ACCESS_COARSE_LOCATION
-                    )
-                )
-            }
+            onUseLocation = ::requestOrResolveDeviceLocation,
+            onChooseCity = { showCityPicker = true }
         )
     } else {
-        SalatMainShell(requireNotNull(location))
+        SalatMainShell(
+            location = requireNotNull(location),
+            onChooseCity = { showCityPicker = true },
+            onUseDeviceLocation = ::requestOrResolveDeviceLocation
+        )
+    }
+
+    if (showCityPicker) {
+        AndroidManualCityPicker(
+            onSelected = { selected ->
+                showCityPicker = false
+                applyLocation(selected)
+            },
+            onUseDeviceLocation = {
+                showCityPicker = false
+                requestOrResolveDeviceLocation()
+            },
+            onDismiss = { showCityPicker = false }
+        )
     }
 }
 
@@ -100,7 +125,8 @@ private fun SalatApp(
 private fun LocationStartScreen(
     resolving: Boolean,
     showError: Boolean,
-    onUseLocation: () -> Unit
+    onUseLocation: () -> Unit,
+    onChooseCity: () -> Unit
 ) {
     MaterialTheme {
         Surface(modifier = Modifier.fillMaxSize(), color = Canvas) {
@@ -138,6 +164,14 @@ private fun LocationStartScreen(
                 ) {
                     if (resolving) CircularProgressIndicator(color = Color.White)
                     else Text(stringResource(R.string.use_current_location))
+                }
+                Spacer(Modifier.height(10.dp))
+                OutlinedButton(
+                    onClick = onChooseCity,
+                    modifier = Modifier.fillMaxWidth().height(54.dp),
+                    shape = RoundedCornerShape(18.dp)
+                ) {
+                    Text(stringResource(R.string.location_choose_city))
                 }
                 if (showError) {
                     Spacer(Modifier.height(14.dp))
