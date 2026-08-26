@@ -17,8 +17,6 @@ struct TodayView: View {
             .background(Color(red: 0.98, green: 0.97, blue: 0.95))
             .onChange(of: locationModel.location) { location in
                 if let location {
-                    // Rebuilds only previously opted-in alerts. This never requests
-                    // notification permission just because location became available.
                     notificationCoordinator.rebuild(location: location)
                 }
             }
@@ -39,7 +37,7 @@ struct TodayView: View {
                 .frame(maxWidth: .infinity, alignment: .leading)
 
                 VStack(alignment: .leading, spacing: 6) {
-                    Text("NEXT PRAYER")
+                    Text(L10n.text("next_prayer"))
                         .font(.caption)
                         .tracking(1.2)
                         .foregroundStyle(Color(red: 0.27, green: 0.48, blue: 0.41))
@@ -78,13 +76,13 @@ struct TodayView: View {
     private var locationStartContent: some View {
         VStack(alignment: .leading, spacing: 18) {
             Spacer()
-            Text("SALAT")
+            Text(L10n.text("brand_name"))
                 .font(.caption.weight(.semibold))
                 .tracking(3)
                 .foregroundStyle(Color(red: 0.27, green: 0.48, blue: 0.41))
-            Text("Prayer times for where you are")
+            Text(L10n.text("location_title"))
                 .font(.system(size: 34, weight: .medium))
-            Text("Your coordinates are used on this device to calculate prayer times and Qibla. Salat has no location server.")
+            Text(L10n.text("location_privacy"))
                 .foregroundStyle(.secondary)
             Button {
                 locationModel.requestLocation()
@@ -94,7 +92,7 @@ struct TodayView: View {
                     if locationModel.isResolving {
                         ProgressView().tint(.white)
                     } else {
-                        Text("Use current location")
+                        Text(L10n.text("use_current_location"))
                     }
                     Spacer()
                 }
@@ -104,8 +102,8 @@ struct TodayView: View {
             .tint(Color(red: 0.27, green: 0.48, blue: 0.41))
             .disabled(locationModel.isResolving)
 
-            if let error = locationModel.errorMessage {
-                Text(error)
+            if locationModel.errorMessage != nil {
+                Text(L10n.text("location_unavailable"))
                     .foregroundStyle(Color(red: 0.60, green: 0.35, blue: 0.27))
                     .font(.footnote)
             }
