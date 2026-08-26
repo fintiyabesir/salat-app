@@ -1,0 +1,50 @@
+name: Generate Production City Catalog
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [ feature/offline-city-catalog ]
+    paths:
+      - 'data/city_catalog_generation_request.txt'
+
+jobs:
+  generate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Download GeoNames build inputs
+        run: |
+          mkdir -p build/geonames
+          curl --fail --location --retry 3 -o build/geonames/cities5000.zip https://download.geonames.org/export/dump/cities5000.zip
+          curl --fail --location --retry 3 -o build/geonames/countryInfo.txt https://download.geonames.org/export/dump/countryInfo.txt
+          curl --fail --location --retry 3 -o build/geonames/admin1CodesASCII.txt https://download.geonames.org/export/dump/admin1CodesASCII.txt
+          curl --fail --location --retry 3 -o build/geonames/alternateNamesV2.zip https://download.geonames.org/export/dump/alternateNamesV2.zip
+      - name: Generate production catalog
+        run: |
+          python3 scripts/process_geonames_cities.py \
+            --dataset cities5000 \
+            --cities-zip build/geonames/cities5000.zip \
+            --country-info build/geonames/countryInfo.txt \
+            --admin1 build/geonames/admin1CodesASCII.txt \
+            --alternate-names-zip build/geonames/alternateNamesV2.zip \
+            --output build/city-catalog/city_catalog.tsv \
+            --report build/city-catalog/report.json
+      - name: Verify multilingual search aliases
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          text = Path('build/city-catalog/city_catalog.tsv').read_text(encoding='utf-8')
+          required = ['İstanbul', '北京', 'ঢাকা', 'تهران', 'کراچی']
+          missing = [value for value in required if value not in text]
+          if missing:
+              raise SystemExit(f'Missing required multilingual city aliases: {missing}')
+          print('Multilingual alias verification passed:', ', '.join(required))
+          PY
+      - uses: actions/upload-artifact@v4
+        with:
+          name: production-city-catalog-cities5000
+          path: |
+            build/city-catalog/city_catalog.tsv
+            build/city-catalog/city_catalog.tsv.gz
+            build/city-catalog/report.json
+          retention-days: 7
