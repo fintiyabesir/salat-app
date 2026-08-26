@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.ModalBottomSheet
@@ -15,17 +16,19 @@ import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import app.salat.location.ManualCity
-import app.salat.location.StarterManualCityCatalog
 import app.salat.model.ResolvedLocation
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -34,8 +37,17 @@ fun AndroidManualCityPicker(
     onUseDeviceLocation: () -> Unit,
     onDismiss: () -> Unit
 ) {
+    val context = LocalContext.current
+    val catalog = remember(context) { AndroidOfflineCityCatalog(context.applicationContext) }
     var query by remember { mutableStateOf("") }
-    val results = remember(query) { StarterManualCityCatalog.search(query, 30) }
+    var loading by remember { mutableStateOf(true) }
+    var results by remember { mutableStateOf<List<OfflineCityEntry>>(emptyList()) }
+
+    LaunchedEffect(query) {
+        loading = true
+        results = withContext(Dispatchers.IO) { catalog.search(query, 30) }
+        loading = false
+    }
 
     ModalBottomSheet(onDismissRequest = onDismiss) {
         Column(Modifier.fillMaxWidth().padding(horizontal = 20.dp, vertical = 8.dp)) {
@@ -57,14 +69,14 @@ fun AndroidManualCityPicker(
                 Text(stringResource(R.string.location_use_device))
             }
 
-            if (results.isEmpty()) {
-                Text(
+            when {
+                loading -> CircularProgressIndicator(modifier = Modifier.padding(vertical = 24.dp))
+                results.isEmpty() -> Text(
                     stringResource(R.string.location_no_city_results),
                     modifier = Modifier.padding(vertical = 24.dp)
                 )
-            } else {
-                LazyColumn(modifier = Modifier.fillMaxWidth()) {
-                    items(results, key = ManualCity::id) { city ->
+                else -> LazyColumn(modifier = Modifier.fillMaxWidth()) {
+                    items(results, key = OfflineCityEntry::id) { city ->
                         Row(
                             modifier = Modifier.fillMaxWidth()
                                 .clickable { onSelected(city.asResolvedLocation()) }
