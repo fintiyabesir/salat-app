@@ -48,10 +48,18 @@ final class IOSLocationModel: NSObject, ObservableObject, @preconcurrency CLLoca
         case .authorizedAlways, .authorizedWhenInUse:
             resolveOnce()
         case .denied, .restricted:
-            errorMessage = "Location access is unavailable. Choose a city manually instead."
+            errorMessage = "location_unavailable"
         @unknown default:
-            errorMessage = "Location access is unavailable."
+            errorMessage = "location_unavailable"
         }
+    }
+
+    func useManualLocation(_ value: PrayerLocation) {
+        manager.stopUpdatingLocation()
+        geocoder.cancelGeocode()
+        location = value
+        isResolving = false
+        errorMessage = nil
     }
 
     func locationManagerDidChangeAuthorization(_ manager: CLLocationManager) {
@@ -60,7 +68,7 @@ final class IOSLocationModel: NSObject, ObservableObject, @preconcurrency CLLoca
             resolveOnce()
         case .denied, .restricted:
             isResolving = false
-            errorMessage = "Location access is unavailable. Choose a city manually instead."
+            errorMessage = "location_unavailable"
         case .notDetermined:
             break
         @unknown default:
@@ -71,7 +79,7 @@ final class IOSLocationModel: NSObject, ObservableObject, @preconcurrency CLLoca
     func locationManager(_ manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
         guard let latest = locations.last else {
             isResolving = false
-            errorMessage = "Could not determine your current location."
+            errorMessage = "location_unavailable"
             return
         }
         reverseGeocode(latest)
@@ -79,7 +87,7 @@ final class IOSLocationModel: NSObject, ObservableObject, @preconcurrency CLLoca
 
     func locationManager(_ manager: CLLocationManager, didFailWithError error: Error) {
         isResolving = false
-        errorMessage = "Could not determine your current location."
+        errorMessage = "location_unavailable"
     }
 
     private func resolveOnce() {
