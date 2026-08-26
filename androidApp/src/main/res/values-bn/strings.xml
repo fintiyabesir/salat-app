@@ -1,0 +1,9 @@
+<resources>
+    <string name="app_name">Salat</string><string name="brand_name">SALAT</string>
+    <string name="location_title">আপনার অবস্থান অনুযায়ী নামাজের সময়</string><string name="location_privacy">নামাজের সময় ও কিবলা হিসাব করতে আপনার অবস্থান শুধু এই ডিভাইসেই ব্যবহৃত হয়। Salat কোনো সার্ভারে আপনার অবস্থান পাঠায় না।</string>
+    <string name="use_current_location">বর্তমান অবস্থান ব্যবহার করুন</string><string name="location_unavailable">অবস্থান পাওয়া যাচ্ছে না। একটি শহর নিজে নির্বাচন করুন।</string>
+    <string name="next_prayer">পরবর্তী নামাজ</string><string name="today">আজ</string><string name="calendar">ক্যালেন্ডার</string><string name="qibla">কিবলা</string><string name="settings">সেটিংস</string><string name="notifications">নোটিফিকেশন</string>
+    <string name="prayer_fajr">ফজর</string><string name="prayer_sunrise">সূর্যোদয়</string><string name="prayer_dhuhr">যোহর</string><string name="prayer_asr">আসর</string><string name="prayer_maghrib">মাগরিব</string><string name="prayer_isha">ইশা</string>
+    <string name="prayer_in_minutes">%1$s শুরু হতে %2$d মিনিট</string><string name="prayer_time_now">%1$s-এর সময়</string>
+    <string name="notification_at_time">নামাজের সময়</string><string name="notification_minutes_before">%1$d মিনিট আগে</string><string name="notification_sound_system">সিস্টেম সাউন্ড</string><string name="notification_sound_silent">নীরব</string><string name="notification_sound_short_adhan">সংক্ষিপ্ত আজান</string>
+</resources>
