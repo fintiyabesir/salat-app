@@ -16,6 +16,8 @@ jobs:
           distribution: temurin
           java-version: '21'
       - uses: android-actions/setup-android@v3
+        with:
+          packages: platform-tools
       - name: Install stable Android 16 compile SDK
         run: sdkmanager "platforms;android-36" "build-tools;36.0.0"
       - uses: gradle/actions/setup-gradle@v4
@@ -23,6 +25,8 @@ jobs:
           gradle-version: '9.5.1'
       - name: Run shared JVM tests
         run: gradle :shared:jvmTest --stacktrace
+      - name: Compile Android debug app
+        run: gradle :androidApp:assembleDebug --stacktrace
       - name: Verify prototype JavaScript syntax
         run: |
           python3 - <<'PY'
