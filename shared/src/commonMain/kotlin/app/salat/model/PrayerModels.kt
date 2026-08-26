@@ -14,6 +14,7 @@ enum class PrayerName { FAJR, SUNRISE, DHUHR, ASR, MAGHRIB, ISHA }
 
 enum class CalculationMethodId {
     TURKEY,
+    MALAYSIA,
     MUSLIM_WORLD_LEAGUE,
     EGYPTIAN,
     KARACHI,
