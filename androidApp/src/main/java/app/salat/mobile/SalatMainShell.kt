@@ -1,6 +1,7 @@
 package app.salat.mobile
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -40,6 +41,9 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import app.salat.domain.SalatEngine
+import app.salat.model.AppPreferences
+import app.salat.model.AppearanceMode
+import app.salat.model.CalculationPreferences
 import app.salat.model.PrayerName
 import app.salat.model.ResolvedLocation
 import java.time.Instant
@@ -52,30 +56,49 @@ import kotlin.math.abs
 private enum class MainSection { TODAY, CALENDAR, QIBLA }
 
 private val ShellCanvas = Color(0xFFFAF8F3)
+private val ShellCanvasDark = Color(0xFF171916)
 private val ShellSage = Color(0xFF467A69)
 private val ShellWarm = Color(0xFFF5EEDB)
+private val ShellCardDark = Color(0xFF242823)
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SalatMainShell(location: ResolvedLocation) {
+    val context = LocalContext.current
+    val settingsStore = remember(context) { AndroidAppSettingsStore(context) }
+    val notificationCoordinator = remember(context) { AndroidPrayerNotificationCoordinator(context) }
+    var settings by remember { mutableStateOf(settingsStore.load()) }
     var section by remember { mutableStateOf(MainSection.TODAY) }
-    var showSettingsPlaceholder by remember { mutableStateOf(false) }
+    var showSettings by remember { mutableStateOf(false) }
+
+    val dark = when (settings.appearance) {
+        AppearanceMode.SYSTEM -> isSystemInDarkTheme()
+        AppearanceMode.DARK -> true
+        AppearanceMode.LIGHT -> false
+    }
+    val canvas = if (dark) ShellCanvasDark else ShellCanvas
+
+    fun persist(next: AppPreferences) {
+        settings = next
+        settingsStore.save(next)
+        notificationCoordinator.rebuild(location)
+    }
 
     MaterialTheme {
         Scaffold(
-            containerColor = ShellCanvas,
+            containerColor = canvas,
             topBar = {
                 TopAppBar(
                     title = { Text(stringResource(R.string.brand_name), color = ShellSage, letterSpacing = 2.sp) },
                     actions = {
-                        IconButton(onClick = { showSettingsPlaceholder = !showSettingsPlaceholder }) {
+                        IconButton(onClick = { showSettings = true }) {
                             Text("⚙", fontSize = 22.sp)
                         }
                     }
                 )
             },
             bottomBar = {
-                NavigationBar(containerColor = ShellCanvas) {
+                NavigationBar(containerColor = canvas) {
                     NavigationBarItem(
                         selected = section == MainSection.TODAY,
                         onClick = { section = MainSection.TODAY },
@@ -97,25 +120,22 @@ fun SalatMainShell(location: ResolvedLocation) {
                 }
             }
         ) { padding ->
-            Box(Modifier.fillMaxSize().padding(padding)) {
+            Box(Modifier.fillMaxSize().padding(padding).background(canvas)) {
                 when (section) {
-                    MainSection.TODAY -> AdaptiveTodayScreen(location)
-                    MainSection.CALENDAR -> SalatCalendarScreen(location)
+                    MainSection.TODAY -> AdaptiveTodayScreen(location, settings.calculation)
+                    MainSection.CALENDAR -> SalatCalendarScreen(location, settings.calculation, dark)
                     MainSection.QIBLA -> SalatQiblaScreen(location)
                 }
-
-                if (showSettingsPlaceholder) {
-                    Text(
-                        stringResource(R.string.settings),
-                        modifier = Modifier
-                            .align(Alignment.TopEnd)
-                            .padding(16.dp)
-                            .background(ShellWarm, RoundedCornerShape(14.dp))
-                            .padding(horizontal = 16.dp, vertical = 10.dp),
-                        fontWeight = FontWeight.SemiBold
-                    )
-                }
             }
+        }
+
+        if (showSettings) {
+            AndroidSettingsSheet(
+                location = location,
+                value = settings,
+                onChange = ::persist,
+                onDismiss = { showSettings = false }
+            )
         }
     }
 }
@@ -126,11 +146,15 @@ private data class CalendarDayUi(
 )
 
 @Composable
-private fun SalatCalendarScreen(location: ResolvedLocation) {
+private fun SalatCalendarScreen(
+    location: ResolvedLocation,
+    preferences: CalculationPreferences,
+    dark: Boolean
+) {
     val zone = remember(location.timeZoneId) { ZoneId.of(location.timeZoneId) }
     val engine = remember { SalatEngine() }
     val start = remember(location, zone) { LocalDate.now(zone) }
-    val days = remember(location, start) {
+    val days = remember(location, start, preferences) {
         (0L until 30L).map { offset ->
             val date = start.plusDays(offset)
             val day = engine.calculateDay(
@@ -140,7 +164,8 @@ private fun SalatCalendarScreen(location: ResolvedLocation) {
                 latitude = location.point.latitude,
                 longitude = location.point.longitude,
                 timeZoneId = location.timeZoneId,
-                countryCode = location.countryCode ?: "ZZ"
+                countryCode = location.countryCode ?: "ZZ",
+                preferences = preferences
             )
             CalendarDayUi(
                 date = date,
@@ -161,7 +186,7 @@ private fun SalatCalendarScreen(location: ResolvedLocation) {
         items(days) { item ->
             Column(
                 Modifier.fillMaxWidth()
-                    .background(Color.White.copy(alpha = 0.72f), RoundedCornerShape(22.dp))
+                    .background(if (dark) ShellCardDark else Color.White.copy(alpha = 0.72f), RoundedCornerShape(22.dp))
                     .padding(18.dp)
             ) {
                 Text(
@@ -221,7 +246,7 @@ private fun SalatQiblaScreen(location: ResolvedLocation) {
 
         Box(
             Modifier
-                .background(if (aligned) Color(0xFFE2EFE8) else ShellWarm, RoundedCornerShape(120.dp))
+                .background(ShellWarm, RoundedCornerShape(120.dp))
                 .padding(64.dp),
             contentAlignment = Alignment.Center
         ) {
