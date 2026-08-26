@@ -18,6 +18,8 @@ targets:
       - path: SalatApp
         excludes:
           - Info.plist
+      - path: ../resources/city_catalog.tsv
+        buildPhase: resources
     info:
       path: SalatApp/Info.plist
     settings:
