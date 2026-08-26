@@ -7,6 +7,7 @@ import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.compose.setContent
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -148,6 +149,7 @@ private fun LocationStartScreen(
 fun SalatTodayScreen(location: ResolvedLocation) {
     val zone = remember(location.timeZoneId) { ZoneId.of(location.timeZoneId) }
     val today = remember(location, zone) { LocalDate.now(zone) }
+    var selectedPrayer by remember { mutableStateOf<PrayerName?>(null) }
     val day = remember(location, today) {
         SalatEngine().calculateDay(
             year = today.year,
@@ -177,9 +179,22 @@ fun SalatTodayScreen(location: ResolvedLocation) {
                 NextPrayerCard(day, next, zone)
                 Spacer(Modifier.height(20.dp))
                 PrayerName.entries.forEach { prayer ->
-                    PrayerRow(name = prayer.label(), time = format(day, prayer, zone), active = prayer == next)
+                    PrayerRow(
+                        name = prayer.label(),
+                        time = format(day, prayer, zone),
+                        active = prayer == next,
+                        onClick = { selectedPrayer = prayer }
+                    )
                 }
             }
+        }
+
+        selectedPrayer?.let { prayer ->
+            PrayerNotificationSettingsSheet(
+                prayer = prayer,
+                location = location,
+                onDismiss = { selectedPrayer = null }
+            )
         }
     }
 }
@@ -194,10 +209,11 @@ private fun NextPrayerCard(day: PrayerDay, prayer: PrayerName, zone: ZoneId) {
 }
 
 @Composable
-private fun PrayerRow(name: String, time: String, active: Boolean = false) {
+private fun PrayerRow(name: String, time: String, active: Boolean = false, onClick: () -> Unit) {
     Row(
         Modifier.fillMaxWidth()
             .background(if (active) ActiveWarm else Color.Transparent, RoundedCornerShape(16.dp))
+            .clickable(onClick = onClick)
             .padding(horizontal = 12.dp, vertical = 13.dp),
         horizontalArrangement = Arrangement.SpaceBetween
     ) {
