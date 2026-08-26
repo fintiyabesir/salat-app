@@ -152,6 +152,10 @@ fun AndroidSettingsSheet(
                 onSelected = { onChange(value.copy(appearance = AppearanceMode.valueOf(it))) }
             )
 
+            SettingsHeading("GeoNames")
+            Text("GeoNames · CC BY 4.0", fontWeight = FontWeight.Medium)
+            Text("geonames.org", fontSize = 13.sp)
+
             Spacer(Modifier.height(32.dp))
         }
     }
