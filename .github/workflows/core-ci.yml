@@ -27,6 +27,8 @@ jobs:
       - uses: gradle/actions/setup-gradle@v4
         with:
           gradle-version: '9.5.1'
+      - name: Validate localization resources
+        run: python3 scripts/validate_localizations.py
       - name: Run shared JVM tests
         run: gradle :shared:jvmTest --stacktrace
       - name: Compile Android debug app
