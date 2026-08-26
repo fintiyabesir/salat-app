@@ -7,6 +7,9 @@ on:
     paths:
       - 'data/city_catalog_generation_request.txt'
 
+permissions:
+  contents: write
+
 jobs:
   generate:
     runs-on: ubuntu-latest
@@ -40,6 +43,20 @@ jobs:
               raise SystemExit(f'Missing required multilingual city aliases: {missing}')
           print('Multilingual alias verification passed:', ', '.join(required))
           PY
+      - name: Commit generated runtime resource
+        run: |
+          mkdir -p resources data
+          cp build/city-catalog/city_catalog.tsv resources/city_catalog.tsv
+          cp build/city-catalog/report.json data/city_catalog_report.json
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add resources/city_catalog.tsv data/city_catalog_report.json
+          if git diff --cached --quiet; then
+            echo "Generated catalog is unchanged"
+            exit 0
+          fi
+          git commit -m "Bundle generated offline city catalog"
+          git push origin HEAD:${GITHUB_REF_NAME}
       - uses: actions/upload-artifact@v4
         with:
           name: production-city-catalog-cities5000
