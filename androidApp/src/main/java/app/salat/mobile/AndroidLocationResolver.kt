@@ -29,7 +29,7 @@ class AndroidLocationResolver(private val activity: Activity) {
 
     fun resolve(onResult: (ResolvedLocation?) -> Unit) {
         if (!hasPermission()) {
-            onResult(null)
+            deliver(onResult, null)
             return
         }
 
@@ -51,7 +51,7 @@ class AndroidLocationResolver(private val activity: Activity) {
         }
 
         if (provider == null) {
-            onResult(null)
+            deliver(onResult, null)
             return
         }
 
@@ -68,7 +68,7 @@ class AndroidLocationResolver(private val activity: Activity) {
                 },
                 Looper.getMainLooper()
             )
-        }.onFailure { onResult(null) }
+        }.onFailure { deliver(onResult, null) }
     }
 
     private fun enrich(location: Location, onResult: (ResolvedLocation?) -> Unit) {
@@ -79,7 +79,7 @@ class AndroidLocationResolver(private val activity: Activity) {
         )
 
         if (!Geocoder.isPresent()) {
-            onResult(base)
+            deliver(onResult, base)
             return
         }
 
@@ -91,11 +91,11 @@ class AndroidLocationResolver(private val activity: Activity) {
                 1,
                 object : Geocoder.GeocodeListener {
                     override fun onGeocode(addresses: MutableList<Address>) {
-                        onResult(base.withAddress(addresses.firstOrNull()))
+                        deliver(onResult, base.withAddress(addresses.firstOrNull()))
                     }
 
                     override fun onError(errorMessage: String?) {
-                        onResult(base)
+                        deliver(onResult, base)
                     }
                 }
             )
@@ -105,9 +105,13 @@ class AndroidLocationResolver(private val activity: Activity) {
                 val address = runCatching {
                     geocoder.getFromLocation(location.latitude, location.longitude, 1)?.firstOrNull()
                 }.getOrNull()
-                activity.runOnUiThread { onResult(base.withAddress(address)) }
+                deliver(onResult, base.withAddress(address))
             }.start()
         }
+    }
+
+    private fun deliver(onResult: (ResolvedLocation?) -> Unit, value: ResolvedLocation?) {
+        activity.runOnUiThread { onResult(value) }
     }
 
     private fun ResolvedLocation.withAddress(address: Address?): ResolvedLocation = copy(
