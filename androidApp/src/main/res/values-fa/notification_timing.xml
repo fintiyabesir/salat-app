@@ -1,0 +1,5 @@
+<resources>
+    <string name="notification_exact_timing_title">زمان‌بندی دقیق</string>
+    <string name="notification_exact_timing_explanation">برای اینکه اعلان‌های نماز در زمان محاسبه‌شده برسند، مجوز زنگ هشدار دقیق را فعال کنید. بدون آن ممکن است Android اعلان را دیرتر نمایش دهد.</string>
+    <string name="notification_exact_timing_action">اجازه زمان‌بندی دقیق</string>
+</resources>
