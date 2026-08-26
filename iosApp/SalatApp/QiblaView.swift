@@ -29,19 +29,19 @@ struct QiblaView: View {
                 .font(.system(size: 30, weight: .semibold))
             Text("\(Int(qiblaBearing.rounded()))°")
                 .font(.title3)
-                .foregroundStyle(Color(red: 0.27, green: 0.48, blue: 0.41))
+                .foregroundStyle(.tint)
                 .padding(.top, 6)
 
             Spacer()
 
             ZStack {
                 Circle()
-                    .fill(aligned ? Color(red: 0.89, green: 0.95, blue: 0.91) : Color(red: 0.96, green: 0.93, blue: 0.86))
+                    .fill(aligned ? Color.accentColor.opacity(0.16) : Color(uiColor: .secondarySystemBackground))
                     .frame(width: 250, height: 250)
 
                 Image(systemName: "arrowtriangle.up.fill")
                     .font(.system(size: 84, weight: .light))
-                    .foregroundStyle(Color(red: 0.27, green: 0.48, blue: 0.41))
+                    .foregroundStyle(.tint)
                     .rotationEffect(.degrees(delta ?? 0))
                     .animation(.easeOut(duration: 0.18), value: delta)
             }
@@ -50,13 +50,13 @@ struct QiblaView: View {
 
             Group {
                 if !headingModel.isAvailable {
-                    Text("Compass sensor unavailable")
+                    Text(L10n.text("qibla_compass_unavailable"))
                 } else if headingModel.heading == nil {
-                    Text("Calibrating compass…")
+                    Text(L10n.text("qibla_calibrating"))
                 } else if aligned {
-                    Text("Aligned with Qibla")
+                    Text(L10n.text("qibla_aligned"))
                         .fontWeight(.semibold)
-                        .foregroundStyle(Color(red: 0.27, green: 0.48, blue: 0.41))
+                        .foregroundStyle(.tint)
                 } else if let delta {
                     Text("\(Int(abs(delta).rounded()))°")
                 }
@@ -64,7 +64,7 @@ struct QiblaView: View {
             .foregroundStyle(.secondary)
 
             if let accuracy = headingModel.accuracy, accuracy > 20 {
-                Text("Move the phone in a figure-eight to improve compass accuracy.")
+                Text(L10n.text("qibla_accuracy_hint"))
                     .font(.footnote)
                     .foregroundStyle(.secondary)
                     .multilineTextAlignment(.center)
@@ -74,7 +74,7 @@ struct QiblaView: View {
             Spacer().frame(height: 24)
         }
         .padding(.horizontal, 24)
-        .background(Color(red: 0.98, green: 0.97, blue: 0.95))
+        .background(Color(uiColor: .systemBackground))
         .onAppear { headingModel.start() }
         .onDisappear { headingModel.stop() }
         .onChange(of: aligned) { _, isAligned in
