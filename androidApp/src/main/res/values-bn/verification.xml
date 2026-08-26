@@ -1,0 +1,6 @@
+<resources>
+    <string name="verification_official_source">সরকারি রেফারেন্স</string>
+    <string name="verification_adapter_ready">সরকারি উৎস অ্যাডাপ্টার উপলব্ধ। আজকের সময়গুলো এখনও এই ডিভাইসে তুলনা করা হয়নি।</string>
+    <string name="verification_reference_only">সরকারি রেফারেন্স সেট করা আছে। লাইভ তুলনা এখনও সক্রিয় নয়।</string>
+    <string name="verification_local_only">এখনও কোনো সরকারি রেফারেন্স সেট করা নেই। স্থানীয় হিসাব ব্যবহার করা হচ্ছে।</string>
+</resources>
