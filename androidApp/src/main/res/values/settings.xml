@@ -1,0 +1,25 @@
+<resources>
+    <string name="settings_calculation_method">Calculation method</string>
+    <string name="settings_asr_method">Asr method</string>
+    <string name="settings_high_latitude">High latitude</string>
+    <string name="settings_prayer_adjustments">Prayer time adjustments</string>
+    <string name="settings_hijri_calendar">Hijri calendar</string>
+    <string name="settings_hijri_day_adjustment">Hijri day adjustment</string>
+    <string name="settings_language">Language</string>
+    <string name="settings_appearance">Appearance</string>
+    <string name="settings_automatic">Automatic</string>
+    <string name="settings_standard_shafi">Standard / Shafi</string>
+    <string name="settings_hanafi">Hanafi</string>
+    <string name="settings_middle_night">Middle of night</string>
+    <string name="settings_seventh_night">Seventh of night</string>
+    <string name="settings_twilight_angle">Twilight angle</string>
+    <string name="settings_system">System</string>
+    <string name="settings_light">Light</string>
+    <string name="settings_dark">Dark</string>
+    <string name="settings_location">Location</string>
+    <string name="settings_place">Place</string>
+    <string name="settings_timezone">Timezone</string>
+    <string name="settings_method">Method</string>
+    <string name="settings_day_adjustment">Day adjustment</string>
+    <string name="settings_minutes">%1$d min</string>
+</resources>
