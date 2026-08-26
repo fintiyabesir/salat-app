@@ -5,8 +5,7 @@ struct IOSSettingsView: View {
     @ObservedObject var store: IOSAppSettingsStore
     @Environment(\.dismiss) private var dismiss
 
-    private let methodOptions: [(String?, String)] = [
-        (nil, "Automatic"),
+    private let explicitMethods: [(String, String)] = [
         ("TURKEY", "Turkey / Diyanet"),
         ("MALAYSIA", "Malaysia · 18°/18°"),
         ("MUSLIM_WORLD_LEAGUE", "Muslim World League"),
@@ -25,56 +24,57 @@ struct IOSSettingsView: View {
         NavigationStack {
             Form {
                 if let location {
-                    Section("Location") {
-                        LabeledContent("Place", value: location.displayName)
-                        LabeledContent("Timezone", value: location.timeZoneId)
+                    Section(L10n.text("settings_location")) {
+                        LabeledContent(L10n.text("settings_place"), value: location.displayName)
+                        LabeledContent(L10n.text("settings_timezone"), value: location.timeZoneId)
                     }
                 }
 
-                Section("Calculation") {
-                    Picker("Method", selection: methodBinding) {
-                        ForEach(methodOptions, id: \.1) { option in
-                            Text(option.1).tag(option.0)
+                Section(L10n.text("settings_calculation")) {
+                    Picker(L10n.text("settings_method"), selection: methodBinding) {
+                        Text(L10n.text("settings_automatic")).tag(String?.none)
+                        ForEach(explicitMethods, id: \.0) { option in
+                            Text(option.1).tag(String?.some(option.0))
                         }
                     }
-                    Picker("Asr", selection: madhabBinding) {
-                        Text("Automatic").tag(String?.none)
-                        Text("Standard / Shafi").tag(String?.some("SHAFI"))
-                        Text("Hanafi").tag(String?.some("HANAFI"))
+                    Picker(L10n.text("settings_asr_method"), selection: madhabBinding) {
+                        Text(L10n.text("settings_automatic")).tag(String?.none)
+                        Text(L10n.text("settings_standard_shafi")).tag(String?.some("SHAFI"))
+                        Text(L10n.text("settings_hanafi")).tag(String?.some("HANAFI"))
                     }
-                    Picker("High latitude", selection: highLatitudeBinding) {
-                        Text("Automatic").tag("AUTOMATIC")
-                        Text("Middle of night").tag("MIDDLE_OF_THE_NIGHT")
-                        Text("Seventh of night").tag("SEVENTH_OF_THE_NIGHT")
-                        Text("Twilight angle").tag("TWILIGHT_ANGLE")
+                    Picker(L10n.text("settings_high_latitude"), selection: highLatitudeBinding) {
+                        Text(L10n.text("settings_automatic")).tag("AUTOMATIC")
+                        Text(L10n.text("settings_middle_night")).tag("MIDDLE_OF_THE_NIGHT")
+                        Text(L10n.text("settings_seventh_night")).tag("SEVENTH_OF_THE_NIGHT")
+                        Text(L10n.text("settings_twilight_angle")).tag("TWILIGHT_ANGLE")
                     }
                 }
 
-                Section("Prayer time adjustments") {
-                    AdjustmentStepper("Fajr", value: adjustmentBinding(\.fajrAdjustment))
-                    AdjustmentStepper("Sunrise", value: adjustmentBinding(\.sunriseAdjustment))
-                    AdjustmentStepper("Dhuhr", value: adjustmentBinding(\.dhuhrAdjustment))
-                    AdjustmentStepper("Asr", value: adjustmentBinding(\.asrAdjustment))
-                    AdjustmentStepper("Maghrib", value: adjustmentBinding(\.maghribAdjustment))
-                    AdjustmentStepper("Isha", value: adjustmentBinding(\.ishaAdjustment))
+                Section(L10n.text("settings_prayer_adjustments")) {
+                    AdjustmentStepper(L10n.prayer("fajr"), value: adjustmentBinding(\.fajrAdjustment))
+                    AdjustmentStepper(L10n.prayer("sunrise"), value: adjustmentBinding(\.sunriseAdjustment))
+                    AdjustmentStepper(L10n.prayer("dhuhr"), value: adjustmentBinding(\.dhuhrAdjustment))
+                    AdjustmentStepper(L10n.prayer("asr"), value: adjustmentBinding(\.asrAdjustment))
+                    AdjustmentStepper(L10n.prayer("maghrib"), value: adjustmentBinding(\.maghribAdjustment))
+                    AdjustmentStepper(L10n.prayer("isha"), value: adjustmentBinding(\.ishaAdjustment))
                 }
 
-                Section("Hijri calendar") {
-                    Picker("Method", selection: hijriMethodBinding) {
-                        Text("Automatic").tag("AUTOMATIC")
+                Section(L10n.text("settings_hijri_calendar")) {
+                    Picker(L10n.text("settings_method"), selection: hijriMethodBinding) {
+                        Text(L10n.text("settings_automatic")).tag("AUTOMATIC")
                         Text("Umm al-Qura").tag("UMM_AL_QURA")
                         Text("Tabular").tag("TABULAR")
                     }
                     Stepper(
-                        "Day adjustment: \(signed(store.value.hijriDayAdjustment))",
+                        "\(L10n.text("settings_day_adjustment")): \(signed(store.value.hijriDayAdjustment))",
                         value: hijriOffsetBinding,
                         in: -2...2
                     )
                 }
 
-                Section("Language") {
-                    Picker("Language", selection: languageBinding) {
-                        Text("System").tag(String?.none)
+                Section(L10n.text("settings_language")) {
+                    Picker(L10n.text("settings_language"), selection: languageBinding) {
+                        Text(L10n.text("settings_system")).tag(String?.none)
                         Text("English").tag(String?.some("en"))
                         Text("Türkçe").tag(String?.some("tr"))
                         Text("العربية").tag(String?.some("ar"))
@@ -87,18 +87,18 @@ struct IOSSettingsView: View {
                     }
                 }
 
-                Section("Appearance") {
-                    Picker("Appearance", selection: appearanceBinding) {
-                        Text("System").tag("SYSTEM")
-                        Text("Light").tag("LIGHT")
-                        Text("Dark").tag("DARK")
+                Section(L10n.text("settings_appearance")) {
+                    Picker(L10n.text("settings_appearance"), selection: appearanceBinding) {
+                        Text(L10n.text("settings_system")).tag("SYSTEM")
+                        Text(L10n.text("settings_light")).tag("LIGHT")
+                        Text(L10n.text("settings_dark")).tag("DARK")
                     }
                 }
             }
             .navigationTitle(L10n.text("settings"))
             .toolbar {
                 ToolbarItem(placement: .topBarTrailing) {
-                    Button("Done") { dismiss() }
+                    Button(L10n.text("settings_done")) { dismiss() }
                 }
             }
         }
@@ -179,6 +179,10 @@ private struct AdjustmentStepper: View {
     }
 
     var body: some View {
-        Stepper("\(title): \(value > 0 ? "+" : "")\(value) min", value: $value, in: -30...30)
+        Stepper(
+            "\(title): \(value > 0 ? "+" : "")\(L10n.format("settings_minutes_format", value))",
+            value: $value,
+            in: -30...30
+        )
     }
 }
