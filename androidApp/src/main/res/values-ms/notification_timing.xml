@@ -1,0 +1,5 @@
+<resources>
+    <string name="notification_exact_timing_title">Masa tepat</string>
+    <string name="notification_exact_timing_explanation">Benarkan penggera tepat supaya pemberitahuan solat tiba pada waktu yang dikira. Tanpa kebenaran ini, Android mungkin menghantarnya lewat.</string>
+    <string name="notification_exact_timing_action">Benarkan masa tepat</string>
+</resources>
