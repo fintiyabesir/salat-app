@@ -11,7 +11,8 @@ import app.salat.model.MadhabId
 import app.salat.model.PrayerAdjustments
 
 class AndroidAppSettingsStore(context: Context) {
-    private val prefs = context.applicationContext.getSharedPreferences(FILE_NAME, Context.MODE_PRIVATE)
+    private val appContext = context.applicationContext
+    private val prefs = appContext.getSharedPreferences(FILE_NAME, Context.MODE_PRIVATE)
 
     fun load(): AppPreferences {
         val calculation = CalculationPreferences(
@@ -61,6 +62,9 @@ class AndroidAppSettingsStore(context: Context) {
             .putNullableString(KEY_LANGUAGE, value.languageTag)
             .putString(KEY_APPEARANCE, value.appearance.name)
             .apply()
+
+        // Keep backend-free widgets aligned with calculation-profile changes.
+        AndroidGlanceTimelineStore(appContext).rebuildLastKnown(value)
     }
 
     private inline fun <reified T : Enum<T>> enumOrNull(raw: String?): T? =

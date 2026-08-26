@@ -96,9 +96,12 @@ jobs:
         run: |
           APP="$RUNNER_TEMP/SalatDerivedData/Build/Products/Debug-iphonesimulator/Salat.app"
           CATALOG="$APP/city_catalog.tsv"
+          WIDGET="$APP/PlugIns/SalatWidgetExtension.appex"
           test -d "$APP"
           test -f "$APP/Info.plist"
           test -f "$CATALOG"
+          test -d "$WIDGET"
+          test -f "$WIDGET/Info.plist"
           EXPECTED="$(shasum -a 256 resources/city_catalog.tsv | awk '{print $1}')"
           ACTUAL="$(shasum -a 256 "$CATALOG" | awk '{print $1}')"
           test "$ACTUAL" = "$EXPECTED"

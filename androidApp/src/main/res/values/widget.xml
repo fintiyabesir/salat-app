@@ -1,0 +1,4 @@
+<resources>
+    <string name="widget_description">Next prayer and countdown</string>
+    <string name="widget_open_app_hint">Open Salat to update prayer times.</string>
+</resources>

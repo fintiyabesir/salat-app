@@ -41,7 +41,8 @@ class MainActivity : ComponentActivity() {
         AndroidLocaleController.apply(this, AndroidAppSettingsStore(this).load().languageTag)
         val resolver = AndroidLocationResolver(this)
         val notificationCoordinator = AndroidPrayerNotificationCoordinator(this)
-        setContent { SalatApp(resolver, notificationCoordinator) }
+        val glanceTimelineStore = AndroidGlanceTimelineStore(this)
+        setContent { SalatApp(resolver, notificationCoordinator, glanceTimelineStore) }
     }
 }
 
@@ -51,7 +52,8 @@ private val Sage = Color(0xFF467A69)
 @Composable
 private fun SalatApp(
     resolver: AndroidLocationResolver,
-    notificationCoordinator: AndroidPrayerNotificationCoordinator
+    notificationCoordinator: AndroidPrayerNotificationCoordinator,
+    glanceTimelineStore: AndroidGlanceTimelineStore
 ) {
     var location by remember { mutableStateOf<ResolvedLocation?>(null) }
     var resolving by remember { mutableStateOf(false) }
@@ -62,7 +64,10 @@ private fun SalatApp(
         location = resolved
         resolving = false
         locationError = resolved == null
-        if (resolved != null) notificationCoordinator.rebuild(resolved)
+        if (resolved != null) {
+            notificationCoordinator.rebuild(resolved)
+            glanceTimelineStore.rebuild(resolved)
+        }
     }
 
     fun resolveDeviceLocation() {

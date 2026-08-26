@@ -1,0 +1,4 @@
+<resources>
+    <string name="widget_description">পরবর্তী নামাজ ও কাউন্টডাউন</string>
+    <string name="widget_open_app_hint">নামাজের সময় হালনাগাদ করতে Salat খুলুন।</string>
+</resources>
