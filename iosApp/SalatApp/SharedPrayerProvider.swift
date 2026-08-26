@@ -17,22 +17,36 @@ struct TodayPrayerDisplay {
 }
 
 /// Formats KMP prayer snapshots for SwiftUI. Prayer calculation remains entirely
-/// in the shared Kotlin/Adhan engine; Swift only supplies location and presentation.
+/// in the shared Kotlin/Adhan engine; Swift only supplies location, preferences and presentation.
 struct SharedPrayerProvider {
-    func today(location: PrayerLocation, now: Date = Date()) -> TodayPrayerDisplay {
+    func today(
+        location: PrayerLocation,
+        settings: IOSAppSettings = .defaults,
+        now: Date = Date()
+    ) -> TodayPrayerDisplay {
         let timeZone = TimeZone(identifier: location.timeZoneId) ?? .current
         var calendar = Calendar(identifier: .gregorian)
         calendar.timeZone = timeZone
         let components = calendar.dateComponents([.year, .month, .day], from: now)
 
-        let snapshot = SalatApi.shared.calculateDaySnapshot(
+        let calculation = settings.calculation
+        let snapshot = SalatApi.shared.calculateDaySnapshotConfigured(
             year: Int32(components.year!),
             month: Int32(components.month!),
             day: Int32(components.day!),
             latitude: location.latitude,
             longitude: location.longitude,
             timeZoneId: timeZone.identifier,
-            countryCode: location.countryCode
+            countryCode: location.countryCode,
+            methodOverride: calculation.methodOverride,
+            madhabOverride: calculation.madhabOverride,
+            highLatitudeRule: calculation.highLatitudeRule,
+            fajrAdjustment: Int32(calculation.fajrAdjustment),
+            sunriseAdjustment: Int32(calculation.sunriseAdjustment),
+            dhuhrAdjustment: Int32(calculation.dhuhrAdjustment),
+            asrAdjustment: Int32(calculation.asrAdjustment),
+            maghribAdjustment: Int32(calculation.maghribAdjustment),
+            ishaAdjustment: Int32(calculation.ishaAdjustment)
         )
 
         let rows = [
