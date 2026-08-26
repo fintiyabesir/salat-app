@@ -19,9 +19,7 @@ class PrayerNotificationReceiver : BroadcastReceiver() {
         if (
             Build.VERSION.SDK_INT >= 33 &&
             context.checkSelfPermission(Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED
-        ) {
-            return
-        }
+        ) return
 
         val stableId = intent.getStringExtra(AndroidPrayerNotificationScheduler.EXTRA_STABLE_ID) ?: return
         val rawPrayer = intent.getStringExtra(AndroidPrayerNotificationScheduler.EXTRA_PRAYER_NAME) ?: return
@@ -33,12 +31,12 @@ class PrayerNotificationReceiver : BroadcastReceiver() {
             )
         }.getOrDefault(NotificationSoundMode.SYSTEM)
 
-        val prayerName = rawPrayer.lowercase().replaceFirstChar { it.uppercase() }
+        val prayerName = localizedPrayerName(context, rawPrayer)
         val remainingMinutes = max(0L, (prayerAt - System.currentTimeMillis()) / 60_000L)
         val body = if (remainingMinutes > 0) {
-            "$prayerName in $remainingMinutes min"
+            context.getString(R.string.prayer_in_minutes, prayerName, remainingMinutes)
         } else {
-            "$prayerName prayer time"
+            context.getString(R.string.prayer_time_now, prayerName)
         }
 
         val channelId = PrayerNotificationChannels.ensure(context, soundMode)
@@ -63,5 +61,18 @@ class PrayerNotificationReceiver : BroadcastReceiver() {
 
         context.getSystemService(NotificationManager::class.java)
             .notify(stableId.hashCode(), notification)
+    }
+
+    private fun localizedPrayerName(context: Context, rawPrayer: String): String {
+        val resource = when (rawPrayer.uppercase()) {
+            "FAJR" -> R.string.prayer_fajr
+            "SUNRISE" -> R.string.prayer_sunrise
+            "DHUHR" -> R.string.prayer_dhuhr
+            "ASR" -> R.string.prayer_asr
+            "MAGHRIB" -> R.string.prayer_maghrib
+            "ISHA" -> R.string.prayer_isha
+            else -> return rawPrayer
+        }
+        return context.getString(resource)
     }
 }
