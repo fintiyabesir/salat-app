@@ -104,7 +104,7 @@ private fun SalatApp(
             }
         )
     } else {
-        SalatTodayScreen(requireNotNull(location))
+        SalatMainShell(requireNotNull(location))
     }
 }
 
