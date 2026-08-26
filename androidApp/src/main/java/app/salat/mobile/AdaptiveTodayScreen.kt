@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -35,11 +36,6 @@ import java.time.LocalDate
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 import java.util.Locale
-
-private val AdaptiveCanvas = Color(0xFFFAF8F3)
-private val AdaptiveSage = Color(0xFF467A69)
-private val AdaptiveWarm = Color(0xFFF5EEDB)
-private val AdaptiveActiveWarm = Color(0xFFFFF1D8)
 
 @Composable
 fun AdaptiveTodayScreen(
@@ -65,7 +61,7 @@ fun AdaptiveTodayScreen(
         day.time(it).toEpochMilliseconds() > System.currentTimeMillis()
     } ?: PrayerName.FAJR
 
-    Surface(modifier = Modifier.fillMaxSize(), color = AdaptiveCanvas) {
+    Surface(modifier = Modifier.fillMaxSize(), color = MaterialTheme.colorScheme.background) {
         BoxWithConstraints(Modifier.fillMaxSize()) {
             if (maxWidth >= 700.dp) {
                 Row(
@@ -106,10 +102,10 @@ fun AdaptiveTodayScreen(
 private fun LocationHeader(location: ResolvedLocation, today: LocalDate) {
     Text(location.displayName, fontSize = 24.sp, fontWeight = FontWeight.SemiBold)
     val region = listOfNotNull(location.regionName, location.countryCode).distinct().joinToString(" · ")
-    if (region.isNotBlank()) Text(region, color = Color(0xFF6D716E))
+    if (region.isNotBlank()) Text(region, color = MaterialTheme.colorScheme.onSurfaceVariant)
     Text(
         today.format(DateTimeFormatter.ofPattern("d MMM yyyy", Locale.getDefault())),
-        color = Color(0xFF6D716E)
+        color = MaterialTheme.colorScheme.onSurfaceVariant
     )
 }
 
@@ -117,10 +113,15 @@ private fun LocationHeader(location: ResolvedLocation, today: LocalDate) {
 private fun AdaptiveHero(day: PrayerDay, prayer: PrayerName, zone: ZoneId) {
     Column(
         Modifier.fillMaxWidth()
-            .background(AdaptiveWarm, RoundedCornerShape(28.dp))
+            .background(MaterialTheme.colorScheme.surfaceVariant, RoundedCornerShape(28.dp))
             .padding(26.dp)
     ) {
-        Text(stringResource(R.string.next_prayer), color = AdaptiveSage, fontSize = 12.sp, letterSpacing = 1.2.sp)
+        Text(
+            stringResource(R.string.next_prayer),
+            color = MaterialTheme.colorScheme.primary,
+            fontSize = 12.sp,
+            letterSpacing = 1.2.sp
+        )
         Text(prayer.adaptiveLabel(), fontSize = 26.sp, fontWeight = FontWeight.Medium)
         Text(adaptiveFormat(day, prayer, zone), fontSize = 58.sp, fontWeight = FontWeight.Light)
     }
@@ -137,7 +138,10 @@ private fun PrayerList(
         val active = prayer == next
         Row(
             Modifier.fillMaxWidth()
-                .background(if (active) AdaptiveActiveWarm else Color.Transparent, RoundedCornerShape(16.dp))
+                .background(
+                    if (active) MaterialTheme.colorScheme.secondaryContainer else Color.Transparent,
+                    RoundedCornerShape(16.dp)
+                )
                 .clickable { onPrayer(prayer) }
                 .padding(horizontal = 14.dp, vertical = 14.dp),
             horizontalArrangement = Arrangement.SpaceBetween
@@ -145,7 +149,7 @@ private fun PrayerList(
             Text(prayer.adaptiveLabel(), fontWeight = if (active) FontWeight.SemiBold else FontWeight.Normal)
             Text(
                 adaptiveFormat(day, prayer, zone),
-                color = if (active) AdaptiveSage else Color.Unspecified,
+                color = if (active) MaterialTheme.colorScheme.primary else Color.Unspecified,
                 fontWeight = if (active) FontWeight.SemiBold else FontWeight.Normal
             )
         }
