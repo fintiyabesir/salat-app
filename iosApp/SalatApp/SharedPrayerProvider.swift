@@ -12,6 +12,7 @@ struct TodayPrayerDisplay {
     let locationName: String
     let regionText: String
     let dateText: String
+    let hijriDateText: String
     let prayers: [PrayerDisplay]
     let nextPrayer: PrayerDisplay
 }
@@ -64,6 +65,12 @@ struct SharedPrayerProvider {
         dateFormatter.timeZone = timeZone
         dateFormatter.locale = L10n.selectedLocale
         dateFormatter.setLocalizedDateFormatFromTemplate("d MMM yyyy")
+        let hijriDate = IOSHijriFormatter.format(
+            date: now,
+            timeZone: timeZone,
+            method: settings.hijriMethod,
+            dayAdjustment: settings.hijriDayAdjustment
+        )
 
         let region = [location.regionName, location.countryCode]
             .compactMap { $0 }
@@ -77,6 +84,7 @@ struct SharedPrayerProvider {
             locationName: location.displayName,
             regionText: region,
             dateText: dateFormatter.string(from: now),
+            hijriDateText: hijriDate,
             prayers: rows,
             nextPrayer: next
         )
