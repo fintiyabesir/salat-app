@@ -45,9 +45,7 @@ final class IOSPrayerNotificationScheduler {
     func replaceAll(with alerts: [IOSPrayerAlert], completion: ((Error?) -> Void)? = nil) {
         center.getPendingNotificationRequests { [weak self] pending in
             guard let self else { return }
-            let owned = pending
-                .map(\.identifier)
-                .filter { $0.hasPrefix(self.identifierPrefix) }
+            let owned = pending.map(\.identifier).filter { $0.hasPrefix(self.identifierPrefix) }
             if !owned.isEmpty {
                 self.center.removePendingNotificationRequests(withIdentifiers: owned)
             }
@@ -74,18 +72,14 @@ final class IOSPrayerNotificationScheduler {
                 }
             }
 
-            group.notify(queue: .main) {
-                completion?(firstError)
-            }
+            group.notify(queue: .main) { completion?(firstError) }
         }
     }
 
     func removeAllPrayerAlerts() {
         center.getPendingNotificationRequests { [weak self] pending in
             guard let self else { return }
-            let owned = pending
-                .map(\.identifier)
-                .filter { $0.hasPrefix(self.identifierPrefix) }
+            let owned = pending.map(\.identifier).filter { $0.hasPrefix(self.identifierPrefix) }
             self.center.removePendingNotificationRequests(withIdentifiers: owned)
         }
     }
@@ -96,8 +90,8 @@ final class IOSPrayerNotificationScheduler {
 
         let minutesBefore = max(0, Int(alert.prayerAt.timeIntervalSince(alert.triggerAt) / 60.0))
         content.body = minutesBefore > 0
-            ? "\(alert.prayerName) in \(minutesBefore) min"
-            : "\(alert.prayerName) prayer time"
+            ? L10n.format("prayer_in_minutes", alert.prayerName, minutesBefore)
+            : L10n.format("prayer_time_now", alert.prayerName)
         content.sound = sound(for: alert.soundMode)
         content.userInfo = [
             "prayer": alert.prayerName,
