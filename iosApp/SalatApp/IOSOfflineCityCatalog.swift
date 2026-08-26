@@ -33,10 +33,10 @@ enum IOSOfflineCityCatalog {
         return contents.split(separator: "\n", omittingEmptySubsequences: true).compactMap { raw in
             if raw.first == "#" { return nil }
             let p = raw.split(separator: "\t", omittingEmptySubsequences: false).map(String.init)
-            guard p.count >= 10,
+            guard p.count >= 9,
                   let latitude = Double(p[5]),
                   let longitude = Double(p[6]) else { return nil }
-            let aliases = p[9].replacingOccurrences(of: "|", with: " ")
+            let aliases = p[8].replacingOccurrences(of: "|", with: " ")
             let searchable = [p[1], p[2], p[3], p[4], aliases].joined(separator: " ")
             return IOSOfflineCityEntry(
                 id: p[0],
