@@ -5,21 +5,18 @@ import app.salat.model.PrayerName
 import kotlinx.datetime.LocalDate
 import kotlin.test.Test
 import kotlin.test.assertEquals
-import kotlin.test.assertFalse
+import kotlin.test.assertTrue
 import kotlin.time.Instant
 
 class PrayerNotificationPlannerTest {
     @Test
-    fun default_plan_excludes_sunrise_and_never_schedules_past_triggers() {
-        val day = prayerDay()
+    fun default_plan_is_empty_until_user_opts_in() {
         val alerts = PrayerNotificationPlanner.plan(
-            days = listOf(day),
+            days = listOf(prayerDay()),
             settings = PrayerNotificationSettings(),
-            now = Instant.parse("2026-08-26T02:30:00Z")
+            now = Instant.parse("2026-08-26T00:00:00Z")
         )
-
-        assertFalse(alerts.any { it.prayer == PrayerName.SUNRISE })
-        assertFalse(alerts.any { it.triggerAt <= Instant.parse("2026-08-26T02:30:00Z") })
+        assertTrue(alerts.isEmpty())
     }
 
     @Test
