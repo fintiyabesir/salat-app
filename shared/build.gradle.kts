@@ -10,8 +10,15 @@ kotlin {
         minSdk = 26
     }
 
-    iosArm64()
-    iosSimulatorArm64()
+    val iosArm64Target = iosArm64()
+    val iosSimulatorArm64Target = iosSimulatorArm64()
+    listOf(iosArm64Target, iosSimulatorArm64Target).forEach { target ->
+        target.binaries.framework {
+            baseName = "SalatShared"
+            isStatic = true
+        }
+    }
+
     jvm("jvm")
 
     sourceSets {
