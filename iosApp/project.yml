@@ -18,10 +18,14 @@ targets:
       - path: SalatApp
         excludes:
           - Info.plist
+          - SalatApp.entitlements
+      - path: GlanceShared
       - path: ../resources/city_catalog.tsv
         buildPhase: resources
     info:
       path: SalatApp/Info.plist
+    entitlements:
+      path: SalatApp/SalatApp.entitlements
     settings:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: app.salat.mobile
@@ -35,6 +39,33 @@ targets:
     dependencies:
       - framework: ../shared/build/bin/iosSimulatorArm64/debugFramework/SalatShared.framework
         embed: false
+      - target: SalatWidgetExtension
+
+  SalatWidgetExtension:
+    type: app-extension
+    platform: iOS
+    deploymentTarget: "17.0"
+    sources:
+      - path: SalatWidget
+        excludes:
+          - Info.plist
+          - SalatWidget.entitlements
+      - path: GlanceShared
+    info:
+      path: SalatWidget/Info.plist
+    entitlements:
+      path: SalatWidget/SalatWidget.entitlements
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: app.salat.mobile.widget
+        PRODUCT_NAME: SalatWidgetExtension
+        GENERATE_INFOPLIST_FILE: NO
+        TARGETED_DEVICE_FAMILY: "1,2"
+        SKIP_INSTALL: YES
+        APPLICATION_EXTENSION_API_ONLY: YES
+        CODE_SIGN_STYLE: Automatic
+        ARCHS: arm64
+        ONLY_ACTIVE_ARCH: YES
 
 schemes:
   SalatApp:
