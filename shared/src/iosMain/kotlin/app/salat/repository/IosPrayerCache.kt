@@ -21,7 +21,7 @@ class IosPrayerCache(
     ): PrayerDay? {
         val raw = defaults.stringForKey(cacheKey(sourceId, locationKey, date)) ?: return null
         val fields = raw.split(SEPARATOR)
-        if (fields.size < FIELD_COUNT_WITHOUT_DELTA) return null
+        if (fields.size < FIELD_COUNT_BASE) return null
 
         val refreshAfter = fields[8].toLongOrNull() ?: return null
         if (now.toEpochMilliseconds() >= refreshAfter) return null
@@ -58,6 +58,7 @@ class IosPrayerCache(
                 day.calculationProfile,
                 fetchedAt.toEpochMilliseconds(),
                 refreshAfter.toEpochMilliseconds(),
+                "",
                 ""
             ).joinToString(SEPARATOR)
             defaults.setObject(encoded, forKey = cacheKey(sourceId, locationKey, day.date))
@@ -68,13 +69,15 @@ class IosPrayerCache(
         sourceId: String,
         locationKey: String,
         date: LocalDate,
+        calculationProfile: String,
         maxDeltaMinutes: Int
     ) {
         val key = cacheKey(sourceId, locationKey, date)
         val raw = defaults.stringForKey(key) ?: return
         val fields = raw.split(SEPARATOR).toMutableList()
-        while (fields.size < FIELD_COUNT_WITH_DELTA) fields.add("")
-        fields[9] = maxDeltaMinutes.toString()
+        while (fields.size < FIELD_COUNT_WITH_COMPARISON) fields.add("")
+        fields[9] = calculationProfile
+        fields[10] = maxDeltaMinutes.toString()
         defaults.setObject(fields.joinToString(SEPARATOR), forKey = key)
     }
 
@@ -83,7 +86,7 @@ class IosPrayerCache(
 
     private companion object {
         const val SEPARATOR = "|"
-        const val FIELD_COUNT_WITHOUT_DELTA = 9
-        const val FIELD_COUNT_WITH_DELTA = 10
+        const val FIELD_COUNT_BASE = 9
+        const val FIELD_COUNT_WITH_COMPARISON = 11
     }
 }
