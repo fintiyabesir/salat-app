@@ -5,6 +5,7 @@ on:
     branches: [ main ]
   pull_request:
     branches: [ main ]
+  workflow_dispatch:
 
 concurrency:
   group: core-ci-${{ github.ref }}
@@ -43,6 +44,12 @@ jobs:
           pathlib.Path('/tmp/salat-prototype.js').write_text(script.group(1), encoding='utf-8')
           PY
           node --check /tmp/salat-prototype.js
+      - name: Upload Android debug APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: salat-android-debug
+          path: androidApp/build/outputs/apk/debug/androidApp-debug.apk
+          retention-days: 7
 
   ios-app:
     runs-on: macos-15
@@ -84,3 +91,13 @@ jobs:
         run: |
           test -d "$RUNNER_TEMP/SalatDerivedData/Build/Products/Debug-iphonesimulator/Salat.app"
           test -f "$RUNNER_TEMP/SalatDerivedData/Build/Products/Debug-iphonesimulator/Salat.app/Info.plist"
+      - name: Package iOS simulator app
+        run: |
+          cd "$RUNNER_TEMP/SalatDerivedData/Build/Products/Debug-iphonesimulator"
+          ditto -c -k --sequesterRsrc --keepParent Salat.app "$RUNNER_TEMP/Salat-iOS-Simulator.zip"
+      - name: Upload iOS simulator app
+        uses: actions/upload-artifact@v4
+        with:
+          name: salat-ios-simulator
+          path: ${{ runner.temp }}/Salat-iOS-Simulator.zip
+          retention-days: 7
