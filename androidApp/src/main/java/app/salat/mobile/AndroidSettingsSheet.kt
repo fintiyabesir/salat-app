@@ -115,6 +115,14 @@ fun AndroidSettingsSheet(
                 onValue = { onChange(value.copy(hijriDayAdjustment = it.coerceIn(-2, 2))) }
             )
 
+            SettingsHeading("Language")
+            ChipFlow(
+                choices = listOf<String?>(null, "en", "tr", "ar", "fa", "ur", "bn", "ms", "zh-Hans", "zh-Hant"),
+                selected = value.languageTag,
+                label = { it.languageLabel() },
+                onSelected = { onChange(value.copy(languageTag = it)) }
+            )
+
             SettingsHeading("Appearance")
             ChipFlow(
                 choices = AppearanceMode.entries.map { it.name },
@@ -123,11 +131,6 @@ fun AndroidSettingsSheet(
                 onSelected = { onChange(value.copy(appearance = AppearanceMode.valueOf(it))) }
             )
 
-            Spacer(Modifier.height(8.dp))
-            Text(
-                "Language follows the device by default. An explicit in-app language selector will use the same persisted settings model.",
-                fontSize = 13.sp
-            )
             Spacer(Modifier.height(32.dp))
         }
     }
@@ -231,5 +234,19 @@ private fun String.hijriLabel(): String = when (this) {
     HijriCalendarMethodId.AUTOMATIC.name -> "Automatic"
     HijriCalendarMethodId.UMM_AL_QURA.name -> "Umm al-Qura"
     HijriCalendarMethodId.TABULAR.name -> "Tabular"
+    else -> this
+}
+
+private fun String?.languageLabel(): String = when (this) {
+    null -> "System"
+    "en" -> "English"
+    "tr" -> "Türkçe"
+    "ar" -> "العربية"
+    "fa" -> "فارسی"
+    "ur" -> "اردو"
+    "bn" -> "বাংলা"
+    "ms" -> "Bahasa Melayu"
+    "zh-Hans" -> "简体中文"
+    "zh-Hant" -> "繁體中文"
     else -> this
 }
