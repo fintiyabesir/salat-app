@@ -12,6 +12,7 @@ object RegionalCalculationProfileResolver {
         val cc = countryCode.uppercase()
         val method = when (cc) {
             "TR" -> CalculationMethodId.TURKEY
+            "MY" -> CalculationMethodId.MALAYSIA
             "SG" -> CalculationMethodId.SINGAPORE
             "EG" -> CalculationMethodId.EGYPTIAN
             "PK" -> CalculationMethodId.KARACHI
