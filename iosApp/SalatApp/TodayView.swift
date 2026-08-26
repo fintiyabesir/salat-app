@@ -80,6 +80,7 @@ struct TodayView: View {
     private func prayerList(_ model: TodayPrayerDisplay) -> some View {
         VStack(spacing: 2) {
             ForEach(model.prayers) { prayer in
+                let active = model.nextPrayerIsToday && prayer.id == model.nextPrayer.id
                 Button {
                     selectedPrayer = prayer
                 } label: {
@@ -88,11 +89,11 @@ struct TodayView: View {
                         Spacer()
                         Text(prayer.time)
                     }
-                    .fontWeight(prayer.id == model.nextPrayer.id ? .semibold : .regular)
+                    .fontWeight(active ? .semibold : .regular)
                     .padding(.horizontal, 14)
                     .padding(.vertical, 14)
                     .background(
-                        prayer.id == model.nextPrayer.id ? Color.accentColor.opacity(0.10) : Color.clear,
+                        active ? Color.accentColor.opacity(0.10) : Color.clear,
                         in: RoundedRectangle(cornerRadius: 16)
                     )
                 }
