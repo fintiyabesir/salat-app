@@ -27,7 +27,7 @@ struct CalendarView: View {
                                 Spacer()
                                 Text(prayer.time)
                                     .fontWeight(.medium)
-                                    .foregroundStyle(Color(red: 0.27, green: 0.48, blue: 0.41))
+                                    .foregroundStyle(.tint)
                             }
                             .padding(.vertical, 3)
                         }
@@ -35,7 +35,7 @@ struct CalendarView: View {
                     .padding(18)
                     .frame(maxWidth: .infinity, alignment: .leading)
                     .background(
-                        Color.white.opacity(0.72),
+                        Color(uiColor: .secondarySystemBackground),
                         in: RoundedRectangle(cornerRadius: 22)
                     )
                 }
@@ -43,7 +43,7 @@ struct CalendarView: View {
             .padding(.horizontal, 18)
             .padding(.vertical, 10)
         }
-        .background(Color(red: 0.98, green: 0.97, blue: 0.95))
+        .background(Color(uiColor: .systemBackground))
         .navigationTitle(L10n.text("calendar"))
     }
 
@@ -88,7 +88,7 @@ struct CalendarView: View {
             ]
 
             let formatter = DateFormatter()
-            formatter.locale = .current
+            formatter.locale = L10n.selectedLocale
             formatter.timeZone = timeZone
             formatter.setLocalizedDateFormatFromTemplate("EEEE d MMMM")
 
@@ -102,7 +102,7 @@ struct CalendarView: View {
 
     private func prayer(_ id: String, _ epochMillis: Int64, _ timeZone: TimeZone) -> PrayerDisplay {
         let formatter = DateFormatter()
-        formatter.locale = .current
+        formatter.locale = L10n.selectedLocale
         formatter.timeZone = timeZone
         formatter.dateFormat = "HH:mm"
         let date = Date(timeIntervalSince1970: Double(epochMillis) / 1000.0)
