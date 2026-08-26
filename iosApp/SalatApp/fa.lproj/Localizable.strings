@@ -15,7 +15,7 @@
 "prayer.asr" = "عصر";
 "prayer.maghrib" = "مغرب";
 "prayer.isha" = "عشاء";
-"prayer_in_minutes" = "%ld دقیقه تا %@";
+"prayer_in_minutes" = "%@ تا %ld دقیقه دیگر";
 "prayer_time_now" = "وقت %@ است";
 "notification_at_time" = "در زمان نماز";
 "notification_minutes_before" = "%ld دقیقه قبل";
