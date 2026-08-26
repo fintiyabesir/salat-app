@@ -1,23 +1,28 @@
 import SwiftUI
 
+private struct IOSCalculationMethodOption: Identifiable {
+    let id: String
+    let title: String
+}
+
 struct IOSSettingsView: View {
     let location: PrayerLocation?
     @ObservedObject var store: IOSAppSettingsStore
     @Environment(\.dismiss) private var dismiss
 
-    private let explicitMethods: [(String, String)] = [
-        ("TURKEY", "Turkey / Diyanet"),
-        ("MALAYSIA", "Malaysia · 18°/18°"),
-        ("MUSLIM_WORLD_LEAGUE", "Muslim World League"),
-        ("EGYPTIAN", "Egyptian"),
-        ("KARACHI", "Karachi"),
-        ("UMM_AL_QURA", "Umm al-Qura"),
-        ("DUBAI", "Dubai"),
-        ("QATAR", "Qatar"),
-        ("KUWAIT", "Kuwait"),
-        ("MOON_SIGHTING_COMMITTEE", "Moonsighting Committee"),
-        ("SINGAPORE", "Singapore"),
-        ("NORTH_AMERICA", "North America")
+    private let explicitMethods: [IOSCalculationMethodOption] = [
+        .init(id: "TURKEY", title: "Turkey / Diyanet"),
+        .init(id: "MALAYSIA", title: "Malaysia · 18°/18°"),
+        .init(id: "MUSLIM_WORLD_LEAGUE", title: "Muslim World League"),
+        .init(id: "EGYPTIAN", title: "Egyptian"),
+        .init(id: "KARACHI", title: "Karachi"),
+        .init(id: "UMM_AL_QURA", title: "Umm al-Qura"),
+        .init(id: "DUBAI", title: "Dubai"),
+        .init(id: "QATAR", title: "Qatar"),
+        .init(id: "KUWAIT", title: "Kuwait"),
+        .init(id: "MOON_SIGHTING_COMMITTEE", title: "Moonsighting Committee"),
+        .init(id: "SINGAPORE", title: "Singapore"),
+        .init(id: "NORTH_AMERICA", title: "North America")
     ]
 
     var body: some View {
@@ -33,8 +38,8 @@ struct IOSSettingsView: View {
                 Section(L10n.text("settings_calculation")) {
                     Picker(L10n.text("settings_method"), selection: methodBinding) {
                         Text(L10n.text("settings_automatic")).tag(String?.none)
-                        ForEach(explicitMethods, id: \.0) { option in
-                            Text(option.1).tag(String?.some(option.0))
+                        ForEach(explicitMethods) { option in
+                            Text(option.title).tag(String?.some(option.id))
                         }
                     }
                     Picker(L10n.text("settings_asr_method"), selection: madhabBinding) {
