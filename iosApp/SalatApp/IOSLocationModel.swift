@@ -30,6 +30,16 @@ final class IOSLocationModel: NSObject, ObservableObject, @preconcurrency CLLoca
         manager.desiredAccuracy = kCLLocationAccuracyKilometer
     }
 
+    /// Reuses an existing user grant without causing a permission prompt on app launch.
+    func resolveIfAlreadyAuthorized() {
+        switch manager.authorizationStatus {
+        case .authorizedAlways, .authorizedWhenInUse:
+            resolveOnce()
+        default:
+            break
+        }
+    }
+
     func requestLocation() {
         errorMessage = nil
         switch manager.authorizationStatus {
