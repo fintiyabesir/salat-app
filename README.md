@@ -77,7 +77,7 @@ Open `prototype/index.html` directly in a browser. It is self-contained and does
 
 ## Development notes
 
-The Gradle configuration targets current 2026-era toolchains (Kotlin 2.4 / AGP 9.3 / compileSdk 37). Platform projects will evolve as native app wiring is completed.
+The Gradle configuration targets current stable Android 16 / API 36 with Kotlin 2.4 and AGP 9.3. Platform projects will evolve as native app wiring is completed.
 
 ## Planning & privacy
 
