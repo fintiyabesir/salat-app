@@ -24,6 +24,7 @@ import app.salat.notification.ScheduledPrayerAlert
  */
 class AndroidPrayerNotificationScheduler(private val context: Context) {
     private val alarms = context.getSystemService(AlarmManager::class.java)
+    private val preferences = context.getSharedPreferences(PREFERENCES, Context.MODE_PRIVATE)
 
     fun needsNotificationPermission(): Boolean =
         Build.VERSION.SDK_INT >= 33 &&
@@ -44,17 +45,20 @@ class AndroidPrayerNotificationScheduler(private val context: Context) {
         }
 
     /**
-     * Replace Salat-owned pending alarms with a newly calculated plan. Call this after
-     * location, timezone, calculation-profile, or notification-setting changes.
+     * Replace every Salat-owned pending alarm with a newly calculated plan. This is
+     * important when a prayer is disabled: cancelling only the new IDs would leave
+     * the previously enabled prayer alarm alive on the device.
      */
     fun reschedule(alerts: List<ScheduledPrayerAlert>) {
-        cancel(alerts.map { it.stableId })
-        alerts.forEach(::schedule)
+        cancel(storedIds())
+        val scheduled = alerts.filter(::schedule).mapTo(mutableSetOf()) { it.stableId }
+        preferences.edit().putStringSet(KEY_SCHEDULED_IDS, scheduled).apply()
     }
 
-    fun schedule(alert: ScheduledPrayerAlert) {
+    /** Returns true only when a future alarm was actually registered. */
+    fun schedule(alert: ScheduledPrayerAlert): Boolean {
         val triggerAt = alert.triggerAt.toEpochMilliseconds()
-        if (triggerAt <= System.currentTimeMillis()) return
+        if (triggerAt <= System.currentTimeMillis()) return false
 
         val pendingIntent = pendingIntent(alert, PendingIntent.FLAG_UPDATE_CURRENT)
         if (canScheduleExactAlarms()) {
@@ -62,6 +66,7 @@ class AndroidPrayerNotificationScheduler(private val context: Context) {
         } else {
             alarms.setAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, triggerAt, pendingIntent)
         }
+        return true
     }
 
     fun cancel(stableIds: Collection<String>) {
@@ -76,6 +81,14 @@ class AndroidPrayerNotificationScheduler(private val context: Context) {
             pending.cancel()
         }
     }
+
+    fun cancelAll() {
+        cancel(storedIds())
+        preferences.edit().remove(KEY_SCHEDULED_IDS).apply()
+    }
+
+    private fun storedIds(): Set<String> =
+        preferences.getStringSet(KEY_SCHEDULED_IDS, emptySet())?.toSet().orEmpty()
 
     private fun pendingIntent(alert: ScheduledPrayerAlert, updateFlag: Int): PendingIntent {
         val intent = Intent(context, PrayerNotificationReceiver::class.java)
@@ -101,6 +114,9 @@ class AndroidPrayerNotificationScheduler(private val context: Context) {
         const val EXTRA_PRAYER_NAME = "prayer_name"
         const val EXTRA_PRAYER_AT = "prayer_at"
         const val EXTRA_SOUND_MODE = "sound_mode"
+
+        private const val PREFERENCES = "salat-prayer-notifications"
+        private const val KEY_SCHEDULED_IDS = "scheduled-ids"
     }
 }
 
@@ -110,8 +126,6 @@ internal object PrayerNotificationChannels {
     private const val ADHAN = "prayer-short-adhan"
 
     fun ensure(context: Context, mode: NotificationSoundMode): String {
-        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) return SYSTEM
-
         val manager = context.getSystemService(NotificationManager::class.java)
         val channelId = when (mode) {
             NotificationSoundMode.SILENT -> SILENT
