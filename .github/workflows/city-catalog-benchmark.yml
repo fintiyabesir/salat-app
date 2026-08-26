@@ -2,6 +2,11 @@ name: City Catalog Benchmark
 
 on:
   workflow_dispatch:
+  pull_request:
+    branches: [ main ]
+    paths:
+      - scripts/process_geonames_cities.py
+      - .github/workflows/city-catalog-benchmark.yml
 
 jobs:
   android-benchmark:
