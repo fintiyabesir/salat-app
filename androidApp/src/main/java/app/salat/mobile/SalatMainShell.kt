@@ -65,7 +65,11 @@ private val ShellCardDark = Color(0xFF242823)
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun SalatMainShell(location: ResolvedLocation) {
+fun SalatMainShell(
+    location: ResolvedLocation,
+    onChooseCity: () -> Unit,
+    onUseDeviceLocation: () -> Unit
+) {
     val context = LocalContext.current
     val settingsStore = remember(context) { AndroidAppSettingsStore(context) }
     val notificationCoordinator = remember(context) { AndroidPrayerNotificationCoordinator(context) }
@@ -115,6 +119,9 @@ fun SalatMainShell(location: ResolvedLocation) {
                 TopAppBar(
                     title = { Text(stringResource(R.string.brand_name), color = MaterialTheme.colorScheme.primary, letterSpacing = 2.sp) },
                     actions = {
+                        IconButton(onClick = onChooseCity) {
+                            Text("⌖", fontSize = 22.sp)
+                        }
                         IconButton(onClick = { showSettings = true }) {
                             Text("⚙", fontSize = 22.sp)
                         }
