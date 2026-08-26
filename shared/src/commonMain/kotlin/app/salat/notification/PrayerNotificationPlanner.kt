@@ -22,9 +22,9 @@ data class PrayerNotificationSettings(
     fun rule(prayer: PrayerName): PrayerAlertRule = rules[prayer] ?: PrayerAlertRule()
 
     companion object {
-        fun defaultRules(): Map<PrayerName, PrayerAlertRule> = PrayerName.entries.associateWith { prayer ->
-            PrayerAlertRule(enabled = prayer != PrayerName.SUNRISE)
-        }
+        /** Nothing is enabled until the user explicitly opts in. */
+        fun defaultRules(): Map<PrayerName, PrayerAlertRule> =
+            PrayerName.entries.associateWith { PrayerAlertRule(enabled = false) }
     }
 }
 
