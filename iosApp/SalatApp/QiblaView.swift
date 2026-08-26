@@ -6,6 +6,7 @@ import UIKit
 struct QiblaView: View {
     let location: PrayerLocation
 
+    @Environment(\.horizontalSizeClass) private var horizontalSizeClass
     @StateObject private var headingModel = IOSQiblaHeadingModel()
     @State private var wasAligned = false
 
@@ -24,56 +25,49 @@ struct QiblaView: View {
     }
 
     var body: some View {
-        VStack(spacing: 0) {
-            Text(L10n.text("qibla"))
-                .font(.system(size: 30, weight: .semibold))
-            Text("\(Int(qiblaBearing.rounded()))°")
-                .font(.title3)
-                .foregroundStyle(.tint)
-                .padding(.top, 6)
+        Group {
+            if horizontalSizeClass == .regular {
+                HStack(spacing: 56) {
+                    VStack(alignment: .leading, spacing: 14) {
+                        Text(L10n.text("qibla"))
+                            .font(.system(size: 34, weight: .semibold))
+                        Text(location.displayName)
+                            .font(.title3)
+                            .foregroundStyle(.secondary)
+                        Text("\(Int(qiblaBearing.rounded()))°")
+                            .font(.system(size: 56, weight: .light, design: .rounded))
+                            .foregroundStyle(.tint)
+                            .padding(.vertical, 10)
+                        statusView
+                        accuracyHint
+                    }
+                    .frame(maxWidth: .infinity, alignment: .leading)
 
-            Spacer()
-
-            ZStack {
-                Circle()
-                    .fill(aligned ? Color.accentColor.opacity(0.16) : Color(uiColor: .secondarySystemBackground))
-                    .frame(width: 250, height: 250)
-
-                Image(systemName: "arrowtriangle.up.fill")
-                    .font(.system(size: 84, weight: .light))
-                    .foregroundStyle(.tint)
-                    .rotationEffect(.degrees(delta ?? 0))
-                    .animation(.easeOut(duration: 0.18), value: delta)
-            }
-
-            Spacer()
-
-            Group {
-                if !headingModel.isAvailable {
-                    Text(L10n.text("qibla_compass_unavailable"))
-                } else if headingModel.heading == nil {
-                    Text(L10n.text("qibla_calibrating"))
-                } else if aligned {
-                    Text(L10n.text("qibla_aligned"))
-                        .fontWeight(.semibold)
-                        .foregroundStyle(.tint)
-                } else if let delta {
-                    Text("\(Int(abs(delta).rounded()))°")
+                    compassView(size: 310, arrowSize: 102)
+                        .frame(maxWidth: .infinity)
                 }
-            }
-            .foregroundStyle(.secondary)
+                .frame(maxWidth: 980)
+                .padding(44)
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
+            } else {
+                VStack(spacing: 0) {
+                    Text(L10n.text("qibla"))
+                        .font(.system(size: 30, weight: .semibold))
+                    Text("\(Int(qiblaBearing.rounded()))°")
+                        .font(.title3)
+                        .foregroundStyle(.tint)
+                        .padding(.top, 6)
 
-            if let accuracy = headingModel.accuracy, accuracy > 20 {
-                Text(L10n.text("qibla_accuracy_hint"))
-                    .font(.footnote)
-                    .foregroundStyle(.secondary)
-                    .multilineTextAlignment(.center)
-                    .padding(.top, 10)
+                    Spacer()
+                    compassView(size: 250, arrowSize: 84)
+                    Spacer()
+                    statusView
+                    accuracyHint
+                    Spacer().frame(height: 24)
+                }
+                .padding(.horizontal, 24)
             }
-
-            Spacer().frame(height: 24)
         }
-        .padding(.horizontal, 24)
         .background(Color(uiColor: .systemBackground))
         .onAppear { headingModel.start() }
         .onDisappear { headingModel.stop() }
@@ -82,6 +76,50 @@ struct QiblaView: View {
                 UIImpactFeedbackGenerator(style: .medium).impactOccurred()
             }
             wasAligned = isAligned
+        }
+    }
+
+    @ViewBuilder
+    private func compassView(size: CGFloat, arrowSize: CGFloat) -> some View {
+        ZStack {
+            Circle()
+                .fill(aligned ? Color.accentColor.opacity(0.16) : Color(uiColor: .secondarySystemBackground))
+                .frame(width: size, height: size)
+
+            Image(systemName: "arrowtriangle.up.fill")
+                .font(.system(size: arrowSize, weight: .light))
+                .foregroundStyle(.tint)
+                .rotationEffect(.degrees(delta ?? 0))
+                .animation(.easeOut(duration: 0.18), value: delta)
+        }
+    }
+
+    @ViewBuilder
+    private var statusView: some View {
+        Group {
+            if !headingModel.isAvailable {
+                Text(L10n.text("qibla_compass_unavailable"))
+            } else if headingModel.heading == nil {
+                Text(L10n.text("qibla_calibrating"))
+            } else if aligned {
+                Text(L10n.text("qibla_aligned"))
+                    .fontWeight(.semibold)
+                    .foregroundStyle(.tint)
+            } else if let delta {
+                Text("\(Int(abs(delta).rounded()))°")
+            }
+        }
+        .foregroundStyle(.secondary)
+    }
+
+    @ViewBuilder
+    private var accuracyHint: some View {
+        if let accuracy = headingModel.accuracy, accuracy > 20 {
+            Text(L10n.text("qibla_accuracy_hint"))
+                .font(.footnote)
+                .foregroundStyle(.secondary)
+                .multilineTextAlignment(horizontalSizeClass == .regular ? .leading : .center)
+                .padding(.top, 10)
         }
     }
 
