@@ -38,15 +38,16 @@ class InMemoryManualCityCatalog(cities: List<ManualCity>) : ManualCityCatalog {
     private val byId = all.associateBy { it.id }
 
     override fun search(query: String, limit: Int): List<ManualCity> {
+        val boundedLimit = limit.coerceIn(1, 100)
         val needle = query.trim().lowercase()
-        if (needle.isBlank()) return emptyList()
+        if (needle.isBlank()) return all.take(boundedLimit)
         return all.asSequence()
             .filter { city ->
                 city.name.lowercase().contains(needle) ||
                     city.countryName.lowercase().contains(needle) ||
                     city.regionName?.lowercase()?.contains(needle) == true
             }
-            .take(limit.coerceIn(1, 100))
+            .take(boundedLimit)
             .toList()
     }
 
