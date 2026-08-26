@@ -96,6 +96,28 @@ jobs:
           test "$(/usr/libexec/PlistBuddy -c 'Print :NSExtension:NSExtensionPointIdentifier' iosApp/SalatWidget/Info.plist)" = 'com.apple.widgetkit-extension'
           test "$(/usr/libexec/PlistBuddy -c 'Print :com.apple.security.application-groups:0' iosApp/SalatApp/SalatApp.entitlements)" = 'group.app.salat.mobile'
           test "$(/usr/libexec/PlistBuddy -c 'Print :com.apple.security.application-groups:0' iosApp/SalatWidget/SalatWidget.entitlements)" = 'group.app.salat.mobile'
+      - name: Build watchOS simulator app
+        run: |
+          set -o pipefail
+          xcodebuild \
+            -project iosApp/SalatApp.xcodeproj \
+            -scheme SalatWatch \
+            -configuration Debug \
+            -sdk watchsimulator \
+            -destination 'generic/platform=watchOS Simulator' \
+            -derivedDataPath "$RUNNER_TEMP/SalatWatchDerivedData" \
+            ARCHS=arm64 \
+            ONLY_ACTIVE_ARCH=YES \
+            CODE_SIGNING_ALLOWED=NO \
+            build
+      - name: Verify watchOS app and complication
+        run: |
+          WATCH_APP="$RUNNER_TEMP/SalatWatchDerivedData/Build/Products/Debug-watchsimulator/SalatWatch.app"
+          COMPLICATION="$WATCH_APP/PlugIns/SalatWatchComplication.appex"
+          test -d "$WATCH_APP"
+          test -f "$WATCH_APP/Info.plist"
+          test -d "$COMPLICATION"
+          test -f "$COMPLICATION/Info.plist"
       - name: Build iOS simulator app
         run: |
           set -o pipefail
@@ -115,6 +137,7 @@ jobs:
           APP="$RUNNER_TEMP/SalatDerivedData/Build/Products/Debug-iphonesimulator/Salat.app"
           CATALOG="$APP/city_catalog.tsv"
           WIDGET="$APP/PlugIns/SalatWidgetExtension.appex"
+          WATCH="$APP/Watch/SalatWatch.app"
           test -d "$APP"
           test -f "$APP/Info.plist"
           test -f "$CATALOG"
@@ -124,6 +147,8 @@ jobs:
           test "$(/usr/libexec/PlistBuddy -c 'Print :CFBundleExecutable' "$WIDGET/Info.plist")" = 'SalatWidgetExtension'
           test -x "$WIDGET/SalatWidgetExtension"
           otool -l "$WIDGET/SalatWidgetExtension" | grep -q '__swift5_entry'
+          test -d "$WATCH"
+          test -f "$WATCH/Info.plist"
           EXPECTED="$(shasum -a 256 resources/city_catalog.tsv | awk '{print $1}')"
           ACTUAL="$(shasum -a 256 "$CATALOG" | awk '{print $1}')"
           test "$ACTUAL" = "$EXPECTED"
