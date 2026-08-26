@@ -3,6 +3,7 @@ import SwiftUI
 @MainActor
 struct SalatRootView: View {
     @StateObject private var locationModel = IOSLocationModel()
+    @StateObject private var settingsStore = IOSAppSettingsStore()
     @State private var showSettings = false
     private let notificationCoordinator = IOSPrayerNotificationCoordinator()
 
@@ -29,27 +30,34 @@ struct SalatRootView: View {
             }
             .onChange(of: locationModel.location) { _, location in
                 if let location {
-                    notificationCoordinator.rebuild(location: location)
+                    notificationCoordinator.rebuild(location: location, appSettings: settingsStore.value)
+                }
+            }
+            .onChange(of: settingsStore.value) { _, settings in
+                if let location = locationModel.location {
+                    notificationCoordinator.rebuild(location: location, appSettings: settings)
                 }
             }
             .onAppear {
                 locationModel.resolveIfAlreadyAuthorized()
             }
         }
+        .preferredColorScheme(preferredColorScheme)
+        .environment(\.locale, Locale(identifier: settingsStore.value.languageTag ?? Locale.current.identifier))
         .sheet(isPresented: $showSettings) {
-            SettingsPreviewView(location: locationModel.location)
+            IOSSettingsView(location: locationModel.location, store: settingsStore)
         }
     }
 
     @ViewBuilder
     private func mainTabs(_ location: PrayerLocation) -> some View {
         TabView {
-            TodayView(location: location)
+            TodayView(location: location, settings: settingsStore.value)
                 .tabItem {
                     Label(L10n.text("today"), systemImage: "clock")
                 }
 
-            CalendarView(location: location)
+            CalendarView(location: location, settings: settingsStore.value)
                 .tabItem {
                     Label(L10n.text("calendar"), systemImage: "calendar")
                 }
@@ -60,6 +68,14 @@ struct SalatRootView: View {
                 }
         }
         .tint(Color(red: 0.27, green: 0.48, blue: 0.41))
+    }
+
+    private var preferredColorScheme: ColorScheme? {
+        switch settingsStore.value.appearance {
+        case "LIGHT": return .light
+        case "DARK": return .dark
+        default: return nil
+        }
     }
 
     private var locationStartContent: some View {
@@ -100,32 +116,5 @@ struct SalatRootView: View {
             Spacer()
         }
         .padding(26)
-    }
-}
-
-private struct SettingsPreviewView: View {
-    let location: PrayerLocation?
-    @Environment(\.dismiss) private var dismiss
-
-    var body: some View {
-        NavigationStack {
-            Form {
-                if let location {
-                    Section(L10n.text("settings")) {
-                        LabeledContent(L10n.text("today"), value: location.displayName)
-                        LabeledContent("Timezone", value: location.timeZoneId)
-                    }
-                }
-                Section {
-                    Label(L10n.text("notifications"), systemImage: "bell")
-                }
-            }
-            .navigationTitle(L10n.text("settings"))
-            .toolbar {
-                ToolbarItem(placement: .topBarTrailing) {
-                    Button("Done") { dismiss() }
-                }
-            }
-        }
     }
 }
