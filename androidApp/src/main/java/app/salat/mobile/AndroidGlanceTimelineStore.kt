@@ -3,6 +3,8 @@ package app.salat.mobile
 import android.content.Context
 import app.salat.domain.SalatEngine
 import app.salat.model.AppPreferences
+import app.salat.model.GeoPoint
+import app.salat.model.LocationSource
 import app.salat.model.PrayerName
 import app.salat.model.ResolvedLocation
 import org.json.JSONArray
@@ -69,10 +71,23 @@ class AndroidGlanceTimelineStore(context: Context) {
         preferences.edit()
             .putString(KEY_LOCATION, location.displayName)
             .putString(KEY_TIME_ZONE, location.timeZoneId)
+            .putString(KEY_COUNTRY, location.countryCode)
+            .putString(KEY_CITY, location.cityName)
+            .putString(KEY_REGION, location.regionName)
+            .putString(KEY_SOURCE, location.source.name)
+            .putLong(KEY_LATITUDE_BITS, location.point.latitude.toBits())
+            .putLong(KEY_LONGITUDE_BITS, location.point.longitude.toBits())
             .putString(KEY_EVENTS, events.toString())
             .apply()
 
         SalatAppWidgetProvider.refreshAll(appContext)
+    }
+
+    /** Recalculate the persisted projection after prayer calculation settings change. */
+    fun rebuildLastKnown(settings: AppPreferences): Boolean {
+        val location = lastKnownLocation() ?: return false
+        rebuild(location = location, settings = settings)
+        return true
     }
 
     fun load(): AndroidGlanceTimeline? {
@@ -91,11 +106,38 @@ class AndroidGlanceTimelineStore(context: Context) {
         return AndroidGlanceTimeline(location, timeZone, events)
     }
 
+    private fun lastKnownLocation(): ResolvedLocation? {
+        if (!preferences.contains(KEY_LATITUDE_BITS) || !preferences.contains(KEY_LONGITUDE_BITS)) return null
+        val latitude = Double.fromBits(preferences.getLong(KEY_LATITUDE_BITS, 0L))
+        val longitude = Double.fromBits(preferences.getLong(KEY_LONGITUDE_BITS, 0L))
+        val timeZone = preferences.getString(KEY_TIME_ZONE, null) ?: return null
+        val source = preferences.getString(KEY_SOURCE, null)
+            ?.let { runCatching { LocationSource.valueOf(it) }.getOrNull() }
+            ?: LocationSource.DEVICE
+
+        return runCatching {
+            ResolvedLocation(
+                point = GeoPoint(latitude, longitude),
+                timeZoneId = timeZone,
+                countryCode = preferences.getString(KEY_COUNTRY, null),
+                cityName = preferences.getString(KEY_CITY, null),
+                regionName = preferences.getString(KEY_REGION, null),
+                source = source
+            )
+        }.getOrNull()
+    }
+
     companion object {
         const val DEFAULT_HORIZON_DAYS = 30
         private const val PREFERENCES = "salat_glance_timeline"
         private const val KEY_LOCATION = "location"
         private const val KEY_TIME_ZONE = "time_zone"
+        private const val KEY_COUNTRY = "country"
+        private const val KEY_CITY = "city"
+        private const val KEY_REGION = "region"
+        private const val KEY_SOURCE = "source"
+        private const val KEY_LATITUDE_BITS = "latitude_bits"
+        private const val KEY_LONGITUDE_BITS = "longitude_bits"
         private const val KEY_EVENTS = "events"
     }
 }
