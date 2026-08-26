@@ -1,0 +1,25 @@
+<resources>
+    <string name="settings_calculation_method">روش محاسبه</string>
+    <string name="settings_asr_method">روش عصر</string>
+    <string name="settings_high_latitude">عرض‌های جغرافیایی بالا</string>
+    <string name="settings_prayer_adjustments">تنظیم زمان‌های نماز</string>
+    <string name="settings_hijri_calendar">تقویم هجری</string>
+    <string name="settings_hijri_day_adjustment">تنظیم روز هجری</string>
+    <string name="settings_language">زبان</string>
+    <string name="settings_appearance">ظاهر</string>
+    <string name="settings_automatic">خودکار</string>
+    <string name="settings_standard_shafi">استاندارد / شافعی</string>
+    <string name="settings_hanafi">حنفی</string>
+    <string name="settings_middle_night">نیمه شب</string>
+    <string name="settings_seventh_night">یک‌هفتم شب</string>
+    <string name="settings_twilight_angle">زاویه شفق</string>
+    <string name="settings_system">سیستم</string>
+    <string name="settings_light">روشن</string>
+    <string name="settings_dark">تیره</string>
+    <string name="settings_location">موقعیت</string>
+    <string name="settings_place">مکان</string>
+    <string name="settings_timezone">منطقه زمانی</string>
+    <string name="settings_method">روش</string>
+    <string name="settings_day_adjustment">تنظیم روز</string>
+    <string name="settings_minutes">%1$d دقیقه</string>
+</resources>
