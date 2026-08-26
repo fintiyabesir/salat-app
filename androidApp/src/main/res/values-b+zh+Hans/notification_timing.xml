@@ -1,0 +1,5 @@
+<resources>
+    <string name="notification_exact_timing_title">精确时间</string>
+    <string name="notification_exact_timing_explanation">允许精确闹钟，以便礼拜时间通知能在计算出的时间送达。否则，Android 可能会延迟通知。</string>
+    <string name="notification_exact_timing_action">允许精确时间</string>
+</resources>

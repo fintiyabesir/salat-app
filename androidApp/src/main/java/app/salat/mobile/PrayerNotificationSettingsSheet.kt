@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.ModalBottomSheet
@@ -47,11 +48,15 @@ fun PrayerNotificationSettingsSheet(
     val scheduler = remember { AndroidPrayerNotificationScheduler(context.applicationContext) }
     var settings by remember(prayer) { mutableStateOf(store.load()) }
     var pendingEnable by remember(prayer) { mutableStateOf(false) }
+    var exactTimingNeeded by remember(prayer) {
+        mutableStateOf(settings.rule(prayer).enabled && !scheduler.canScheduleExactAlarms())
+    }
 
     fun applyRule(rule: PrayerAlertRule) {
         settings = PrayerNotificationSettings(settings.rules + (prayer to rule))
         store.save(settings)
         coordinator.rebuild(location)
+        exactTimingNeeded = rule.enabled && !scheduler.canScheduleExactAlarms()
     }
 
     val permissionLauncher = rememberLauncherForActivityResult(
@@ -61,6 +66,13 @@ fun PrayerNotificationSettingsSheet(
             applyRule(settings.rule(prayer).copy(enabled = true))
         }
         pendingEnable = false
+    }
+
+    val exactAlarmLauncher = rememberLauncherForActivityResult(
+        ActivityResultContracts.StartActivityForResult()
+    ) {
+        exactTimingNeeded = !scheduler.canScheduleExactAlarms()
+        coordinator.rebuild(location)
     }
 
     val rule = settings.rule(prayer)
@@ -91,6 +103,28 @@ fun PrayerNotificationSettingsSheet(
             }
 
             if (rule.enabled) {
+                if (exactTimingNeeded) {
+                    Spacer(Modifier.height(20.dp))
+                    Column(
+                        modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp),
+                        verticalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        Text(
+                            stringResource(R.string.notification_exact_timing_title),
+                            fontWeight = FontWeight.SemiBold,
+                            fontSize = 17.sp
+                        )
+                        Text(stringResource(R.string.notification_exact_timing_explanation))
+                        Button(
+                            onClick = {
+                                scheduler.exactAlarmAccessIntent()?.let(exactAlarmLauncher::launch)
+                            }
+                        ) {
+                            Text(stringResource(R.string.notification_exact_timing_action))
+                        }
+                    }
+                }
+
                 Spacer(Modifier.height(22.dp))
                 Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                     listOf(0, 5, 10, 15, 30).forEach { minutes ->

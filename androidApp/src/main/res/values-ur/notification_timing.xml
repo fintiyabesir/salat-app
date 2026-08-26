@@ -1,0 +1,5 @@
+<resources>
+    <string name="notification_exact_timing_title">درست وقت</string>
+    <string name="notification_exact_timing_explanation">نماز کی اطلاعات کو حساب شدہ وقت پر پہنچانے کے لیے درست الارم کی اجازت دیں۔ اس اجازت کے بغیر Android اطلاع دیر سے دکھا سکتا ہے۔</string>
+    <string name="notification_exact_timing_action">درست وقت کی اجازت دیں</string>
+</resources>

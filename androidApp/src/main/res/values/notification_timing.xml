@@ -1,0 +1,5 @@
+<resources>
+    <string name="notification_exact_timing_title">Exact timing</string>
+    <string name="notification_exact_timing_explanation">Allow exact alarms so prayer notifications can arrive at the calculated time. Without it, Android may deliver them later.</string>
+    <string name="notification_exact_timing_action">Allow exact timing</string>
+</resources>

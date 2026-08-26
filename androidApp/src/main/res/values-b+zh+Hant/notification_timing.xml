@@ -1,0 +1,5 @@
+<resources>
+    <string name="notification_exact_timing_title">精確時間</string>
+    <string name="notification_exact_timing_explanation">允許精確鬧鐘，讓禮拜時間通知能在計算出的時間送達。否則，Android 可能會延遲通知。</string>
+    <string name="notification_exact_timing_action">允許精確時間</string>
+</resources>
