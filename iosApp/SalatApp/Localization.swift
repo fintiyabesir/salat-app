@@ -4,13 +4,9 @@ enum L10n {
     private static let languageKey = "app.language"
 
     static func text(_ key: String) -> String {
-        NSLocalizedString(
-            key,
-            tableName: nil,
-            bundle: selectedBundle,
-            value: key,
-            comment: ""
-        )
+        let mainValue = selectedBundle.localizedString(forKey: key, value: nil, table: "Localizable")
+        if mainValue != key { return mainValue }
+        return selectedBundle.localizedString(forKey: key, value: nil, table: "Settings")
     }
 
     static func format(_ key: String, _ arguments: CVarArg...) -> String {
