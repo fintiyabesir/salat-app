@@ -1,0 +1,25 @@
+<resources>
+    <string name="settings_calculation_method">计算方法</string>
+    <string name="settings_asr_method">晡礼方法</string>
+    <string name="settings_high_latitude">高纬度</string>
+    <string name="settings_prayer_adjustments">礼拜时间调整</string>
+    <string name="settings_hijri_calendar">伊斯兰历</string>
+    <string name="settings_hijri_day_adjustment">伊斯兰历日期调整</string>
+    <string name="settings_language">语言</string>
+    <string name="settings_appearance">外观</string>
+    <string name="settings_automatic">自动</string>
+    <string name="settings_standard_shafi">标准 / 沙斐仪</string>
+    <string name="settings_hanafi">哈乃斐</string>
+    <string name="settings_middle_night">夜间中点</string>
+    <string name="settings_seventh_night">夜间七分之一</string>
+    <string name="settings_twilight_angle">暮光角度</string>
+    <string name="settings_system">跟随系统</string>
+    <string name="settings_light">浅色</string>
+    <string name="settings_dark">深色</string>
+    <string name="settings_location">位置</string>
+    <string name="settings_place">地点</string>
+    <string name="settings_timezone">时区</string>
+    <string name="settings_method">方法</string>
+    <string name="settings_day_adjustment">日期调整</string>
+    <string name="settings_minutes">%1$d 分钟</string>
+</resources>
