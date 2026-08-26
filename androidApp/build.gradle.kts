@@ -5,7 +5,7 @@ plugins {
 
 android {
     namespace = "app.salat.mobile"
-    compileSdk = 37
+    compileSdk = 36
 
     defaultConfig {
         applicationId = "app.salat.mobile"
