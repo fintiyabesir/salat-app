@@ -1,6 +1,14 @@
 name: TestFlight Release
 
 on:
+  push:
+    branches: [ main ]
+    paths:
+      - '.github/workflows/testflight.yml'
+      - 'iosApp/**'
+      - 'shared/**'
+      - 'resources/**'
+      - 'scripts/generate_app_icon.py'
   pull_request:
     branches: [ main ]
   workflow_dispatch:
@@ -21,7 +29,7 @@ permissions:
 
 jobs:
   release-preflight:
-    if: github.event_name == 'workflow_dispatch' || startsWith(github.head_ref, 'release/')
+    if: github.event_name == 'workflow_dispatch' || github.event_name == 'push' || startsWith(github.head_ref, 'release/')
     runs-on: macos-15
     steps:
       - uses: actions/checkout@v4
