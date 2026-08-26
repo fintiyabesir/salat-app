@@ -15,6 +15,7 @@ struct TodayPrayerDisplay {
     let hijriDateText: String
     let prayers: [PrayerDisplay]
     let nextPrayer: PrayerDisplay
+    let nextPrayerIsToday: Bool
 }
 
 /// Formats KMP prayer snapshots for SwiftUI. Prayer calculation remains entirely
@@ -28,38 +29,40 @@ struct SharedPrayerProvider {
         let timeZone = TimeZone(identifier: location.timeZoneId) ?? .current
         var calendar = Calendar(identifier: .gregorian)
         calendar.timeZone = timeZone
-        let components = calendar.dateComponents([.year, .month, .day], from: now)
-
         let calculation = settings.calculation
-        let snapshot = SalatApi.shared.calculateDaySnapshotConfigured(
-            year: Int32(components.year!),
-            month: Int32(components.month!),
-            day: Int32(components.day!),
-            latitude: location.latitude,
-            longitude: location.longitude,
-            timeZoneId: timeZone.identifier,
-            countryCode: location.countryCode,
-            methodOverride: calculation.methodOverride,
-            madhabOverride: calculation.madhabOverride,
-            highLatitudeRule: calculation.highLatitudeRule,
-            fajrAdjustment: Int32(calculation.fajrAdjustment),
-            sunriseAdjustment: Int32(calculation.sunriseAdjustment),
-            dhuhrAdjustment: Int32(calculation.dhuhrAdjustment),
-            asrAdjustment: Int32(calculation.asrAdjustment),
-            maghribAdjustment: Int32(calculation.maghribAdjustment),
-            ishaAdjustment: Int32(calculation.ishaAdjustment)
-        )
 
-        let rows = [
-            PrayerDisplay(id: "fajr", name: L10n.prayer("fajr"), time: format(snapshot.fajrEpochMillis, timeZone), epochMillis: snapshot.fajrEpochMillis),
-            PrayerDisplay(id: "sunrise", name: L10n.prayer("sunrise"), time: format(snapshot.sunriseEpochMillis, timeZone), epochMillis: snapshot.sunriseEpochMillis),
-            PrayerDisplay(id: "dhuhr", name: L10n.prayer("dhuhr"), time: format(snapshot.dhuhrEpochMillis, timeZone), epochMillis: snapshot.dhuhrEpochMillis),
-            PrayerDisplay(id: "asr", name: L10n.prayer("asr"), time: format(snapshot.asrEpochMillis, timeZone), epochMillis: snapshot.asrEpochMillis),
-            PrayerDisplay(id: "maghrib", name: L10n.prayer("maghrib"), time: format(snapshot.maghribEpochMillis, timeZone), epochMillis: snapshot.maghribEpochMillis),
-            PrayerDisplay(id: "isha", name: L10n.prayer("isha"), time: format(snapshot.ishaEpochMillis, timeZone), epochMillis: snapshot.ishaEpochMillis)
-        ]
+        let snapshot = calculateSnapshot(
+            for: now,
+            calendar: calendar,
+            timeZone: timeZone,
+            location: location,
+            calculation: calculation
+        )
+        let rows = prayerRows(snapshot: snapshot, timeZone: timeZone)
         let nowMillis = Int64(now.timeIntervalSince1970 * 1000)
-        let next = rows.first(where: { $0.epochMillis > nowMillis }) ?? rows[0]
+
+        let nextPrayer: PrayerDisplay
+        let nextPrayerIsToday: Bool
+        if let remaining = rows.first(where: { $0.epochMillis > nowMillis }) {
+            nextPrayer = remaining
+            nextPrayerIsToday = true
+        } else {
+            let tomorrow = calendar.date(byAdding: .day, value: 1, to: now) ?? now.addingTimeInterval(86_400)
+            let tomorrowSnapshot = calculateSnapshot(
+                for: tomorrow,
+                calendar: calendar,
+                timeZone: timeZone,
+                location: location,
+                calculation: calculation
+            )
+            nextPrayer = PrayerDisplay(
+                id: "fajr",
+                name: L10n.prayer("fajr"),
+                time: format(tomorrowSnapshot.fajrEpochMillis, timeZone),
+                epochMillis: tomorrowSnapshot.fajrEpochMillis
+            )
+            nextPrayerIsToday = false
+        }
 
         let dateFormatter = DateFormatter()
         dateFormatter.timeZone = timeZone
@@ -86,8 +89,48 @@ struct SharedPrayerProvider {
             dateText: dateFormatter.string(from: now),
             hijriDateText: hijriDate,
             prayers: rows,
-            nextPrayer: next
+            nextPrayer: nextPrayer,
+            nextPrayerIsToday: nextPrayerIsToday
         )
+    }
+
+    private func calculateSnapshot(
+        for date: Date,
+        calendar: Calendar,
+        timeZone: TimeZone,
+        location: PrayerLocation,
+        calculation: IOSCalculationSettings
+    ) -> PrayerDaySnapshot {
+        let components = calendar.dateComponents([.year, .month, .day], from: date)
+        return SalatApi.shared.calculateDaySnapshotConfigured(
+            year: Int32(components.year!),
+            month: Int32(components.month!),
+            day: Int32(components.day!),
+            latitude: location.latitude,
+            longitude: location.longitude,
+            timeZoneId: timeZone.identifier,
+            countryCode: location.countryCode,
+            methodOverride: calculation.methodOverride,
+            madhabOverride: calculation.madhabOverride,
+            highLatitudeRule: calculation.highLatitudeRule,
+            fajrAdjustment: Int32(calculation.fajrAdjustment),
+            sunriseAdjustment: Int32(calculation.sunriseAdjustment),
+            dhuhrAdjustment: Int32(calculation.dhuhrAdjustment),
+            asrAdjustment: Int32(calculation.asrAdjustment),
+            maghribAdjustment: Int32(calculation.maghribAdjustment),
+            ishaAdjustment: Int32(calculation.ishaAdjustment)
+        )
+    }
+
+    private func prayerRows(snapshot: PrayerDaySnapshot, timeZone: TimeZone) -> [PrayerDisplay] {
+        [
+            PrayerDisplay(id: "fajr", name: L10n.prayer("fajr"), time: format(snapshot.fajrEpochMillis, timeZone), epochMillis: snapshot.fajrEpochMillis),
+            PrayerDisplay(id: "sunrise", name: L10n.prayer("sunrise"), time: format(snapshot.sunriseEpochMillis, timeZone), epochMillis: snapshot.sunriseEpochMillis),
+            PrayerDisplay(id: "dhuhr", name: L10n.prayer("dhuhr"), time: format(snapshot.dhuhrEpochMillis, timeZone), epochMillis: snapshot.dhuhrEpochMillis),
+            PrayerDisplay(id: "asr", name: L10n.prayer("asr"), time: format(snapshot.asrEpochMillis, timeZone), epochMillis: snapshot.asrEpochMillis),
+            PrayerDisplay(id: "maghrib", name: L10n.prayer("maghrib"), time: format(snapshot.maghribEpochMillis, timeZone), epochMillis: snapshot.maghribEpochMillis),
+            PrayerDisplay(id: "isha", name: L10n.prayer("isha"), time: format(snapshot.ishaEpochMillis, timeZone), epochMillis: snapshot.ishaEpochMillis)
+        ]
     }
 
     private func format(_ epochMillis: Int64, _ timeZone: TimeZone) -> String {

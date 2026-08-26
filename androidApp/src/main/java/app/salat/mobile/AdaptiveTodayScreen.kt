@@ -38,6 +38,12 @@ import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 import java.util.Locale
 
+private data class NextPrayerUi(
+    val prayer: PrayerName,
+    val epochMillis: Long,
+    val isToday: Boolean
+)
+
 @Composable
 fun AdaptiveTodayScreen(
     location: ResolvedLocation,
@@ -46,9 +52,10 @@ fun AdaptiveTodayScreen(
     val locale = LocalConfiguration.current.locales[0]
     val zone = remember(location.timeZoneId) { ZoneId.of(location.timeZoneId) }
     val today = remember(location, zone) { LocalDate.now(zone) }
+    val engine = remember { SalatEngine() }
     var selectedPrayer by remember { mutableStateOf<PrayerName?>(null) }
     val day = remember(location, today, settings.calculation) {
-        SalatEngine().calculateDay(
+        engine.calculateDay(
             year = today.year,
             month = today.monthValue,
             day = today.dayOfMonth,
@@ -59,9 +66,29 @@ fun AdaptiveTodayScreen(
             preferences = settings.calculation
         )
     }
+    val nowMillis = System.currentTimeMillis()
     val next = PrayerName.entries.firstOrNull {
-        day.time(it).toEpochMilliseconds() > System.currentTimeMillis()
-    } ?: PrayerName.FAJR
+        day.time(it).toEpochMilliseconds() > nowMillis
+    }?.let { prayer ->
+        NextPrayerUi(prayer, day.time(prayer).toEpochMilliseconds(), isToday = true)
+    } ?: run {
+        val tomorrow = today.plusDays(1)
+        val tomorrowDay = engine.calculateDay(
+            year = tomorrow.year,
+            month = tomorrow.monthValue,
+            day = tomorrow.dayOfMonth,
+            latitude = location.point.latitude,
+            longitude = location.point.longitude,
+            timeZoneId = location.timeZoneId,
+            countryCode = location.countryCode ?: "ZZ",
+            preferences = settings.calculation
+        )
+        NextPrayerUi(
+            prayer = PrayerName.FAJR,
+            epochMillis = tomorrowDay.time(PrayerName.FAJR).toEpochMilliseconds(),
+            isToday = false
+        )
+    }
     val gregorianDate = remember(today, locale) {
         today.format(DateTimeFormatter.ofPattern("d MMM yyyy", locale))
     }
@@ -85,19 +112,19 @@ fun AdaptiveTodayScreen(
                     Column(Modifier.weight(1f)) {
                         LocationHeader(location, gregorianDate, hijriDate)
                         Spacer(Modifier.height(32.dp))
-                        AdaptiveHero(day, next, zone, locale)
+                        AdaptiveHero(next, zone, locale)
                     }
                     Column(Modifier.weight(1f)) {
-                        PrayerList(day, next, zone, locale) { selectedPrayer = it }
+                        PrayerList(day, next.prayer.takeIf { next.isToday }, zone, locale) { selectedPrayer = it }
                     }
                 }
             } else {
                 Column(Modifier.padding(horizontal = 22.dp, vertical = 20.dp)) {
                     LocationHeader(location, gregorianDate, hijriDate)
                     Spacer(Modifier.height(28.dp))
-                    AdaptiveHero(day, next, zone, locale)
+                    AdaptiveHero(next, zone, locale)
                     Spacer(Modifier.height(20.dp))
-                    PrayerList(day, next, zone, locale) { selectedPrayer = it }
+                    PrayerList(day, next.prayer.takeIf { next.isToday }, zone, locale) { selectedPrayer = it }
                 }
             }
         }
@@ -122,7 +149,7 @@ private fun LocationHeader(location: ResolvedLocation, gregorianDate: String, hi
 }
 
 @Composable
-private fun AdaptiveHero(day: PrayerDay, prayer: PrayerName, zone: ZoneId, locale: Locale) {
+private fun AdaptiveHero(next: NextPrayerUi, zone: ZoneId, locale: Locale) {
     Column(
         Modifier.fillMaxWidth()
             .background(MaterialTheme.colorScheme.surfaceVariant, RoundedCornerShape(28.dp))
@@ -134,21 +161,21 @@ private fun AdaptiveHero(day: PrayerDay, prayer: PrayerName, zone: ZoneId, local
             fontSize = 12.sp,
             letterSpacing = 1.2.sp
         )
-        Text(prayer.adaptiveLabel(), fontSize = 26.sp, fontWeight = FontWeight.Medium)
-        Text(adaptiveFormat(day, prayer, zone, locale), fontSize = 58.sp, fontWeight = FontWeight.Light)
+        Text(next.prayer.adaptiveLabel(), fontSize = 26.sp, fontWeight = FontWeight.Medium)
+        Text(adaptiveFormat(next.epochMillis, zone, locale), fontSize = 58.sp, fontWeight = FontWeight.Light)
     }
 }
 
 @Composable
 private fun PrayerList(
     day: PrayerDay,
-    next: PrayerName,
+    nextToday: PrayerName?,
     zone: ZoneId,
     locale: Locale,
     onPrayer: (PrayerName) -> Unit
 ) {
     PrayerName.entries.forEach { prayer ->
-        val active = prayer == next
+        val active = prayer == nextToday
         Row(
             Modifier.fillMaxWidth()
                 .background(
@@ -161,7 +188,7 @@ private fun PrayerList(
         ) {
             Text(prayer.adaptiveLabel(), fontWeight = if (active) FontWeight.SemiBold else FontWeight.Normal)
             Text(
-                adaptiveFormat(day, prayer, zone, locale),
+                adaptiveFormat(day.time(prayer).toEpochMilliseconds(), zone, locale),
                 color = if (active) MaterialTheme.colorScheme.primary else Color.Unspecified,
                 fontWeight = if (active) FontWeight.SemiBold else FontWeight.Normal
             )
@@ -169,10 +196,10 @@ private fun PrayerList(
     }
 }
 
-private fun adaptiveFormat(day: PrayerDay, prayer: PrayerName, zone: ZoneId, locale: Locale): String =
+private fun adaptiveFormat(epochMillis: Long, zone: ZoneId, locale: Locale): String =
     DateTimeFormatter.ofPattern("HH:mm", locale)
         .withZone(zone)
-        .format(Instant.ofEpochMilli(day.time(prayer).toEpochMilliseconds()))
+        .format(Instant.ofEpochMilli(epochMillis))
 
 @Composable
 private fun PrayerName.adaptiveLabel(): String = when (this) {
