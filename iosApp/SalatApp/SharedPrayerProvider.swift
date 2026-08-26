@@ -36,18 +36,19 @@ struct SharedPrayerProvider {
         )
 
         let rows = [
-            PrayerDisplay(id: "fajr", name: "Fajr", time: format(snapshot.fajrEpochMillis, timeZone), epochMillis: snapshot.fajrEpochMillis),
-            PrayerDisplay(id: "sunrise", name: "Sunrise", time: format(snapshot.sunriseEpochMillis, timeZone), epochMillis: snapshot.sunriseEpochMillis),
-            PrayerDisplay(id: "dhuhr", name: "Dhuhr", time: format(snapshot.dhuhrEpochMillis, timeZone), epochMillis: snapshot.dhuhrEpochMillis),
-            PrayerDisplay(id: "asr", name: "Asr", time: format(snapshot.asrEpochMillis, timeZone), epochMillis: snapshot.asrEpochMillis),
-            PrayerDisplay(id: "maghrib", name: "Maghrib", time: format(snapshot.maghribEpochMillis, timeZone), epochMillis: snapshot.maghribEpochMillis),
-            PrayerDisplay(id: "isha", name: "Isha", time: format(snapshot.ishaEpochMillis, timeZone), epochMillis: snapshot.ishaEpochMillis)
+            PrayerDisplay(id: "fajr", name: L10n.prayer("fajr"), time: format(snapshot.fajrEpochMillis, timeZone), epochMillis: snapshot.fajrEpochMillis),
+            PrayerDisplay(id: "sunrise", name: L10n.prayer("sunrise"), time: format(snapshot.sunriseEpochMillis, timeZone), epochMillis: snapshot.sunriseEpochMillis),
+            PrayerDisplay(id: "dhuhr", name: L10n.prayer("dhuhr"), time: format(snapshot.dhuhrEpochMillis, timeZone), epochMillis: snapshot.dhuhrEpochMillis),
+            PrayerDisplay(id: "asr", name: L10n.prayer("asr"), time: format(snapshot.asrEpochMillis, timeZone), epochMillis: snapshot.asrEpochMillis),
+            PrayerDisplay(id: "maghrib", name: L10n.prayer("maghrib"), time: format(snapshot.maghribEpochMillis, timeZone), epochMillis: snapshot.maghribEpochMillis),
+            PrayerDisplay(id: "isha", name: L10n.prayer("isha"), time: format(snapshot.ishaEpochMillis, timeZone), epochMillis: snapshot.ishaEpochMillis)
         ]
         let nowMillis = Int64(now.timeIntervalSince1970 * 1000)
         let next = rows.first(where: { $0.epochMillis > nowMillis }) ?? rows[0]
 
         let dateFormatter = DateFormatter()
         dateFormatter.timeZone = timeZone
+        dateFormatter.locale = .current
         dateFormatter.setLocalizedDateFormatFromTemplate("d MMM yyyy")
 
         let region = [location.regionName, location.countryCode]
@@ -70,6 +71,7 @@ struct SharedPrayerProvider {
     private func format(_ epochMillis: Int64, _ timeZone: TimeZone) -> String {
         let formatter = DateFormatter()
         formatter.timeZone = timeZone
+        formatter.locale = .current
         formatter.dateFormat = "HH:mm"
         return formatter.string(from: Date(timeIntervalSince1970: Double(epochMillis) / 1000.0))
     }
