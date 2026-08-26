@@ -1,0 +1,5 @@
+<resources>
+    <string name="notification_exact_timing_title">Hassas zamanlama</string>
+    <string name="notification_exact_timing_explanation">Namaz bildirimlerinin hesaplanan vakitte gelebilmesi için hassas alarm izni verin. Bu izin olmadan Android bildirimi daha geç iletebilir.</string>
+    <string name="notification_exact_timing_action">Hassas zamanlamaya izin ver</string>
+</resources>
