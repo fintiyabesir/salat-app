@@ -5,6 +5,7 @@ struct SalatRootView: View {
     @StateObject private var locationModel = IOSLocationModel()
     @StateObject private var settingsStore = IOSAppSettingsStore()
     @State private var showSettings = false
+    @State private var showCityPicker = false
     private let notificationCoordinator = IOSPrayerNotificationCoordinator()
 
     var body: some View {
@@ -19,7 +20,12 @@ struct SalatRootView: View {
             .background(Color(uiColor: .systemBackground))
             .toolbar {
                 if locationModel.location != nil {
-                    ToolbarItem(placement: .topBarTrailing) {
+                    ToolbarItemGroup(placement: .topBarTrailing) {
+                        Button {
+                            showCityPicker = true
+                        } label: {
+                            Image(systemName: "location.magnifyingglass")
+                        }
                         Button {
                             showSettings = true
                         } label: {
@@ -46,6 +52,12 @@ struct SalatRootView: View {
         .environment(\.locale, L10n.selectedLocale)
         .sheet(isPresented: $showSettings) {
             IOSSettingsView(location: locationModel.location, store: settingsStore)
+        }
+        .sheet(isPresented: $showCityPicker) {
+            IOSManualCityPicker(
+                onSelected: { locationModel.useManualLocation($0) },
+                onUseDeviceLocation: { locationModel.requestLocation() }
+            )
         }
     }
 
@@ -107,6 +119,18 @@ struct SalatRootView: View {
             .buttonStyle(.borderedProminent)
             .tint(Color(red: 0.27, green: 0.48, blue: 0.41))
             .disabled(locationModel.isResolving)
+
+            Button {
+                showCityPicker = true
+            } label: {
+                HStack {
+                    Spacer()
+                    Text(L10n.text("location_choose_city"))
+                    Spacer()
+                }
+                .frame(height: 52)
+            }
+            .buttonStyle(.bordered)
 
             if locationModel.errorMessage != nil {
                 Text(L10n.text("location_unavailable"))
