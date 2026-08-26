@@ -65,11 +65,11 @@ internal class AndroidOfflineCityCatalog(private val context: Context) {
 
     private fun parse(line: String): OfflineCityEntry? {
         val p = line.split('\t')
-        if (p.size < 10) return null
+        if (p.size < 9) return null
         val latitude = p[5].toDoubleOrNull() ?: return null
         val longitude = p[6].toDoubleOrNull() ?: return null
         val region = p[4].ifBlank { null }
-        val aliases = p[9].replace('|', ' ')
+        val aliases = p[8].replace('|', ' ')
         val searchable = listOf(p[1], p[2], p[3], region.orEmpty(), aliases).joinToString(" ")
         return OfflineCityEntry(
             id = p[0],
