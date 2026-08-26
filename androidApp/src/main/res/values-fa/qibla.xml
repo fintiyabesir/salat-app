@@ -1,0 +1,6 @@
+<resources>
+    <string name="qibla_compass_unavailable">حسگر قطب‌نما در دسترس نیست</string>
+    <string name="qibla_calibrating">در حال کالیبره‌کردن قطب‌نما…</string>
+    <string name="qibla_aligned">با جهت قبله هم‌راستا شد</string>
+    <string name="qibla_accuracy_hint">برای بهبود دقت قطب‌نما، گوشی را به شکل عدد هشت حرکت دهید.</string>
+</resources>
