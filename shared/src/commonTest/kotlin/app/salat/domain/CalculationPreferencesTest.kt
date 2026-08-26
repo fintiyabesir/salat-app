@@ -20,12 +20,13 @@ class CalculationPreferencesTest {
     }
 
     @Test
-    fun turkey_and_karachi_profiles_default_to_hanafi_asr() {
+    fun turkey_uses_diyanet_asr_i_awwal_and_pakistan_defaults_hanafi() {
         val turkey = RegionalCalculationProfileResolver.resolve("TR")
         val pakistan = RegionalCalculationProfileResolver.resolve("PK")
-        assertEquals(MadhabId.HANAFI, turkey.madhab)
+        assertEquals(MadhabId.SHAFI, turkey.madhab)
         assertEquals(MadhabId.HANAFI, pakistan.madhab)
-        assertTrue(turkey.id.endsWith("-hanafi"))
+        assertTrue(turkey.id.endsWith("-shafi"))
+        assertTrue(pakistan.id.endsWith("-hanafi"))
     }
 
     @Test
@@ -34,13 +35,13 @@ class CalculationPreferencesTest {
             "TR",
             CalculationPreferences(
                 methodOverride = CalculationMethodId.MUSLIM_WORLD_LEAGUE,
-                madhabOverride = MadhabId.SHAFI,
+                madhabOverride = MadhabId.HANAFI,
                 highLatitudeRule = HighLatitudeRuleId.TWILIGHT_ANGLE,
                 adjustments = PrayerAdjustments(fajr = 2, isha = -1)
             )
         )
         assertEquals(CalculationMethodId.MUSLIM_WORLD_LEAGUE, resolved.method)
-        assertEquals(MadhabId.SHAFI, resolved.madhab)
+        assertEquals(MadhabId.HANAFI, resolved.madhab)
         assertEquals(HighLatitudeRuleId.TWILIGHT_ANGLE, resolved.highLatitudeRule)
         assertTrue(resolved.id.startsWith("custom-tr-"))
     }
