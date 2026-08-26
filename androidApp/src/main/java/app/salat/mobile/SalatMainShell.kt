@@ -1,5 +1,6 @@
 package app.salat.mobile
 
+import android.app.Activity
 import androidx.compose.foundation.background
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
@@ -22,6 +23,8 @@ import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.darkColorScheme
+import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
@@ -77,14 +80,36 @@ fun SalatMainShell(location: ResolvedLocation) {
         AppearanceMode.LIGHT -> false
     }
     val canvas = if (dark) ShellCanvasDark else ShellCanvas
+    val colorScheme = if (dark) {
+        darkColorScheme(
+            primary = Color(0xFF91C9B5),
+            background = ShellCanvasDark,
+            surface = ShellCardDark,
+            onBackground = Color(0xFFF2F1EC),
+            onSurface = Color(0xFFF2F1EC)
+        )
+    } else {
+        lightColorScheme(
+            primary = ShellSage,
+            background = ShellCanvas,
+            surface = Color.White,
+            onBackground = Color(0xFF20221F),
+            onSurface = Color(0xFF20221F)
+        )
+    }
 
     fun persist(next: AppPreferences) {
+        val languageChanged = next.languageTag != settings.languageTag
         settings = next
         settingsStore.save(next)
         notificationCoordinator.rebuild(location)
+        if (languageChanged) {
+            AndroidLocaleController.apply(context, next.languageTag)
+            (context as? Activity)?.recreate()
+        }
     }
 
-    MaterialTheme {
+    MaterialTheme(colorScheme = colorScheme) {
         Scaffold(
             containerColor = canvas,
             topBar = {
