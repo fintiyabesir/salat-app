@@ -1,0 +1,3 @@
+cities5000 + alternateNamesV2
+request=4
+format=salat-city-catalog-v2

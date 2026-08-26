@@ -118,6 +118,13 @@ struct IOSSettingsView: View {
                         Text(L10n.text("settings_dark")).tag("DARK")
                     }
                 }
+
+                Section("GeoNames") {
+                    Text("GeoNames · CC BY 4.0")
+                    Text("geonames.org")
+                        .font(.footnote)
+                        .foregroundStyle(.secondary)
+                }
             }
             .navigationTitle(L10n.text("settings"))
             .toolbar {

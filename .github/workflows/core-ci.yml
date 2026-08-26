@@ -30,6 +30,15 @@ jobs:
         run: gradle :shared:jvmTest --stacktrace
       - name: Compile Android debug app
         run: gradle :androidApp:assembleDebug --stacktrace
+      - name: Verify Android bundled city catalog
+        run: |
+          APK="androidApp/build/outputs/apk/debug/androidApp-debug.apk"
+          test -f "$APK"
+          unzip -l "$APK" | grep -q 'assets/city_catalog.tsv'
+          EXPECTED="$(sha256sum resources/city_catalog.tsv | awk '{print $1}')"
+          ACTUAL="$(unzip -p "$APK" assets/city_catalog.tsv | sha256sum | awk '{print $1}')"
+          test "$ACTUAL" = "$EXPECTED"
+          unzip -p "$APK" assets/city_catalog.tsv | head -n 1 | grep -q '#salat-city-catalog-v2'
       - name: Verify prototype JavaScript syntax
         run: |
           python3 - <<'PY'
@@ -85,8 +94,15 @@ jobs:
             build
       - name: Verify built app bundle
         run: |
-          test -d "$RUNNER_TEMP/SalatDerivedData/Build/Products/Debug-iphonesimulator/Salat.app"
-          test -f "$RUNNER_TEMP/SalatDerivedData/Build/Products/Debug-iphonesimulator/Salat.app/Info.plist"
+          APP="$RUNNER_TEMP/SalatDerivedData/Build/Products/Debug-iphonesimulator/Salat.app"
+          CATALOG="$APP/city_catalog.tsv"
+          test -d "$APP"
+          test -f "$APP/Info.plist"
+          test -f "$CATALOG"
+          EXPECTED="$(shasum -a 256 resources/city_catalog.tsv | awk '{print $1}')"
+          ACTUAL="$(shasum -a 256 "$CATALOG" | awk '{print $1}')"
+          test "$ACTUAL" = "$EXPECTED"
+          head -n 1 "$CATALOG" | grep -q '#salat-city-catalog-v2'
       - name: Package iOS simulator app
         run: |
           cd "$RUNNER_TEMP/SalatDerivedData/Build/Products/Debug-iphonesimulator"

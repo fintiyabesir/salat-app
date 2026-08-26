@@ -1,0 +1,22 @@
+{
+  "dataset": "cities5000",
+  "format": "salat-city-catalog-v2",
+  "records": 69653,
+  "raw_bytes": 11292983,
+  "gzip_bytes": 5452543,
+  "sha256": "1e9c87ab12104b1ab2526134b09a61ed5b1fe602c68c09dea18ba17315220930",
+  "language_aware_aliases": true,
+  "index_build_ms": 872.61,
+  "linear_search_ms": {
+    "Istanbul": 23.03,
+    "İstanbul": 19.68,
+    "Kuala": 22.74,
+    "Karachi": 22.62,
+    "کراچی": 15.18,
+    "القاهرة": 13.89,
+    "北京": 15.98,
+    "ঢাকা": 14.03,
+    "تهران": 14.35,
+    "São Paulo": 23.39
+  }
+}

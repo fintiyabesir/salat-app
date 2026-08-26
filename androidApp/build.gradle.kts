@@ -15,6 +15,12 @@ android {
         versionName = "0.1.0"
     }
 
+    sourceSets {
+        getByName("main") {
+            assets.srcDir(rootProject.file("resources"))
+        }
+    }
+
     buildFeatures { compose = true }
 }
 
