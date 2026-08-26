@@ -50,6 +50,9 @@ struct TodayView: View {
                 Text(model.regionText).foregroundStyle(.secondary)
             }
             Text(model.dateText).foregroundStyle(.secondary)
+            Text(model.hijriDateText)
+                .font(.footnote)
+                .foregroundStyle(.secondary)
         }
         .frame(maxWidth: .infinity, alignment: .leading)
     }
