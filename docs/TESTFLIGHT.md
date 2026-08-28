@@ -10,6 +10,8 @@ Salat's first internal TestFlight candidate is version **0.1.0 (1)** for iPhone 
 - Marketing version: `0.1.0`
 - Initial TestFlight build: `1`
 
+The app and widget explicitly bind `CFBundleShortVersionString` to `MARKETING_VERSION` and `CFBundleVersion` to `CURRENT_PROJECT_VERSION`, so the archive metadata is deterministic for App Store validation.
+
 ## App Store Connect / Developer account setup
 
 Before the first upload, the Apple Developer account must contain:
