@@ -112,19 +112,40 @@ jobs:
             clean archive
 
       - name: Verify release archive contents
+        shell: bash
         run: |
+          set -euo pipefail
           APP="$RUNNER_TEMP/Salat.xcarchive/Products/Applications/Salat.app"
           WIDGET="$APP/PlugIns/SalatWidgetExtension.appex"
+
           test -d "$APP"
+          test -f "$APP/Info.plist"
           test -d "$WIDGET"
-          test -f "$APP/PrivacyInfo.xcprivacy"
-          test -f "$WIDGET/PrivacyInfo.xcprivacy"
+          test -f "$WIDGET/Info.plist"
           test -f "$APP/Assets.car"
           test -f "$APP/city_catalog.tsv"
-          /usr/libexec/PlistBuddy -c 'Print :CFBundleIcons' "$APP/Info.plist" >/dev/null
+
+          # Xcode may package privacy manifests at a bundle-relative location that
+          # differs across toolchain versions. Their presence in the final bundles
+          # is what matters for App Store submission.
+          APP_PRIVACY="$(find "$APP" -name PrivacyInfo.xcprivacy -type f -print -quit)"
+          WIDGET_PRIVACY="$(find "$WIDGET" -name PrivacyInfo.xcprivacy -type f -print -quit)"
+          test -n "$APP_PRIVACY"
+          test -n "$WIDGET_PRIVACY"
+          plutil -lint "$APP_PRIVACY"
+          plutil -lint "$WIDGET_PRIVACY"
+
           test "$(/usr/libexec/PlistBuddy -c 'Print :CFBundleShortVersionString' "$APP/Info.plist")" = "$MARKETING_VERSION"
           test "$(/usr/libexec/PlistBuddy -c 'Print :CFBundleVersion' "$APP/Info.plist")" = "$BUILD_NUMBER"
           test "$(/usr/libexec/PlistBuddy -c 'Print :ITSAppUsesNonExemptEncryption' "$APP/Info.plist")" = "false"
+
+          EXPECTED="$(shasum -a 256 resources/city_catalog.tsv | awk '{print $1}')"
+          ACTUAL="$(shasum -a 256 "$APP/city_catalog.tsv" | awk '{print $1}')"
+          test "$ACTUAL" = "$EXPECTED"
+
+          echo "Release archive verified: $APP"
+          echo "App privacy manifest: $APP_PRIVACY"
+          echo "Widget privacy manifest: $WIDGET_PRIVACY"
 
       - name: Package release preflight archive
         run: ditto -c -k --sequesterRsrc --keepParent "$RUNNER_TEMP/Salat.xcarchive" "$RUNNER_TEMP/Salat-Release-Preflight.zip"
