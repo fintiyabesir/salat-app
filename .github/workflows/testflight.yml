@@ -171,6 +171,7 @@ jobs:
           test -d "$COMPLICATION"
           test -f "$COMPLICATION/Info.plist"
           test -f "$APP/Assets.car"
+          test -f "$WATCH/Assets.car"
           test -f "$APP/city_catalog.tsv"
 
           APP_PRIVACY="$APP/PrivacyInfo.xcprivacy"
@@ -220,6 +221,7 @@ jobs:
           assert_plist_value "$WATCH/Info.plist" CFBundleShortVersionString "$MARKETING_VERSION"
           assert_plist_value "$WATCH/Info.plist" CFBundleVersion "$BUILD_NUMBER"
           assert_plist_value "$WATCH/Info.plist" CFBundleIconName AppIcon
+          assert_plist_value "$WATCH/Info.plist" CFBundleIcons:CFBundlePrimaryIcon:CFBundleIconName AppIcon
           assert_plist_value "$WATCH/Info.plist" DTPlatformName watchos
           assert_plist_value "$WATCH/Info.plist" MinimumOSVersion 10.0
           assert_plist_value "$WATCH/Info.plist" UIDeviceFamily:0 4
@@ -231,7 +233,6 @@ jobs:
           assert_plist_value "$COMPLICATION/Info.plist" DTPlatformName watchos
           assert_plist_value "$COMPLICATION/Info.plist" MinimumOSVersion 10.0
           assert_plist_value "$COMPLICATION/Info.plist" NSExtension:NSExtensionPointIdentifier com.apple.widgetkit-extension
-          /usr/libexec/PlistBuddy -c 'Print :CFBundleIconFiles:0' "$WATCH/Info.plist" >/dev/null
           test -x "$WIDGET/SalatWidgetExtension"
           otool -l "$WIDGET/SalatWidgetExtension" | grep -q '__swift5_entry'
           test -x "$WATCH/SalatWatch"
