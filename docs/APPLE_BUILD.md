@@ -17,4 +17,4 @@ This catches Xcode target configuration, resource bundling, localization, Swift 
 
 ## Device / TestFlight pipeline
 
-A later release workflow will build an archive for `iphoneos`, sign it with Apple Developer credentials supplied through GitHub Actions secrets, and upload it to TestFlight. Signing credentials must never be committed to the repository.
+The TestFlight workflow builds an archive for `iphoneos`, signs it with Apple Developer credentials supplied through GitHub Actions secrets, and uploads it after `Core CI` succeeds on `main` when `AUTO_TESTFLIGHT_UPLOAD` is enabled. It can also be run manually. Signing credentials must never be committed to the repository.

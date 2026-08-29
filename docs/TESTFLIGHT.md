@@ -40,11 +40,14 @@ The TestFlight workflow expects these secret names:
 
 The certificate secret is the base64 representation of a `.p12` containing the Apple Distribution certificate and its private key. The API private-key secret is the base64 representation of the `.p8` key downloaded from App Store Connect.
 
+Automatic uploads also use the repository variable `AUTO_TESTFLIGHT_UPLOAD`. Keep it unset or set to `false` until every embedded target has a registered App ID and provisioning is ready. Set it to `true` to enable automatic uploads after successful `main` builds.
+
 ## Workflow
 
-`.github/workflows/testflight.yml` has two modes:
+`.github/workflows/testflight.yml` has three modes:
 
 - On a release pull request, `release-preflight` selects Xcode 26.3, builds the KMP device framework, generates the Xcode project and creates a real unsigned Release `.xcarchive` for a generic iOS device. It also validates the app icon, privacy manifests, widget embedding, version/build values, export-compliance flag and bundled offline city catalog.
+- After `Core CI` succeeds for a push to `main`, the same preflight runs against the exact tested commit. When `AUTO_TESTFLIGHT_UPLOAD` is `true`, the workflow then signs, validates and uploads that commit to TestFlight. Runs are queued instead of cancelled, so every successful `main` push gets its own build.
 - From **Actions → TestFlight Release → Run workflow**, set a build number and enable **Upload to TestFlight**. The workflow installs signing material temporarily, performs automatic provisioning using the App Store Connect API key, exports an App Store Connect IPA, validates it and uploads it.
 
 Signing material is stored only in the runner's temporary keychain and deleted at the end of the job.
@@ -59,4 +62,4 @@ If a future official-source verification implementation transmits location or an
 
 ## Build-number policy
 
-Keep marketing version `0.1.0` during the initial internal beta and increment only the TestFlight build number (`2`, `3`, `4`, ...). This makes rapid internal iterations easy to identify without creating unnecessary App Store versions.
+Keep marketing version `0.1.0` during the initial internal beta. Automatic `main` uploads use the monotonically increasing GitHub Actions workflow run number as `CFBundleVersion`; manual uploads use the build number entered when dispatching the workflow. This makes rapid internal iterations easy to identify without creating unnecessary App Store versions. A manually supplied build number must not duplicate an existing App Store Connect build.
