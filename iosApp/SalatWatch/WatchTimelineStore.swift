@@ -54,5 +54,11 @@ final class WatchTimelineStore: NSObject, ObservableObject, WCSessionDelegate {
         ingest(applicationContext)
     }
 
+    func sessionDidBecomeInactive(_ session: WCSession) {}
+
+    func sessionDidDeactivate(_ session: WCSession) {
+        session.activate()
+    }
+
     func sessionReachabilityDidChange(_ session: WCSession) {}
 }
