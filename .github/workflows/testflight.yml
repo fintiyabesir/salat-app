@@ -1,14 +1,10 @@
 name: TestFlight Release
 
 on:
-  push:
+  workflow_run:
+    workflows: [ "Core CI" ]
+    types: [ completed ]
     branches: [ main ]
-    paths:
-      - '.github/workflows/testflight.yml'
-      - 'iosApp/**'
-      - 'shared/**'
-      - 'resources/**'
-      - 'scripts/generate_app_icon.py'
   pull_request:
     branches: [ main ]
   workflow_dispatch:
@@ -16,7 +12,6 @@ on:
       build_number:
         description: TestFlight build number
         required: true
-        default: '1'
         type: string
       upload_to_testflight:
         description: Sign, export and upload to TestFlight
@@ -27,12 +22,25 @@ on:
 permissions:
   contents: read
 
+concurrency:
+  group: testflight-${{ github.event.workflow_run.head_branch || github.ref }}
+  cancel-in-progress: false
+  queue: max
+
 jobs:
   release-preflight:
-    if: github.event_name == 'workflow_dispatch' || github.event_name == 'push' || startsWith(github.head_ref, 'release/')
+    if: >-
+      github.event_name == 'workflow_dispatch' ||
+      (github.event_name == 'workflow_run' &&
+       github.event.workflow_run.event == 'push' &&
+       github.event.workflow_run.head_branch == 'main' &&
+       github.event.workflow_run.conclusion == 'success') ||
+      startsWith(github.head_ref, 'release/')
     runs-on: macos-15
     steps:
       - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event_name == 'workflow_run' && github.event.workflow_run.head_sha || github.sha }}
 
       - name: Resolve build number
         shell: bash
@@ -40,7 +48,7 @@ jobs:
           if [[ "$GITHUB_EVENT_NAME" == "workflow_dispatch" ]]; then
             echo "BUILD_NUMBER=${{ inputs.build_number }}" >> "$GITHUB_ENV"
           else
-            echo "BUILD_NUMBER=1" >> "$GITHUB_ENV"
+            echo "BUILD_NUMBER=${{ github.run_number }}" >> "$GITHUB_ENV"
           fi
           echo "MARKETING_VERSION=0.1.0" >> "$GITHUB_ENV"
 
@@ -246,7 +254,10 @@ jobs:
           retention-days: 7
 
   testflight-upload:
-    if: github.event_name == 'workflow_dispatch' && inputs.upload_to_testflight == true
+    if: >-
+      needs.release-preflight.result == 'success' &&
+      ((github.event_name == 'workflow_dispatch' && inputs.upload_to_testflight == true) ||
+       (github.event_name == 'workflow_run' && vars.AUTO_TESTFLIGHT_UPLOAD == 'true'))
     needs: release-preflight
     runs-on: macos-15
     env:
@@ -258,6 +269,8 @@ jobs:
       APP_STORE_CONNECT_API_PRIVATE_KEY_BASE64: ${{ secrets.APP_STORE_CONNECT_API_PRIVATE_KEY_BASE64 }}
     steps:
       - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event_name == 'workflow_run' && github.event.workflow_run.head_sha || github.sha }}
 
       - name: Check signing and App Store Connect secrets
         shell: bash
@@ -281,7 +294,11 @@ jobs:
 
       - name: Resolve release version
         run: |
-          echo "BUILD_NUMBER=${{ inputs.build_number }}" >> "$GITHUB_ENV"
+          if [[ "$GITHUB_EVENT_NAME" == "workflow_dispatch" ]]; then
+            echo "BUILD_NUMBER=${{ inputs.build_number }}" >> "$GITHUB_ENV"
+          else
+            echo "BUILD_NUMBER=${{ github.run_number }}" >> "$GITHUB_ENV"
+          fi
           echo "MARKETING_VERSION=0.1.0" >> "$GITHUB_ENV"
 
       - name: Select Xcode 26.3
@@ -426,7 +443,7 @@ jobs:
 
       - uses: actions/upload-artifact@v4
         with:
-          name: salat-ios-testflight-ipa-${{ inputs.build_number }}
+          name: salat-ios-testflight-ipa-${{ github.event_name == 'workflow_dispatch' && inputs.build_number || github.run_number }}
           path: ${{ env.IPA_PATH }}
           retention-days: 7
 
