@@ -142,5 +142,7 @@ The phone, widget, Apple Watch, Wear OS app, tile and complications read checked
 - `AdhanPrayerCalculator` maps Salat calculation profiles to Adhan parameters.
 - `QiblaCalculator` calculates true-north bearing to the Kaaba without network access.
 - `PrayerComparator` computes maximum minute delta between local and official sets.
-- `JakimXmlAdapter` parses JAKIM's e-Solat RSS/XML shape; production transport and legal review remain pending.
+- `MuisOpenDataAdapter` parses the licensed MUIS/data.gov.sg consolidated dataset and returns its full published range for annual caching.
+- `JakimXmlAdapter` parses JAKIM's e-Solat RSS/XML shape for regression/reference use, but runtime selection is blocked until reuse and cache permission are confirmed.
+- `OfficialSourceCatalog` records release decisions for all eight initial candidates; `PrayerRepository` ignores adapters whose runtime policy requires permission.
 - Common tests include the Istanbul/Diyanet fixture, Qibla bearing, JAKIM XML parsing, and verification delta comparison.

@@ -50,7 +50,8 @@ data/         Official-source research matrix
 - [x] Adhan-backed prayer calculator
 - [x] Qibla bearing calculation
 - [x] Official source adapter contract
-- [x] JAKIM e-Solat XML parser/adapter first pass
+- [x] JAKIM e-Solat XML parser first pass, runtime-gated pending reuse permission
+- [x] MUIS Singapore open-data adapter with annual bulk cache policy
 - [x] Core regression tests
 - [x] Android and SwiftUI Today screens backed by shared prayer calculation
 - [x] Android/iOS device location and timezone resolution
@@ -64,7 +65,7 @@ data/         Official-source research matrix
 - [ ] Real mobile HTTP transport
 - [x] Native local notification schedulers
 - [x] Calendar + Qibla production screens
-- [ ] Remaining official-source adapters and legal review
+- [ ] Remaining official-source permissions/adapters; eight-candidate legal decisions are runtime-enforced
 - [x] 8-language resource parity across phone/watch surfaces with RTL screenshot regression tests
 
 ## Verification philosophy

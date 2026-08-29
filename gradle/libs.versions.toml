@@ -2,6 +2,7 @@
 kotlin = "2.4.0"
 agp = "9.3.0"
 kotlinxDatetime = "0.8.0"
+kotlinxSerialization = "1.11.0"
 adhan = "0.0.7"
 composeBom = "2026.04.01"
 activityCompose = "1.13.0"
@@ -16,6 +17,7 @@ screenshot = "0.0.1-alpha15"
 
 [libraries]
 kotlinx-datetime = { module = "org.jetbrains.kotlinx:kotlinx-datetime", version.ref = "kotlinxDatetime" }
+kotlinx-serialization-json = { module = "org.jetbrains.kotlinx:kotlinx-serialization-json", version.ref = "kotlinxSerialization" }
 adhan = { module = "com.batoulapps.adhan:adhan2", version.ref = "adhan" }
 androidx-compose-bom = { module = "androidx.compose:compose-bom", version.ref = "composeBom" }
 androidx-compose-material3 = { module = "androidx.compose.material3:material3" }
