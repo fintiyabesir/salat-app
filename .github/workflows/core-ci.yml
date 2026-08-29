@@ -88,6 +88,11 @@ jobs:
           test "$(/usr/libexec/PlistBuddy -c 'Print :CFBundleShortVersionString' iosApp/SalatApp/Info.plist)" = '$(MARKETING_VERSION)'
           test "$(/usr/libexec/PlistBuddy -c 'Print :CFBundleVersion' iosApp/SalatApp/Info.plist)" = '$(CURRENT_PROJECT_VERSION)'
           test "$(/usr/libexec/PlistBuddy -c 'Print :ITSAppUsesNonExemptEncryption' iosApp/SalatApp/Info.plist)" = 'false'
+          test "$(/usr/libexec/PlistBuddy -c 'Print :UISupportedInterfaceOrientations:0' iosApp/SalatApp/Info.plist)" = 'UIInterfaceOrientationPortrait'
+          test "$(/usr/libexec/PlistBuddy -c 'Print :UISupportedInterfaceOrientations:1' iosApp/SalatApp/Info.plist)" = 'UIInterfaceOrientationPortraitUpsideDown'
+          test "$(/usr/libexec/PlistBuddy -c 'Print :UISupportedInterfaceOrientations:2' iosApp/SalatApp/Info.plist)" = 'UIInterfaceOrientationLandscapeLeft'
+          test "$(/usr/libexec/PlistBuddy -c 'Print :UISupportedInterfaceOrientations:3' iosApp/SalatApp/Info.plist)" = 'UIInterfaceOrientationLandscapeRight'
+          test "$(/usr/libexec/PlistBuddy -c 'Print :CFBundleExecutable' iosApp/SalatWidget/Info.plist)" = '$(EXECUTABLE_NAME)'
           test "$(/usr/libexec/PlistBuddy -c 'Print :NSExtension:NSExtensionPointIdentifier' iosApp/SalatWidget/Info.plist)" = 'com.apple.widgetkit-extension'
           test "$(/usr/libexec/PlistBuddy -c 'Print :com.apple.security.application-groups:0' iosApp/SalatApp/SalatApp.entitlements)" = 'group.app.salat.mobile'
           test "$(/usr/libexec/PlistBuddy -c 'Print :com.apple.security.application-groups:0' iosApp/SalatWidget/SalatWidget.entitlements)" = 'group.app.salat.mobile'
@@ -115,6 +120,10 @@ jobs:
           test -f "$CATALOG"
           test -d "$WIDGET"
           test -f "$WIDGET/Info.plist"
+          test "$(/usr/libexec/PlistBuddy -c 'Print :UISupportedInterfaceOrientations:3' "$APP/Info.plist")" = 'UIInterfaceOrientationLandscapeRight'
+          test "$(/usr/libexec/PlistBuddy -c 'Print :CFBundleExecutable' "$WIDGET/Info.plist")" = 'SalatWidgetExtension'
+          test -x "$WIDGET/SalatWidgetExtension"
+          otool -l "$WIDGET/SalatWidgetExtension" | grep -q '__swift5_entry'
           EXPECTED="$(shasum -a 256 resources/city_catalog.tsv | awk '{print $1}')"
           ACTUAL="$(shasum -a 256 "$CATALOG" | awk '{print $1}')"
           test "$ACTUAL" = "$EXPECTED"
