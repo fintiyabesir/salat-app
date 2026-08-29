@@ -123,7 +123,9 @@ jobs:
           test "$(/usr/libexec/PlistBuddy -c 'Print :com.apple.security.application-groups:0' iosApp/SalatApp/SalatApp.entitlements)" = 'group.app.salat.mobile'
           test "$(/usr/libexec/PlistBuddy -c 'Print :com.apple.security.application-groups:0' iosApp/SalatWidget/SalatWidget.entitlements)" = 'group.app.salat.mobile'
           test "$(/usr/libexec/PlistBuddy -c 'Print :CFBundleVersion' iosApp/SalatWatch/Info.plist)" = '$(CURRENT_PROJECT_VERSION)'
+          test "$(/usr/libexec/PlistBuddy -c 'Print :CFBundleIdentifier' iosApp/SalatWatch/Info.plist)" = '$(PRODUCT_BUNDLE_IDENTIFIER)'
           test "$(/usr/libexec/PlistBuddy -c 'Print :CFBundleExecutable' iosApp/SalatWatch/Info.plist)" = '$(EXECUTABLE_NAME)'
+          test "$(/usr/libexec/PlistBuddy -c 'Print :CFBundleIdentifier' iosApp/SalatWatchComplication/Info.plist)" = '$(PRODUCT_BUNDLE_IDENTIFIER)'
           test "$(/usr/libexec/PlistBuddy -c 'Print :CFBundleExecutable' iosApp/SalatWatchComplication/Info.plist)" = '$(EXECUTABLE_NAME)'
           test "$(/usr/libexec/PlistBuddy -c 'Print :com.apple.security.application-groups:0' iosApp/SalatWatch/SalatWatch.entitlements)" = 'group.app.salat.mobile'
           test "$(/usr/libexec/PlistBuddy -c 'Print :com.apple.security.application-groups:0' iosApp/SalatWatchComplication/SalatWatchComplication.entitlements)" = 'group.app.salat.mobile'
@@ -162,7 +164,6 @@ jobs:
             -project iosApp/SalatApp.xcodeproj \
             -scheme SalatApp \
             -configuration Debug \
-            -sdk iphonesimulator \
             -destination 'generic/platform=iOS Simulator' \
             -derivedDataPath "$RUNNER_TEMP/SalatDerivedData" \
             ARCHS=arm64 \
@@ -186,6 +187,8 @@ jobs:
           otool -l "$WIDGET/SalatWidgetExtension" | grep -q '__swift5_entry'
           test -d "$WATCH"
           test -f "$WATCH/Info.plist"
+          test "$(/usr/libexec/PlistBuddy -c 'Print :CFBundleIdentifier' "$WATCH/Info.plist")" = 'app.salat.mobile.watchapp'
+          xcrun vtool -show-build "$WATCH/SalatWatch" | grep -q 'platform WATCHOSSIMULATOR'
           EXPECTED="$(shasum -a 256 resources/city_catalog.tsv | awk '{print $1}')"
           ACTUAL="$(shasum -a 256 "$CATALOG" | awk '{print $1}')"
           test "$ACTUAL" = "$EXPECTED"

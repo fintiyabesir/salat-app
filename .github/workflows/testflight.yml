@@ -123,7 +123,9 @@ jobs:
           test "$(/usr/libexec/PlistBuddy -c 'Print :NSExtension:NSExtensionPointIdentifier' iosApp/SalatWidget/Info.plist)" = 'com.apple.widgetkit-extension'
           test "$(/usr/libexec/PlistBuddy -c 'Print :com.apple.security.application-groups:0' iosApp/SalatApp/SalatApp.entitlements)" = 'group.app.salat.mobile'
           test "$(/usr/libexec/PlistBuddy -c 'Print :com.apple.security.application-groups:0' iosApp/SalatWidget/SalatWidget.entitlements)" = 'group.app.salat.mobile'
+          test "$(/usr/libexec/PlistBuddy -c 'Print :CFBundleIdentifier' iosApp/SalatWatch/Info.plist)" = '$(PRODUCT_BUNDLE_IDENTIFIER)'
           test "$(/usr/libexec/PlistBuddy -c 'Print :CFBundleExecutable' iosApp/SalatWatch/Info.plist)" = '$(EXECUTABLE_NAME)'
+          test "$(/usr/libexec/PlistBuddy -c 'Print :CFBundleIdentifier' iosApp/SalatWatchComplication/Info.plist)" = '$(PRODUCT_BUNDLE_IDENTIFIER)'
           test "$(/usr/libexec/PlistBuddy -c 'Print :CFBundleExecutable' iosApp/SalatWatchComplication/Info.plist)" = '$(EXECUTABLE_NAME)'
           test "$(/usr/libexec/PlistBuddy -c 'Print :com.apple.security.application-groups:0' iosApp/SalatWatch/SalatWatch.entitlements)" = 'group.app.salat.mobile'
           test "$(/usr/libexec/PlistBuddy -c 'Print :com.apple.security.application-groups:0' iosApp/SalatWatchComplication/SalatWatchComplication.entitlements)" = 'group.app.salat.mobile'
@@ -135,7 +137,6 @@ jobs:
             -project iosApp/SalatApp.xcodeproj \
             -scheme SalatApp \
             -configuration Release \
-            -sdk iphoneos \
             -destination 'generic/platform=iOS' \
             -archivePath "$RUNNER_TEMP/Salat.xcarchive" \
             CURRENT_PROJECT_VERSION="$BUILD_NUMBER" \
@@ -218,6 +219,8 @@ jobs:
           test -x "$COMPLICATION/SalatWatchComplication"
           otool -l "$WATCH/SalatWatch" | grep -q '__swift5_entry'
           otool -l "$COMPLICATION/SalatWatchComplication" | grep -q '__swift5_entry'
+          xcrun vtool -show-build "$WATCH/SalatWatch" | grep -q 'platform WATCHOS'
+          xcrun vtool -show-build "$COMPLICATION/SalatWatchComplication" | grep -q 'platform WATCHOS'
 
           EXPECTED="$(shasum -a 256 resources/city_catalog.tsv | awk '{print $1}')"
           ACTUAL="$(shasum -a 256 "$APP/city_catalog.tsv" | awk '{print $1}')"
