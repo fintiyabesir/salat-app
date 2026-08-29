@@ -13,13 +13,13 @@ import java.util.Date
 
 class NextPrayerComplicationService : SuspendingComplicationDataSourceService() {
     override fun getPreviewData(type: ComplicationType): ComplicationData? =
-        buildComplication(type, "Dhuhr", "13:08")
+        buildComplication(type, getString(R.string.prayer_dhuhr), "13:08")
 
     override suspend fun onComplicationRequest(request: ComplicationRequest): ComplicationData {
         val next = WearTimelineStore(this).load()?.next() ?: return NoDataComplicationData()
         return buildComplication(
             request.complicationType,
-            next.displayName(),
+            next.localizedName(this),
             DateFormat.getTimeFormat(this).format(Date(next.atMillis))
         ) ?: NoDataComplicationData()
     }

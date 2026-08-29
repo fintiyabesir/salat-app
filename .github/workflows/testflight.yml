@@ -177,6 +177,10 @@ jobs:
           plutil -lint "$WIDGET_PRIVACY"
           plutil -lint "$WATCH_PRIVACY"
           plutil -lint "$COMPLICATION_PRIVACY"
+          for locale in en tr ar fa ur bn ms zh-Hans zh-Hant; do
+            test -f "$WATCH/$locale.lproj/Watch.strings"
+            test -f "$COMPLICATION/$locale.lproj/Watch.strings"
+          done
 
           assert_plist_value() {
             local plist="$1"

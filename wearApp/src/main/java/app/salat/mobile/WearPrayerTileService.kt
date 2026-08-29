@@ -32,8 +32,8 @@ class WearPrayerTileService : TileService() {
             )
         } else {
             listOf(
-                tileText(getString(R.string.next_prayer).uppercase(), 10f, Color.LTGRAY),
-                tileText(next.displayName(), 20f, Color.rgb(94, 213, 139)),
+                tileText(getString(R.string.next_prayer), 10f, Color.LTGRAY),
+                tileText(next.localizedName(this), 20f, Color.rgb(94, 213, 139)),
                 tileText(DateFormat.getTimeFormat(this).format(Date(next.atMillis)), 28f, Color.WHITE)
             )
         }

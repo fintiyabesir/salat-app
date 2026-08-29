@@ -127,7 +127,7 @@ private fun SalatApp(
 }
 
 @Composable
-private fun LocationStartScreen(
+internal fun LocationStartScreen(
     resolving: Boolean,
     showError: Boolean,
     onUseLocation: () -> Unit,

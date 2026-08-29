@@ -5,4 +5,12 @@
     <string name="tile_label">Next prayer</string>
     <string name="tile_description">Next prayer and its time, available offline.</string>
     <string name="complication_label">Next prayer</string>
+    <string name="prayer_fajr">Fajr</string>
+    <string name="prayer_sunrise">Sunrise</string>
+    <string name="prayer_dhuhr">Dhuhr</string>
+    <string name="prayer_asr">Asr</string>
+    <string name="prayer_maghrib">Maghrib</string>
+    <string name="prayer_isha">Isha</string>
+    <string name="remaining_minutes">%1$d min</string>
+    <string name="remaining_hours_minutes">%1$d:%2$02d</string>
 </resources>

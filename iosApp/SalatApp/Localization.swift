@@ -22,9 +22,16 @@ enum L10n {
 
     static var selectedLocale: Locale {
         guard let tag = UserDefaults.standard.string(forKey: languageKey), !tag.isEmpty else {
-            return .current
+            return Locale(identifier: Bundle.main.preferredLocalizations.first ?? "en")
         }
         return Locale(identifier: tag)
+    }
+
+    static var isRightToLeft: Bool {
+        guard let languageCode = selectedLocale.language.languageCode?.identifier else {
+            return false
+        }
+        return ["ar", "fa", "ur"].contains(languageCode)
     }
 
     private static var selectedBundle: Bundle {

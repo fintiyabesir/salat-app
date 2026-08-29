@@ -53,6 +53,7 @@ struct SalatRootView: View {
         }
         .preferredColorScheme(preferredColorScheme)
         .environment(\.locale, L10n.selectedLocale)
+        .environment(\.layoutDirection, L10n.isRightToLeft ? .rightToLeft : .leftToRight)
         .sheet(isPresented: $showSettings) {
             IOSSettingsView(location: locationModel.location, store: settingsStore)
         }

@@ -108,6 +108,8 @@ Requirements:
 - prayer terminology translation table must be curated, not auto-translated at runtime
 - Chinese prayer terminology should be reviewed by a native/subject-matter reviewer
 
+The phone, widget, Apple Watch, Wear OS app, tile and complications read checked-in resources only. CI verifies key parity for every locale, compiles both watch platforms and compares representative English LTR and Arabic RTL Compose screens against reviewed reference images.
+
 ## v1 screens
 1. First launch / language
 2. Location permission or manual city

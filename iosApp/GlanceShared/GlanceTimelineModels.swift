@@ -8,6 +8,20 @@ struct GlancePrayerEvent: Codable, Hashable {
     var date: Date {
         Date(timeIntervalSince1970: Double(epochMillis) / 1000.0)
     }
+
+    var localizedPrayerName: String {
+        GlanceL10n.prayer(prayerId, fallback: prayerName)
+    }
+}
+
+enum GlanceL10n {
+    static func text(_ key: String, fallback: String) -> String {
+        Bundle.main.localizedString(forKey: key, value: fallback, table: "Watch")
+    }
+
+    static func prayer(_ id: String, fallback: String) -> String {
+        text("prayer.\(id.lowercased())", fallback: fallback)
+    }
 }
 
 struct GlanceTimelinePayload: Codable {

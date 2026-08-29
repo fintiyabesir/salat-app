@@ -65,7 +65,7 @@ data/         Official-source research matrix
 - [x] Native local notification schedulers
 - [x] Calendar + Qibla production screens
 - [ ] Remaining official-source adapters and legal review
-- [ ] 8-language reviewed translations
+- [x] 8-language resource parity across phone/watch surfaces with RTL screenshot regression tests
 
 ## Verification philosophy
 

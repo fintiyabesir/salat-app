@@ -77,5 +77,14 @@ internal fun decodeWearTimeline(raw: String): WearPrayerTimeline? = runCatching 
     )
 }.getOrNull()
 
-fun WearPrayerEvent.displayName(): String =
-    prayerId.lowercase().replaceFirstChar { it.uppercase() }
+fun WearPrayerEvent.localizedName(context: Context): String = context.getString(
+    when (prayerId.uppercase()) {
+        "FAJR" -> R.string.prayer_fajr
+        "SUNRISE" -> R.string.prayer_sunrise
+        "DHUHR" -> R.string.prayer_dhuhr
+        "ASR" -> R.string.prayer_asr
+        "MAGHRIB" -> R.string.prayer_maghrib
+        "ISHA" -> R.string.prayer_isha
+        else -> return prayerId
+    }
+)

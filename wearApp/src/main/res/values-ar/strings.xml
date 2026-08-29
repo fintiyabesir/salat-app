@@ -1,0 +1,16 @@
+<resources>
+    <string name="app_name">Salat</string>
+    <string name="next_prayer">الصلاة القادمة</string>
+    <string name="open_phone_to_sync">افتح Salat على هاتفك مرة واحدة لمزامنة مواقيت الصلاة.</string>
+    <string name="tile_label">الصلاة القادمة</string>
+    <string name="tile_description">الصلاة القادمة ووقتها متاحان دون اتصال.</string>
+    <string name="complication_label">الصلاة القادمة</string>
+    <string name="prayer_fajr">الفجر</string>
+    <string name="prayer_sunrise">الشروق</string>
+    <string name="prayer_dhuhr">الظهر</string>
+    <string name="prayer_asr">العصر</string>
+    <string name="prayer_maghrib">المغرب</string>
+    <string name="prayer_isha">العشاء</string>
+    <string name="remaining_minutes">%1$d د</string>
+    <string name="remaining_hours_minutes">%1$d:%2$02d</string>
+</resources>

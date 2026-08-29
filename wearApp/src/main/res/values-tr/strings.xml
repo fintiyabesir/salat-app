@@ -1,0 +1,16 @@
+<resources>
+    <string name="app_name">Salat</string>
+    <string name="next_prayer">Sonraki vakit</string>
+    <string name="open_phone_to_sync">Namaz vakitlerini eşzamanlamak için Salat’ı telefonda bir kez açın.</string>
+    <string name="tile_label">Sonraki vakit</string>
+    <string name="tile_description">Sıradaki namaz ve vakti çevrimdışı kullanılabilir.</string>
+    <string name="complication_label">Sonraki vakit</string>
+    <string name="prayer_fajr">İmsak</string>
+    <string name="prayer_sunrise">Güneş</string>
+    <string name="prayer_dhuhr">Öğle</string>
+    <string name="prayer_asr">İkindi</string>
+    <string name="prayer_maghrib">Akşam</string>
+    <string name="prayer_isha">Yatsı</string>
+    <string name="remaining_minutes">%1$d dk</string>
+    <string name="remaining_hours_minutes">%1$d:%2$02d</string>
+</resources>

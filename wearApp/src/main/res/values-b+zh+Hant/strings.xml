@@ -1,0 +1,16 @@
+<resources>
+    <string name="app_name">Salat</string>
+    <string name="next_prayer">下一次禮拜</string>
+    <string name="open_phone_to_sync">請在手機上開啟一次 Salat 以同步禮拜時間。</string>
+    <string name="tile_label">下一次禮拜</string>
+    <string name="tile_description">可離線查看下一次禮拜及其時間。</string>
+    <string name="complication_label">下一次禮拜</string>
+    <string name="prayer_fajr">晨禮</string>
+    <string name="prayer_sunrise">日出</string>
+    <string name="prayer_dhuhr">晌禮</string>
+    <string name="prayer_asr">晡禮</string>
+    <string name="prayer_maghrib">昏禮</string>
+    <string name="prayer_isha">宵禮</string>
+    <string name="remaining_minutes">%1$d 分鐘</string>
+    <string name="remaining_hours_minutes">%1$d:%2$02d</string>
+</resources>
