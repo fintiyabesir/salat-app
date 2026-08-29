@@ -8,6 +8,7 @@ import app.salat.model.PrayerName
 import app.salat.model.VerificationState
 import app.salat.verification.OfficialSourceAdapter
 import app.salat.verification.RefreshPolicy
+import app.salat.verification.RuntimeUsePolicy
 import app.salat.verification.SourcePreference
 import app.salat.verification.VerificationRequest
 import kotlinx.datetime.LocalDate
@@ -33,7 +34,9 @@ class PrayerRepository(
         profile: CalculationProfile
     ): PrayerDay {
         val local = calculator.calculate(date, point, timeZoneId, profile)
-        val adapter = adapters.firstOrNull { it.supports(countryCode, regionCode) }
+        val adapter = adapters.firstOrNull {
+            it.metadata.runtimeUse == RuntimeUsePolicy.ENABLED && it.supports(countryCode, regionCode)
+        }
             ?: return local.copy(verification = VerificationState.Unavailable(null))
 
         val cacheLocationKey = locationKey ?: coordinateKey(point)

@@ -19,8 +19,8 @@ data class OfficialSourceReference(
 object OfficialSourceReferenceResolver {
     fun resolve(countryCode: String?): OfficialSourceReference? = when (countryCode?.uppercase()) {
         "TR" -> OfficialSourceReference("diyanet", "Diyanet İşleri Başkanlığı", OfficialSourceIntegrationStatus.REFERENCE_CONFIGURED)
-        "MY" -> OfficialSourceReference("jakim", "JAKIM e-Solat", OfficialSourceIntegrationStatus.ADAPTER_AVAILABLE)
-        "SG" -> OfficialSourceReference("muis", "MUIS", OfficialSourceIntegrationStatus.REFERENCE_CONFIGURED)
+        "MY" -> OfficialSourceReference("jakim", "JAKIM e-Solat", OfficialSourceIntegrationStatus.REFERENCE_CONFIGURED)
+        "SG" -> OfficialSourceReference("muis-open-data", "MUIS", OfficialSourceIntegrationStatus.ADAPTER_AVAILABLE)
         "ID" -> OfficialSourceReference("kemenag", "Kementerian Agama Republik Indonesia", OfficialSourceIntegrationStatus.REFERENCE_CONFIGURED)
         "QA" -> OfficialSourceReference("qatar-moi", "Qatar Ministry of Interior", OfficialSourceIntegrationStatus.REFERENCE_CONFIGURED)
         "BN" -> OfficialSourceReference("brunei-mora", "Brunei Ministry of Religious Affairs", OfficialSourceIntegrationStatus.REFERENCE_CONFIGURED)

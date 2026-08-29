@@ -24,7 +24,8 @@
 - RTL screenshot tests and terminology review.
 
 ## v0.4 — Official verification
-- Malaysia/JAKIM production adapter after terms review.
+- Singapore/MUIS production adapter from licensed data.gov.sg annual data.
+- Malaysia/JAKIM production adapter only after written reuse/cache permission.
 - Additional official source adapters selected from the research matrix.
 - Verification metadata UI and cache freshness.
 - Failure/offline behavior tests.

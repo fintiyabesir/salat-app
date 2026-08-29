@@ -15,7 +15,19 @@ class JakimXmlAdapter(
         authorityName = "Jabatan Kemajuan Islam Malaysia (JAKIM)",
         sourceUrl = "https://www.e-solat.gov.my/",
         attribution = "Prayer timetable verification: JAKIM e-Solat",
-        preference = SourcePreference.PREFER_OFFICIAL
+        preference = SourcePreference.COMPARE_ONLY,
+        runtimeUse = RuntimeUsePolicy.PERMISSION_REQUIRED,
+        usage = SourceUsagePolicy(
+            termsUrl = null,
+            licenseName = "No current reuse licence confirmed",
+            commercialUse = UsagePermission.NOT_CONFIRMED,
+            redistribution = UsagePermission.NOT_CONFIRMED,
+            caching = UsagePermission.NOT_CONFIRMED,
+            attributionRequired = true,
+            publishedRateLimit = null,
+            credentials = CredentialPolicy.NONE,
+            reviewedOn = "2026-08-29"
+        )
     )
 
     override fun supports(countryCode: String, regionCode: String?): Boolean =
