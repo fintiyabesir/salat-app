@@ -35,6 +35,7 @@ See [Architecture](docs/ARCHITECTURE.md), [Product spec](docs/PRODUCT_SPEC.md), 
 ```text
 shared/       KMP prayer/Qibla/verification domain
 androidApp/   Android phone/tablet native UI
+wearApp/      Wear OS app, tile, complication and local timeline storage
 iosApp/       SwiftUI source wired to KMP
 prototype/    Browser UX prototype
 docs/         Product and architecture decisions
@@ -55,11 +56,14 @@ data/         Official-source research matrix
 - [x] Android/iOS device location and timezone resolution
 - [x] Manual-city fallback domain contract and offline city-data strategy
 - [x] Persistent Android/iOS official timetable cache with refresh horizons and comparison deltas
-- [x] CI: JVM tests, Android APK compile, KMP iOS framework build, Swift source typecheck
+- [x] CI: JVM/Wear tests, Android/Wear APKs, KMP iOS framework and real SwiftUI app builds
+- [x] iOS Home/Lock Screen widgets and Android home widget
+- [x] Apple Watch app with complications and offline persisted timetable
+- [x] Wear OS app, tile and complication with phone-synced offline timetable
+- [x] Internal TestFlight build validated, uploaded and installed on a physical iPhone
 - [ ] Real mobile HTTP transport
-- [ ] Native notification schedulers
-- [ ] Calendar + Qibla production screens
-- [ ] Widgets / complications / Wear tiles
+- [x] Native local notification schedulers
+- [x] Calendar + Qibla production screens
 - [ ] Remaining official-source adapters and legal review
 - [ ] 8-language reviewed translations
 

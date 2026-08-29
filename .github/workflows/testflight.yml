@@ -91,9 +91,13 @@ jobs:
         run: |
           plutil -lint iosApp/SalatApp/PrivacyInfo.xcprivacy
           plutil -lint iosApp/SalatWidget/PrivacyInfo.xcprivacy
+          plutil -lint iosApp/SalatWatch/PrivacyInfo.xcprivacy
+          plutil -lint iosApp/SalatWatchComplication/PrivacyInfo.xcprivacy
           grep -q 'NSPrivacyAccessedAPICategoryUserDefaults' iosApp/SalatApp/PrivacyInfo.xcprivacy
           grep -q 'CA92.1' iosApp/SalatApp/PrivacyInfo.xcprivacy
           grep -q '1C8F.1' iosApp/SalatApp/PrivacyInfo.xcprivacy
+          grep -q '1C8F.1' iosApp/SalatWatch/PrivacyInfo.xcprivacy
+          grep -q '1C8F.1' iosApp/SalatWatchComplication/PrivacyInfo.xcprivacy
 
       - name: Validate App Store metadata and entitlements
         shell: bash
@@ -103,7 +107,11 @@ jobs:
             iosApp/SalatApp/Info.plist \
             iosApp/SalatApp/SalatApp.entitlements \
             iosApp/SalatWidget/Info.plist \
-            iosApp/SalatWidget/SalatWidget.entitlements
+            iosApp/SalatWidget/SalatWidget.entitlements \
+            iosApp/SalatWatch/Info.plist \
+            iosApp/SalatWatch/SalatWatch.entitlements \
+            iosApp/SalatWatchComplication/Info.plist \
+            iosApp/SalatWatchComplication/SalatWatchComplication.entitlements
           test "$(/usr/libexec/PlistBuddy -c 'Print :CFBundleShortVersionString' iosApp/SalatApp/Info.plist)" = '$(MARKETING_VERSION)'
           test "$(/usr/libexec/PlistBuddy -c 'Print :CFBundleVersion' iosApp/SalatApp/Info.plist)" = '$(CURRENT_PROJECT_VERSION)'
           test "$(/usr/libexec/PlistBuddy -c 'Print :ITSAppUsesNonExemptEncryption' iosApp/SalatApp/Info.plist)" = 'false'
@@ -115,6 +123,10 @@ jobs:
           test "$(/usr/libexec/PlistBuddy -c 'Print :NSExtension:NSExtensionPointIdentifier' iosApp/SalatWidget/Info.plist)" = 'com.apple.widgetkit-extension'
           test "$(/usr/libexec/PlistBuddy -c 'Print :com.apple.security.application-groups:0' iosApp/SalatApp/SalatApp.entitlements)" = 'group.app.salat.mobile'
           test "$(/usr/libexec/PlistBuddy -c 'Print :com.apple.security.application-groups:0' iosApp/SalatWidget/SalatWidget.entitlements)" = 'group.app.salat.mobile'
+          test "$(/usr/libexec/PlistBuddy -c 'Print :CFBundleExecutable' iosApp/SalatWatch/Info.plist)" = '$(EXECUTABLE_NAME)'
+          test "$(/usr/libexec/PlistBuddy -c 'Print :CFBundleExecutable' iosApp/SalatWatchComplication/Info.plist)" = '$(EXECUTABLE_NAME)'
+          test "$(/usr/libexec/PlistBuddy -c 'Print :com.apple.security.application-groups:0' iosApp/SalatWatch/SalatWatch.entitlements)" = 'group.app.salat.mobile'
+          test "$(/usr/libexec/PlistBuddy -c 'Print :com.apple.security.application-groups:0' iosApp/SalatWatchComplication/SalatWatchComplication.entitlements)" = 'group.app.salat.mobile'
 
       - name: Build unsigned Release archive
         run: |
@@ -138,20 +150,32 @@ jobs:
           set -euo pipefail
           APP="$RUNNER_TEMP/Salat.xcarchive/Products/Applications/Salat.app"
           WIDGET="$APP/PlugIns/SalatWidgetExtension.appex"
+          WATCH="$APP/Watch/SalatWatch.app"
+          COMPLICATION="$WATCH/PlugIns/SalatWatchComplication.appex"
 
           test -d "$APP"
           test -f "$APP/Info.plist"
           test -d "$WIDGET"
           test -f "$WIDGET/Info.plist"
+          test -d "$WATCH"
+          test -f "$WATCH/Info.plist"
+          test -d "$COMPLICATION"
+          test -f "$COMPLICATION/Info.plist"
           test -f "$APP/Assets.car"
           test -f "$APP/city_catalog.tsv"
 
           APP_PRIVACY="$APP/PrivacyInfo.xcprivacy"
           WIDGET_PRIVACY="$WIDGET/PrivacyInfo.xcprivacy"
+          WATCH_PRIVACY="$WATCH/PrivacyInfo.xcprivacy"
+          COMPLICATION_PRIVACY="$COMPLICATION/PrivacyInfo.xcprivacy"
           test -f "$APP_PRIVACY"
           test -f "$WIDGET_PRIVACY"
+          test -f "$WATCH_PRIVACY"
+          test -f "$COMPLICATION_PRIVACY"
           plutil -lint "$APP_PRIVACY"
           plutil -lint "$WIDGET_PRIVACY"
+          plutil -lint "$WATCH_PRIVACY"
+          plutil -lint "$COMPLICATION_PRIVACY"
 
           assert_plist_value() {
             local plist="$1"
@@ -178,8 +202,22 @@ jobs:
           assert_plist_value "$WIDGET/Info.plist" CFBundleShortVersionString "$MARKETING_VERSION"
           assert_plist_value "$WIDGET/Info.plist" CFBundleVersion "$BUILD_NUMBER"
           assert_plist_value "$WIDGET/Info.plist" NSExtension:NSExtensionPointIdentifier com.apple.widgetkit-extension
+          assert_plist_value "$WATCH/Info.plist" CFBundleIdentifier app.salat.mobile.watchapp
+          assert_plist_value "$WATCH/Info.plist" CFBundleExecutable SalatWatch
+          assert_plist_value "$WATCH/Info.plist" CFBundleShortVersionString "$MARKETING_VERSION"
+          assert_plist_value "$WATCH/Info.plist" CFBundleVersion "$BUILD_NUMBER"
+          assert_plist_value "$WATCH/Info.plist" WKCompanionAppBundleIdentifier app.salat.mobile
+          assert_plist_value "$COMPLICATION/Info.plist" CFBundleIdentifier app.salat.mobile.watchapp.complication
+          assert_plist_value "$COMPLICATION/Info.plist" CFBundleExecutable SalatWatchComplication
+          assert_plist_value "$COMPLICATION/Info.plist" CFBundleShortVersionString "$MARKETING_VERSION"
+          assert_plist_value "$COMPLICATION/Info.plist" CFBundleVersion "$BUILD_NUMBER"
+          assert_plist_value "$COMPLICATION/Info.plist" NSExtension:NSExtensionPointIdentifier com.apple.widgetkit-extension
           test -x "$WIDGET/SalatWidgetExtension"
           otool -l "$WIDGET/SalatWidgetExtension" | grep -q '__swift5_entry'
+          test -x "$WATCH/SalatWatch"
+          test -x "$COMPLICATION/SalatWatchComplication"
+          otool -l "$WATCH/SalatWatch" | grep -q '__swift5_entry'
+          otool -l "$COMPLICATION/SalatWatchComplication" | grep -q '__swift5_entry'
 
           EXPECTED="$(shasum -a 256 resources/city_catalog.tsv | awk '{print $1}')"
           ACTUAL="$(shasum -a 256 "$APP/city_catalog.tsv" | awk '{print $1}')"
@@ -188,6 +226,8 @@ jobs:
           echo "Release archive verified: $APP"
           echo "App privacy manifest: $APP_PRIVACY"
           echo "Widget privacy manifest: $WIDGET_PRIVACY"
+          echo "Watch privacy manifest: $WATCH_PRIVACY"
+          echo "Complication privacy manifest: $COMPLICATION_PRIVACY"
 
       - name: Package release preflight archive
         run: ditto -c -k --sequesterRsrc --keepParent "$RUNNER_TEMP/Salat.xcarchive" "$RUNNER_TEMP/Salat-Release-Preflight.zip"

@@ -1,16 +1,18 @@
 # TestFlight release guide
 
-Salat's first internal TestFlight candidate is version **0.1.0 (1)** for iPhone and iPad. Apple Watch and Wear OS work continues separately and does not block this first phone/tablet beta.
+Salat's first internal TestFlight candidate was version **0.1.0 (2)** for iPhone and iPad. Build 2 was validated by App Store Connect, uploaded successfully and installed from TestFlight on a physical iPhone. Apple Watch is included from the next beta after its identifiers are configured; Wear OS is shipped through the Android release path.
 
 ## Current Apple identifiers
 
 - iOS app bundle ID: `app.salat.mobile`
 - Widget extension bundle ID: `app.salat.mobile.widget`
+- Apple Watch app bundle ID: `app.salat.mobile.watchapp`
+- Apple Watch complication bundle ID: `app.salat.mobile.watchapp.complication`
 - App Group: `group.app.salat.mobile`
 - Marketing version: `0.1.0`
-- Initial TestFlight build: `1`
+- Latest verified internal TestFlight build: `2`
 
-The committed app and widget property lists are the release metadata source of truth. XcodeGen references them without regenerating them, so `MARKETING_VERSION`, `CURRENT_PROJECT_VERSION`, export-compliance metadata, widget extension metadata and App Group entitlements survive project generation.
+The committed app, widget and watch property lists are the release metadata source of truth. XcodeGen references them without regenerating them, so `MARKETING_VERSION`, `CURRENT_PROJECT_VERSION`, export-compliance metadata, extension metadata and App Group entitlements survive project generation.
 
 ## App Store Connect / Developer account setup
 
@@ -18,10 +20,12 @@ Before the first upload, the Apple Developer account must contain:
 
 1. An explicit App ID for `app.salat.mobile` with App Groups enabled.
 2. An explicit App ID for `app.salat.mobile.widget` with App Groups enabled.
-3. The App Group `group.app.salat.mobile`, assigned to both identifiers.
+3. The App Group `group.app.salat.mobile`, assigned to both phone/widget identifiers.
 4. An App Store Connect app record associated with `app.salat.mobile`.
 5. A valid Apple Distribution certificate whose private key is available to GitHub Actions.
 6. An App Store Connect API key with sufficient access for signing/provisioning and build upload.
+
+Before uploading the first Apple Watch-enabled build, also create explicit App IDs for `app.salat.mobile.watchapp` and `app.salat.mobile.watchapp.complication`, enable App Groups on both, and assign the existing `group.app.salat.mobile` group to both identifiers.
 
 ## GitHub repository secrets
 
@@ -55,4 +59,4 @@ If a future official-source verification implementation transmits location or an
 
 ## Build-number policy
 
-Keep marketing version `0.1.0` during the initial internal beta and increment only the TestFlight build number (`1`, `2`, `3`, ...). This makes rapid internal iterations easy to identify without creating unnecessary App Store versions.
+Keep marketing version `0.1.0` during the initial internal beta and increment only the TestFlight build number (`2`, `3`, `4`, ...). This makes rapid internal iterations easy to identify without creating unnecessary App Store versions.

@@ -88,6 +88,8 @@ Important: this does **not** make Adhan the source of truth in every country. Co
 
 For Apple Watch v1, avoid making watchOS depend on Kotlin/Native because Kotlin lists watchOS support as Beta. The iPhone app precomputes and transfers a rolling prayer-time horizon to the Watch; the Watch persists that timeline locally and remains useful when disconnected. A later version can evaluate direct KMP watchOS support.
 
+Wear OS follows the same offline contract. The Android phone sends the compact rolling timetable only to a currently connected, same-package/same-signature watch through the non-persistent Wear MessageClient channel. The watch validates and persists its own copy; the app, tile and complication read only that local copy. No coordinates are included in the payload, and DataClient is intentionally not used because its persistent data items can be cloud-backed.
+
 ## Localization
 Initial user-facing languages:
 - English

@@ -6,6 +6,10 @@
     <string>$(EXECUTABLE_NAME)</string>
     <key>CFBundleDisplayName</key>
     <string>Salat</string>
+    <key>CFBundleShortVersionString</key>
+    <string>$(MARKETING_VERSION)</string>
+    <key>CFBundleVersion</key>
+    <string>$(CURRENT_PROJECT_VERSION)</string>
     <key>NSExtension</key>
     <dict>
         <key>NSExtensionPointIdentifier</key>

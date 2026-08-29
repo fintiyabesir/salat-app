@@ -17,3 +17,4 @@ dependencyResolutionManagement {
 rootProject.name = "salat-app"
 include(":shared")
 include(":androidApp")
+include(":wearApp")

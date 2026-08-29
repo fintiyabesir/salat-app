@@ -29,16 +29,32 @@ jobs:
       - name: Run shared JVM tests
         run: gradle :shared:jvmTest --stacktrace
       - name: Compile Android debug app
-        run: gradle :androidApp:assembleDebug --stacktrace
+        run: gradle :androidApp:assembleDebug :wearApp:assembleDebug :wearApp:testDebugUnitTest --stacktrace
       - name: Verify Android bundled city catalog
         run: |
           APK="androidApp/build/outputs/apk/debug/androidApp-debug.apk"
+          MANIFEST="$RUNNER_TEMP/android-manifest.xml"
           test -f "$APK"
+          "$ANDROID_HOME/build-tools/36.0.0/aapt2" dump xmltree "$APK" \
+            --file AndroidManifest.xml > "$MANIFEST"
+          grep -q 'PhoneWearTimelineService' "$MANIFEST"
           unzip -l "$APK" | grep -q 'assets/city_catalog.tsv'
           EXPECTED="$(sha256sum resources/city_catalog.tsv | awk '{print $1}')"
           ACTUAL="$(unzip -p "$APK" assets/city_catalog.tsv | sha256sum | awk '{print $1}')"
           test "$ACTUAL" = "$EXPECTED"
           unzip -p "$APK" assets/city_catalog.tsv | head -n 1 | grep -q '#salat-city-catalog-v2'
+      - name: Verify Wear OS APK surfaces
+        run: |
+          APK="wearApp/build/outputs/apk/debug/wearApp-debug.apk"
+          MANIFEST="$RUNNER_TEMP/wear-manifest.xml"
+          test -f "$APK"
+          "$ANDROID_HOME/build-tools/36.0.0/aapt2" dump xmltree "$APK" \
+            --file AndroidManifest.xml > "$MANIFEST"
+          grep -q 'android.hardware.type.watch' "$MANIFEST"
+          grep -q 'WearMainActivity' "$MANIFEST"
+          grep -q 'WearPrayerTileService' "$MANIFEST"
+          grep -q 'NextPrayerComplicationService' "$MANIFEST"
+          grep -q 'WearTimelineListenerService' "$MANIFEST"
       - name: Verify prototype JavaScript syntax
         run: |
           python3 - <<'PY'
@@ -54,6 +70,12 @@ jobs:
         with:
           name: salat-android-debug
           path: androidApp/build/outputs/apk/debug/androidApp-debug.apk
+          retention-days: 7
+      - name: Upload Wear OS debug APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: salat-wear-os-debug
+          path: wearApp/build/outputs/apk/debug/wearApp-debug.apk
           retention-days: 7
 
   ios-app:
@@ -84,7 +106,11 @@ jobs:
             iosApp/SalatApp/Info.plist \
             iosApp/SalatApp/SalatApp.entitlements \
             iosApp/SalatWidget/Info.plist \
-            iosApp/SalatWidget/SalatWidget.entitlements
+            iosApp/SalatWidget/SalatWidget.entitlements \
+            iosApp/SalatWatch/Info.plist \
+            iosApp/SalatWatch/SalatWatch.entitlements \
+            iosApp/SalatWatchComplication/Info.plist \
+            iosApp/SalatWatchComplication/SalatWatchComplication.entitlements
           test "$(/usr/libexec/PlistBuddy -c 'Print :CFBundleShortVersionString' iosApp/SalatApp/Info.plist)" = '$(MARKETING_VERSION)'
           test "$(/usr/libexec/PlistBuddy -c 'Print :CFBundleVersion' iosApp/SalatApp/Info.plist)" = '$(CURRENT_PROJECT_VERSION)'
           test "$(/usr/libexec/PlistBuddy -c 'Print :ITSAppUsesNonExemptEncryption' iosApp/SalatApp/Info.plist)" = 'false'
@@ -96,6 +122,11 @@ jobs:
           test "$(/usr/libexec/PlistBuddy -c 'Print :NSExtension:NSExtensionPointIdentifier' iosApp/SalatWidget/Info.plist)" = 'com.apple.widgetkit-extension'
           test "$(/usr/libexec/PlistBuddy -c 'Print :com.apple.security.application-groups:0' iosApp/SalatApp/SalatApp.entitlements)" = 'group.app.salat.mobile'
           test "$(/usr/libexec/PlistBuddy -c 'Print :com.apple.security.application-groups:0' iosApp/SalatWidget/SalatWidget.entitlements)" = 'group.app.salat.mobile'
+          test "$(/usr/libexec/PlistBuddy -c 'Print :CFBundleVersion' iosApp/SalatWatch/Info.plist)" = '$(CURRENT_PROJECT_VERSION)'
+          test "$(/usr/libexec/PlistBuddy -c 'Print :CFBundleExecutable' iosApp/SalatWatch/Info.plist)" = '$(EXECUTABLE_NAME)'
+          test "$(/usr/libexec/PlistBuddy -c 'Print :CFBundleExecutable' iosApp/SalatWatchComplication/Info.plist)" = '$(EXECUTABLE_NAME)'
+          test "$(/usr/libexec/PlistBuddy -c 'Print :com.apple.security.application-groups:0' iosApp/SalatWatch/SalatWatch.entitlements)" = 'group.app.salat.mobile'
+          test "$(/usr/libexec/PlistBuddy -c 'Print :com.apple.security.application-groups:0' iosApp/SalatWatchComplication/SalatWatchComplication.entitlements)" = 'group.app.salat.mobile'
       - name: Build watchOS simulator app
         run: |
           set -o pipefail
@@ -118,6 +149,12 @@ jobs:
           test -f "$WATCH_APP/Info.plist"
           test -d "$COMPLICATION"
           test -f "$COMPLICATION/Info.plist"
+          test -f "$WATCH_APP/PrivacyInfo.xcprivacy"
+          test -f "$COMPLICATION/PrivacyInfo.xcprivacy"
+          test "$(/usr/libexec/PlistBuddy -c 'Print :CFBundleExecutable' "$WATCH_APP/Info.plist")" = 'SalatWatch'
+          test "$(/usr/libexec/PlistBuddy -c 'Print :CFBundleExecutable' "$COMPLICATION/Info.plist")" = 'SalatWatchComplication'
+          test -x "$WATCH_APP/SalatWatch"
+          test -x "$COMPLICATION/SalatWatchComplication"
       - name: Build iOS simulator app
         run: |
           set -o pipefail
