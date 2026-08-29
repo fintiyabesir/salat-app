@@ -24,7 +24,7 @@ private struct WatchPrayerView: View {
                             .foregroundStyle(.secondary)
                             .lineLimit(1)
 
-                        Text(next.prayerName)
+                        Text(next.localizedPrayerName)
                             .font(.headline)
                             .foregroundStyle(.tint)
 
@@ -39,7 +39,7 @@ private struct WatchPrayerView: View {
 
                         ForEach(payload.events(on: context.date), id: \.self) { event in
                             HStack {
-                                Text(event.prayerName)
+                                Text(event.localizedPrayerName)
                                     .font(.caption2)
                                 Spacer()
                                 Text(event.date, style: .time)
@@ -57,7 +57,10 @@ private struct WatchPrayerView: View {
                         .foregroundStyle(.tint)
                     Text("Salat")
                         .font(.headline)
-                    Text("Open Salat on iPhone once to sync prayer times.")
+                    Text(GlanceL10n.text(
+                        "watch.open_phone_to_sync",
+                        fallback: "Open Salat on iPhone once to sync prayer times."
+                    ))
                         .font(.caption2)
                         .multilineTextAlignment(.center)
                         .foregroundStyle(.secondary)

@@ -105,7 +105,7 @@ private fun WearPrayerScreen(store: WearTimelineStore) {
         )
         Spacer(Modifier.height(6.dp))
         Text(
-            text = next.displayName(),
+            text = next.localizedName(context),
             color = MaterialTheme.colorScheme.primary,
             fontSize = 18.sp,
             fontWeight = FontWeight.SemiBold
@@ -116,7 +116,7 @@ private fun WearPrayerScreen(store: WearTimelineStore) {
             fontWeight = FontWeight.Light
         )
         Text(
-            text = remainingText(next.atMillis - nowMillis),
+            text = remainingText(context, next.atMillis - nowMillis),
             color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.65f),
             fontSize = 12.sp
         )
@@ -127,7 +127,7 @@ private fun WearPrayerScreen(store: WearTimelineStore) {
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
-                Text(event.displayName(), fontSize = 11.sp)
+                Text(event.localizedName(context), fontSize = 11.sp)
                 Text(
                     timeFormat.format(Date(event.atMillis)),
                     fontSize = 11.sp,
@@ -139,9 +139,13 @@ private fun WearPrayerScreen(store: WearTimelineStore) {
     }
 }
 
-private fun remainingText(remainingMillis: Long): String {
+private fun remainingText(context: android.content.Context, remainingMillis: Long): String {
     val totalMinutes = (remainingMillis.coerceAtLeast(0L) / 60_000L)
     val hours = totalMinutes / 60
     val minutes = totalMinutes % 60
-    return if (hours > 0) "%d:%02d".format(hours, minutes) else "${minutes}m"
+    return if (hours > 0) {
+        context.getString(R.string.remaining_hours_minutes, hours, minutes)
+    } else {
+        context.getString(R.string.remaining_minutes, minutes)
+    }
 }

@@ -1,0 +1,16 @@
+<resources>
+    <string name="app_name">Salat</string>
+    <string name="next_prayer">نماز بعدی</string>
+    <string name="open_phone_to_sync">برای همگام‌سازی اوقات نماز، Salat را یک‌بار در تلفن باز کنید.</string>
+    <string name="tile_label">نماز بعدی</string>
+    <string name="tile_description">نماز بعدی و زمان آن به‌صورت آفلاین در دسترس است.</string>
+    <string name="complication_label">نماز بعدی</string>
+    <string name="prayer_fajr">صبح</string>
+    <string name="prayer_sunrise">طلوع آفتاب</string>
+    <string name="prayer_dhuhr">ظهر</string>
+    <string name="prayer_asr">عصر</string>
+    <string name="prayer_maghrib">مغرب</string>
+    <string name="prayer_isha">عشاء</string>
+    <string name="remaining_minutes">%1$d دقیقه</string>
+    <string name="remaining_hours_minutes">%1$d:%2$02d</string>
+</resources>

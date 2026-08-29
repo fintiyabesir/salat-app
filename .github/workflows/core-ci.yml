@@ -30,6 +30,8 @@ jobs:
         run: gradle :shared:jvmTest --stacktrace
       - name: Compile Android debug app
         run: gradle :androidApp:assembleDebug :wearApp:assembleDebug :wearApp:testDebugUnitTest --stacktrace
+      - name: Validate LTR and RTL screenshots
+        run: gradle :androidApp:validateDebugScreenshotTest --stacktrace
       - name: Verify Android bundled city catalog
         run: |
           APK="androidApp/build/outputs/apk/debug/androidApp-debug.apk"
@@ -153,6 +155,10 @@ jobs:
           test -f "$COMPLICATION/Info.plist"
           test -f "$WATCH_APP/PrivacyInfo.xcprivacy"
           test -f "$COMPLICATION/PrivacyInfo.xcprivacy"
+          for locale in en tr ar fa ur bn ms zh-Hans zh-Hant; do
+            test -f "$WATCH_APP/$locale.lproj/Watch.strings"
+            test -f "$COMPLICATION/$locale.lproj/Watch.strings"
+          done
           test "$(/usr/libexec/PlistBuddy -c 'Print :CFBundleExecutable' "$WATCH_APP/Info.plist")" = 'SalatWatch'
           test "$(/usr/libexec/PlistBuddy -c 'Print :CFBundleExecutable' "$COMPLICATION/Info.plist")" = 'SalatWatchComplication'
           test -x "$WATCH_APP/SalatWatch"

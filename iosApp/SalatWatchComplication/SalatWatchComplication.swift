@@ -42,17 +42,17 @@ struct SalatWatchComplicationView: View {
             if let next = entry.payload?.next(after: entry.date) {
                 switch family {
                 case .accessoryInline:
-                    Text("\(next.prayerName) · \(next.date, style: .time)")
+                    Text("\(next.localizedPrayerName) · \(next.date, style: .time)")
                 case .accessoryCircular:
                     VStack(spacing: 0) {
-                        Text(next.prayerName.prefix(3))
+                        Text(next.localizedPrayerName.prefix(3))
                             .font(.caption2.weight(.semibold))
                         Text(next.date, style: .time)
                             .font(.caption2.monospacedDigit())
                     }
                 default:
                     VStack(alignment: .leading, spacing: 2) {
-                        Text(next.prayerName)
+                        Text(next.localizedPrayerName)
                             .font(.caption.weight(.semibold))
                         Text(next.date, style: .time)
                             .font(.headline.monospacedDigit())
@@ -78,7 +78,10 @@ struct SalatWatchComplication: Widget {
             SalatWatchComplicationView(entry: entry)
         }
         .configurationDisplayName("Salat")
-        .description("Next prayer at a glance")
+        .description(GlanceL10n.text(
+            "watch.complication_description",
+            fallback: "Next prayer at a glance"
+        ))
         .supportedFamilies([.accessoryInline, .accessoryCircular, .accessoryRectangular])
     }
 }

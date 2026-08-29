@@ -8,7 +8,9 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 ANDROID_RES = ROOT / "androidApp" / "src" / "main" / "res"
+WEAR_RES = ROOT / "wearApp" / "src" / "main" / "res"
 IOS_ROOT = ROOT / "iosApp" / "SalatApp"
+IOS_GLANCE_ROOT = ROOT / "iosApp" / "GlanceShared"
 
 ANDROID_LOCALES = {
     "values": "en",
@@ -38,6 +40,19 @@ def android_keys(directory: str) -> set[str]:
     return keys
 
 
+def wear_keys(directory: str) -> set[str]:
+    folder = WEAR_RES / directory
+    if not folder.exists():
+        raise AssertionError(f"missing Wear localization directory: {folder}")
+    keys: set[str] = set()
+    for path in sorted(folder.glob("*.xml")):
+        root = ET.parse(path).getroot()
+        keys.update(node.attrib["name"] for node in root.findall("string") if "name" in node.attrib)
+    if not keys:
+        raise AssertionError(f"no Wear string resources found in {folder}")
+    return keys
+
+
 def ios_keys(locale: str) -> set[str]:
     folder = IOS_ROOT / f"{locale}.lproj"
     if not folder.exists():
@@ -48,6 +63,16 @@ def ios_keys(locale: str) -> set[str]:
         keys.update(re.findall(r'^\s*"([^"]+)"\s*=', text, flags=re.MULTILINE))
     if not keys:
         raise AssertionError(f"no iOS localization strings found in {folder}")
+    return keys
+
+
+def ios_watch_keys(locale: str) -> set[str]:
+    path = IOS_GLANCE_ROOT / f"{locale}.lproj" / "Watch.strings"
+    if not path.exists():
+        raise AssertionError(f"missing watch localization file: {path}")
+    keys = set(re.findall(r'^\s*"([^"]+)"\s*=', path.read_text(encoding="utf-8"), flags=re.MULTILINE))
+    if not keys:
+        raise AssertionError(f"no watch localization strings found in {path}")
     return keys
 
 
@@ -63,9 +88,17 @@ def main() -> int:
     for directory, locale in ANDROID_LOCALES.items():
         assert_equal(android_reference, android_keys(directory), f"Android {locale}")
 
+    wear_reference = wear_keys("values")
+    for directory, locale in ANDROID_LOCALES.items():
+        assert_equal(wear_reference, wear_keys(directory), f"Wear {locale}")
+
     ios_reference = ios_keys("en")
     for locale in IOS_LOCALES:
         assert_equal(ios_reference, ios_keys(locale), f"iOS {locale}")
+
+    watch_reference = ios_watch_keys("en")
+    for locale in IOS_LOCALES:
+        assert_equal(watch_reference, ios_watch_keys(locale), f"watchOS {locale}")
 
     manifest = (ROOT / "androidApp" / "src" / "main" / "AndroidManifest.xml").read_text(encoding="utf-8")
     if 'android:supportsRtl="true"' not in manifest:
@@ -78,7 +111,26 @@ def main() -> int:
     if missing_rtl_android or missing_rtl_ios:
         raise AssertionError(f"RTL locale configuration incomplete: Android={missing_rtl_android}, iOS={missing_rtl_ios}")
 
-    print(f"Localization validation passed: {len(android_reference)} Android keys, {len(ios_reference)} iOS keys, {len(IOS_LOCALES)} locale variants")
+    ios_root_view = (IOS_ROOT / "SalatRootView.swift").read_text(encoding="utf-8")
+    if ".environment(\\.layoutDirection" not in ios_root_view:
+        raise AssertionError("iOS root view must apply the selected language layout direction")
+
+    screenshot_test = ROOT / "androidApp" / "src" / "screenshotTest" / "kotlin" / "app" / "salat" / "mobile" / "LocalizationScreenshotTest.kt"
+    screenshot_source = screenshot_test.read_text(encoding="utf-8")
+    for locale in ("en", "ar"):
+        if f'locale = "{locale}"' not in screenshot_source:
+            raise AssertionError(f"missing representative {locale} screenshot test")
+    reference_root = ROOT / "androidApp" / "src" / "screenshotTestDebug" / "reference"
+    references = list(reference_root.rglob("*.png"))
+    if len(references) < 2:
+        raise AssertionError("LTR and RTL screenshot reference images must be checked in")
+
+    print(
+        "Localization validation passed: "
+        f"{len(android_reference)} Android keys, {len(wear_reference)} Wear keys, "
+        f"{len(ios_reference)} iOS keys, {len(watch_reference)} watchOS keys, "
+        f"{len(IOS_LOCALES)} locale variants"
+    )
     return 0
 
 

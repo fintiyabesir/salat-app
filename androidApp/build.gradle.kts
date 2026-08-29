@@ -1,6 +1,7 @@
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.compose.compiler)
+    alias(libs.plugins.screenshot)
 }
 
 android {
@@ -22,6 +23,7 @@ android {
     }
 
     buildFeatures { compose = true }
+    experimentalProperties["android.experimental.enableScreenshotTest"] = true
 }
 
 dependencies {
@@ -34,4 +36,6 @@ dependencies {
     implementation(libs.androidx.activity.compose)
     implementation(libs.google.play.services.wearable)
     debugImplementation(libs.androidx.compose.ui.tooling)
+    screenshotTestImplementation(libs.screenshot.validation.api)
+    screenshotTestImplementation(libs.androidx.compose.ui.tooling)
 }

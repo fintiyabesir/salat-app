@@ -2,6 +2,7 @@ name: SalatApp
 options:
   minimumXcodeGenVersion: 2.42.0
   createIntermediateGroups: true
+  developmentLanguage: en
 settings:
   base:
     IPHONEOS_DEPLOYMENT_TARGET: "17.0"

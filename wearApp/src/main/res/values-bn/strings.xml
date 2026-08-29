@@ -1,0 +1,16 @@
+<resources>
+    <string name="app_name">Salat</string>
+    <string name="next_prayer">পরবর্তী নামাজ</string>
+    <string name="open_phone_to_sync">নামাজের সময় সিঙ্ক করতে ফোনে একবার Salat খুলুন।</string>
+    <string name="tile_label">পরবর্তী নামাজ</string>
+    <string name="tile_description">পরবর্তী নামাজ ও তার সময় অফলাইনে পাওয়া যায়।</string>
+    <string name="complication_label">পরবর্তী নামাজ</string>
+    <string name="prayer_fajr">ফজর</string>
+    <string name="prayer_sunrise">সূর্যোদয়</string>
+    <string name="prayer_dhuhr">যোহর</string>
+    <string name="prayer_asr">আসর</string>
+    <string name="prayer_maghrib">মাগরিব</string>
+    <string name="prayer_isha">ইশা</string>
+    <string name="remaining_minutes">%1$d মি</string>
+    <string name="remaining_hours_minutes">%1$d:%2$02d</string>
+</resources>
