@@ -107,6 +107,11 @@ jobs:
           test "$(/usr/libexec/PlistBuddy -c 'Print :CFBundleShortVersionString' iosApp/SalatApp/Info.plist)" = '$(MARKETING_VERSION)'
           test "$(/usr/libexec/PlistBuddy -c 'Print :CFBundleVersion' iosApp/SalatApp/Info.plist)" = '$(CURRENT_PROJECT_VERSION)'
           test "$(/usr/libexec/PlistBuddy -c 'Print :ITSAppUsesNonExemptEncryption' iosApp/SalatApp/Info.plist)" = 'false'
+          test "$(/usr/libexec/PlistBuddy -c 'Print :UISupportedInterfaceOrientations:0' iosApp/SalatApp/Info.plist)" = 'UIInterfaceOrientationPortrait'
+          test "$(/usr/libexec/PlistBuddy -c 'Print :UISupportedInterfaceOrientations:1' iosApp/SalatApp/Info.plist)" = 'UIInterfaceOrientationPortraitUpsideDown'
+          test "$(/usr/libexec/PlistBuddy -c 'Print :UISupportedInterfaceOrientations:2' iosApp/SalatApp/Info.plist)" = 'UIInterfaceOrientationLandscapeLeft'
+          test "$(/usr/libexec/PlistBuddy -c 'Print :UISupportedInterfaceOrientations:3' iosApp/SalatApp/Info.plist)" = 'UIInterfaceOrientationLandscapeRight'
+          test "$(/usr/libexec/PlistBuddy -c 'Print :CFBundleExecutable' iosApp/SalatWidget/Info.plist)" = '$(EXECUTABLE_NAME)'
           test "$(/usr/libexec/PlistBuddy -c 'Print :NSExtension:NSExtensionPointIdentifier' iosApp/SalatWidget/Info.plist)" = 'com.apple.widgetkit-extension'
           test "$(/usr/libexec/PlistBuddy -c 'Print :com.apple.security.application-groups:0' iosApp/SalatApp/SalatApp.entitlements)" = 'group.app.salat.mobile'
           test "$(/usr/libexec/PlistBuddy -c 'Print :com.apple.security.application-groups:0' iosApp/SalatWidget/SalatWidget.entitlements)" = 'group.app.salat.mobile'
@@ -164,10 +169,17 @@ jobs:
           assert_plist_value "$APP/Info.plist" CFBundleShortVersionString "$MARKETING_VERSION"
           assert_plist_value "$APP/Info.plist" CFBundleVersion "$BUILD_NUMBER"
           assert_plist_value "$APP/Info.plist" ITSAppUsesNonExemptEncryption false
+          assert_plist_value "$APP/Info.plist" UISupportedInterfaceOrientations:0 UIInterfaceOrientationPortrait
+          assert_plist_value "$APP/Info.plist" UISupportedInterfaceOrientations:1 UIInterfaceOrientationPortraitUpsideDown
+          assert_plist_value "$APP/Info.plist" UISupportedInterfaceOrientations:2 UIInterfaceOrientationLandscapeLeft
+          assert_plist_value "$APP/Info.plist" UISupportedInterfaceOrientations:3 UIInterfaceOrientationLandscapeRight
           assert_plist_value "$WIDGET/Info.plist" CFBundleIdentifier app.salat.mobile.widget
+          assert_plist_value "$WIDGET/Info.plist" CFBundleExecutable SalatWidgetExtension
           assert_plist_value "$WIDGET/Info.plist" CFBundleShortVersionString "$MARKETING_VERSION"
           assert_plist_value "$WIDGET/Info.plist" CFBundleVersion "$BUILD_NUMBER"
           assert_plist_value "$WIDGET/Info.plist" NSExtension:NSExtensionPointIdentifier com.apple.widgetkit-extension
+          test -x "$WIDGET/SalatWidgetExtension"
+          otool -l "$WIDGET/SalatWidgetExtension" | grep -q '__swift5_entry'
 
           EXPECTED="$(shasum -a 256 resources/city_catalog.tsv | awk '{print $1}')"
           ACTUAL="$(shasum -a 256 "$APP/city_catalog.tsv" | awk '{print $1}')"
@@ -334,22 +346,36 @@ jobs:
       - name: Validate IPA with App Store Connect
         env:
           API_PRIVATE_KEYS_DIR: ${{ runner.temp }}/private_keys
+        shell: bash
         run: |
+          set -euo pipefail
+          LOG="$RUNNER_TEMP/altool-validate.log"
           xcrun altool --validate-app \
             --type ios \
             --file "$IPA_PATH" \
             --apiKey "$APP_STORE_CONNECT_API_KEY_ID" \
-            --apiIssuer "$APP_STORE_CONNECT_ISSUER_ID"
+            --apiIssuer "$APP_STORE_CONNECT_ISSUER_ID" 2>&1 | tee "$LOG"
+          if grep -Eiq 'ERROR:|Validation failed|VALIDATION FAILED|Failed to validate' "$LOG"; then
+            echo "::error::App Store Connect validation reported errors"
+            exit 1
+          fi
 
       - name: Upload Build to TestFlight
         env:
           API_PRIVATE_KEYS_DIR: ${{ runner.temp }}/private_keys
+        shell: bash
         run: |
+          set -euo pipefail
+          LOG="$RUNNER_TEMP/altool-upload.log"
           xcrun altool --upload-app \
             --type ios \
             --file "$IPA_PATH" \
             --apiKey "$APP_STORE_CONNECT_API_KEY_ID" \
-            --apiIssuer "$APP_STORE_CONNECT_ISSUER_ID"
+            --apiIssuer "$APP_STORE_CONNECT_ISSUER_ID" 2>&1 | tee "$LOG"
+          if grep -Eiq 'ERROR:|Validation failed|UPLOAD FAILED|Failed to upload' "$LOG"; then
+            echo "::error::App Store Connect upload reported errors"
+            exit 1
+          fi
 
       - uses: actions/upload-artifact@v4
         with:
