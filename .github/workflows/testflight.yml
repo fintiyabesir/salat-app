@@ -219,12 +219,19 @@ jobs:
           assert_plist_value "$WATCH/Info.plist" CFBundleExecutable SalatWatch
           assert_plist_value "$WATCH/Info.plist" CFBundleShortVersionString "$MARKETING_VERSION"
           assert_plist_value "$WATCH/Info.plist" CFBundleVersion "$BUILD_NUMBER"
+          assert_plist_value "$WATCH/Info.plist" CFBundleIconName AppIcon
+          assert_plist_value "$WATCH/Info.plist" DTPlatformName watchos
+          assert_plist_value "$WATCH/Info.plist" MinimumOSVersion 10.0
+          assert_plist_value "$WATCH/Info.plist" UIDeviceFamily:0 4
           assert_plist_value "$WATCH/Info.plist" WKCompanionAppBundleIdentifier app.salat.mobile
           assert_plist_value "$COMPLICATION/Info.plist" CFBundleIdentifier app.salat.mobile.watchapp.complicationextension
           assert_plist_value "$COMPLICATION/Info.plist" CFBundleExecutable SalatWatchComplication
           assert_plist_value "$COMPLICATION/Info.plist" CFBundleShortVersionString "$MARKETING_VERSION"
           assert_plist_value "$COMPLICATION/Info.plist" CFBundleVersion "$BUILD_NUMBER"
+          assert_plist_value "$COMPLICATION/Info.plist" DTPlatformName watchos
+          assert_plist_value "$COMPLICATION/Info.plist" MinimumOSVersion 10.0
           assert_plist_value "$COMPLICATION/Info.plist" NSExtension:NSExtensionPointIdentifier com.apple.widgetkit-extension
+          /usr/libexec/PlistBuddy -c 'Print :CFBundleIconFiles:0' "$WATCH/Info.plist" >/dev/null
           test -x "$WIDGET/SalatWidgetExtension"
           otool -l "$WIDGET/SalatWidgetExtension" | grep -q '__swift5_entry'
           test -x "$WATCH/SalatWatch"
@@ -233,6 +240,10 @@ jobs:
           otool -l "$COMPLICATION/SalatWatchComplication" | grep -q '__swift5_entry'
           xcrun vtool -show-build "$WATCH/SalatWatch" | grep -q 'platform WATCHOS'
           xcrun vtool -show-build "$COMPLICATION/SalatWatchComplication" | grep -q 'platform WATCHOS'
+          lipo -archs "$WATCH/SalatWatch" | grep -qw arm64_32
+          lipo -archs "$WATCH/SalatWatch" | grep -qw arm64
+          lipo -archs "$COMPLICATION/SalatWatchComplication" | grep -qw arm64_32
+          lipo -archs "$COMPLICATION/SalatWatchComplication" | grep -qw arm64
 
           EXPECTED="$(shasum -a 256 resources/city_catalog.tsv | awk '{print $1}')"
           ACTUAL="$(shasum -a 256 "$APP/city_catalog.tsv" | awk '{print $1}')"
@@ -376,7 +387,6 @@ jobs:
             -project iosApp/SalatApp.xcodeproj \
             -scheme SalatApp \
             -configuration Release \
-            -sdk iphoneos \
             -destination 'generic/platform=iOS' \
             -archivePath "$RUNNER_TEMP/Salat.xcarchive" \
             DEVELOPMENT_TEAM="$APPLE_TEAM_ID" \
