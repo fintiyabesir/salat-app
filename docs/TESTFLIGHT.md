@@ -10,6 +10,8 @@ Salat's first internal TestFlight candidate is version **0.1.0 (1)** for iPhone 
 - Marketing version: `0.1.0`
 - Initial TestFlight build: `1`
 
+The committed app and widget property lists are the release metadata source of truth. XcodeGen references them without regenerating them, so `MARKETING_VERSION`, `CURRENT_PROJECT_VERSION`, export-compliance metadata, widget extension metadata and App Group entitlements survive project generation.
+
 ## App Store Connect / Developer account setup
 
 Before the first upload, the Apple Developer account must contain:
