@@ -110,7 +110,7 @@ targets:
       - path: GlanceShared
     settings:
       base:
-        PRODUCT_BUNDLE_IDENTIFIER: app.salat.mobile.watchapp.complication
+        PRODUCT_BUNDLE_IDENTIFIER: app.salat.mobile.watchapp.complicationextension
         PRODUCT_NAME: SalatWatchComplication
         GENERATE_INFOPLIST_FILE: NO
         INFOPLIST_FILE: SalatWatchComplication/Info.plist

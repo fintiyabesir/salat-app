@@ -7,7 +7,7 @@ Salat's first internal TestFlight candidate was version **0.1.0 (2)** for iPhone
 - iOS app bundle ID: `app.salat.mobile`
 - Widget extension bundle ID: `app.salat.mobile.widget`
 - Apple Watch app bundle ID: `app.salat.mobile.watchapp`
-- Apple Watch complication bundle ID: `app.salat.mobile.watchapp.complication`
+- Apple Watch complication bundle ID: `app.salat.mobile.watchapp.complicationextension`
 - App Group: `group.app.salat.mobile`
 - Marketing version: `0.1.0`
 - Latest verified internal TestFlight build: `2`
@@ -25,7 +25,7 @@ Before the first upload, the Apple Developer account must contain:
 5. A valid Apple Distribution certificate whose private key is available to GitHub Actions.
 6. An App Store Connect API key with sufficient access for signing/provisioning and build upload.
 
-Before uploading the first Apple Watch-enabled build, also create explicit App IDs for `app.salat.mobile.watchapp` and `app.salat.mobile.watchapp.complication`, enable App Groups on both, and assign the existing `group.app.salat.mobile` group to both identifiers.
+Before uploading the first Apple Watch-enabled build, also create explicit App IDs for `app.salat.mobile.watchapp` and `app.salat.mobile.watchapp.complicationextension`, enable App Groups on both, and assign the existing `group.app.salat.mobile` group to both identifiers.
 
 ## GitHub repository secrets
 

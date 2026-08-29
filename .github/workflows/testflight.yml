@@ -220,7 +220,7 @@ jobs:
           assert_plist_value "$WATCH/Info.plist" CFBundleShortVersionString "$MARKETING_VERSION"
           assert_plist_value "$WATCH/Info.plist" CFBundleVersion "$BUILD_NUMBER"
           assert_plist_value "$WATCH/Info.plist" WKCompanionAppBundleIdentifier app.salat.mobile
-          assert_plist_value "$COMPLICATION/Info.plist" CFBundleIdentifier app.salat.mobile.watchapp.complication
+          assert_plist_value "$COMPLICATION/Info.plist" CFBundleIdentifier app.salat.mobile.watchapp.complicationextension
           assert_plist_value "$COMPLICATION/Info.plist" CFBundleExecutable SalatWatchComplication
           assert_plist_value "$COMPLICATION/Info.plist" CFBundleShortVersionString "$MARKETING_VERSION"
           assert_plist_value "$COMPLICATION/Info.plist" CFBundleVersion "$BUILD_NUMBER"
