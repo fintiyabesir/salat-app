@@ -1,6 +1,7 @@
 package app.salat.mobile
 
 import android.content.Context
+import com.google.android.gms.wearable.Wearable
 import app.salat.domain.SalatEngine
 import app.salat.model.AppPreferences
 import app.salat.model.GeoPoint
@@ -75,10 +76,13 @@ class AndroidGlanceTimelineStore(context: Context) {
             .putString(KEY_CITY, location.cityName)
             .putString(KEY_REGION, location.regionName)
             .putString(KEY_SOURCE, location.source.name)
+            .putLong(KEY_GENERATED_AT, System.currentTimeMillis())
             .putLong(KEY_LATITUDE_BITS, location.point.latitude.toBits())
             .putLong(KEY_LONGITUDE_BITS, location.point.longitude.toBits())
             .putString(KEY_EVENTS, events.toString())
             .apply()
+
+        publishToWear(buildWearPayload(location.displayName, location.timeZoneId, events))
 
         SalatAppWidgetProvider.refreshAll(appContext)
     }
@@ -127,6 +131,40 @@ class AndroidGlanceTimelineStore(context: Context) {
         }.getOrNull()
     }
 
+    fun payloadForWear(): ByteArray? {
+        val locationName = preferences.getString(KEY_LOCATION, null) ?: return null
+        val timeZoneId = preferences.getString(KEY_TIME_ZONE, null) ?: return null
+        val events = preferences.getString(KEY_EVENTS, null)
+            ?.let { runCatching { JSONArray(it) }.getOrNull() }
+            ?: return null
+        return buildWearPayload(locationName, timeZoneId, events)
+    }
+
+    private fun buildWearPayload(
+        locationName: String,
+        timeZoneId: String,
+        events: JSONArray
+    ): ByteArray = JSONObject()
+            .put("version", 1)
+            .put("generatedAt", preferences.getLong(KEY_GENERATED_AT, System.currentTimeMillis()))
+            .put("locationName", locationName)
+            .put("timeZoneId", timeZoneId)
+            .put("events", events)
+            .toString()
+            .encodeToByteArray()
+
+    private fun publishToWear(payload: ByteArray) {
+        runCatching {
+            Wearable.getNodeClient(appContext).connectedNodes
+                .addOnSuccessListener { nodes ->
+                    nodes.forEach { node ->
+                        Wearable.getMessageClient(appContext)
+                            .sendMessage(node.id, TIMELINE_MESSAGE_PATH, payload)
+                    }
+                }
+        }
+    }
+
     companion object {
         const val DEFAULT_HORIZON_DAYS = 30
         private const val PREFERENCES = "salat_glance_timeline"
@@ -136,8 +174,11 @@ class AndroidGlanceTimelineStore(context: Context) {
         private const val KEY_CITY = "city"
         private const val KEY_REGION = "region"
         private const val KEY_SOURCE = "source"
+        private const val KEY_GENERATED_AT = "generated_at"
         private const val KEY_LATITUDE_BITS = "latitude_bits"
         private const val KEY_LONGITUDE_BITS = "longitude_bits"
         private const val KEY_EVENTS = "events"
+        const val TIMELINE_MESSAGE_PATH = "/salat/glance/timeline/v1"
+        const val TIMELINE_REQUEST_PATH = "/salat/glance/request/v1"
     }
 }
