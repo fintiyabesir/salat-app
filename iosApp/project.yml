@@ -22,10 +22,6 @@ targets:
       - path: GlanceShared
       - path: ../resources/city_catalog.tsv
         buildPhase: resources
-    info:
-      path: SalatApp/Info.plist
-    entitlements:
-      path: SalatApp/SalatApp.entitlements
     preBuildScripts:
       - name: Generate App Icon
         script: |
@@ -37,6 +33,8 @@ targets:
         PRODUCT_BUNDLE_IDENTIFIER: app.salat.mobile
         PRODUCT_NAME: Salat
         GENERATE_INFOPLIST_FILE: NO
+        INFOPLIST_FILE: SalatApp/Info.plist
+        CODE_SIGN_ENTITLEMENTS: SalatApp/SalatApp.entitlements
         TARGETED_DEVICE_FAMILY: "1,2"
         SUPPORTS_MACCATALYST: NO
         CODE_SIGN_STYLE: Automatic
@@ -58,15 +56,13 @@ targets:
           - Info.plist
           - SalatWidget.entitlements
       - path: GlanceShared
-    info:
-      path: SalatWidget/Info.plist
-    entitlements:
-      path: SalatWidget/SalatWidget.entitlements
     settings:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: app.salat.mobile.widget
         PRODUCT_NAME: SalatWidgetExtension
         GENERATE_INFOPLIST_FILE: NO
+        INFOPLIST_FILE: SalatWidget/Info.plist
+        CODE_SIGN_ENTITLEMENTS: SalatWidget/SalatWidget.entitlements
         TARGETED_DEVICE_FAMILY: "1,2"
         SKIP_INSTALL: YES
         APPLICATION_EXTENSION_API_ONLY: YES

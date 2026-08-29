@@ -95,6 +95,22 @@ jobs:
           grep -q 'CA92.1' iosApp/SalatApp/PrivacyInfo.xcprivacy
           grep -q '1C8F.1' iosApp/SalatApp/PrivacyInfo.xcprivacy
 
+      - name: Validate App Store metadata and entitlements
+        shell: bash
+        run: |
+          set -euo pipefail
+          git diff --exit-code -- \
+            iosApp/SalatApp/Info.plist \
+            iosApp/SalatApp/SalatApp.entitlements \
+            iosApp/SalatWidget/Info.plist \
+            iosApp/SalatWidget/SalatWidget.entitlements
+          test "$(/usr/libexec/PlistBuddy -c 'Print :CFBundleShortVersionString' iosApp/SalatApp/Info.plist)" = '$(MARKETING_VERSION)'
+          test "$(/usr/libexec/PlistBuddy -c 'Print :CFBundleVersion' iosApp/SalatApp/Info.plist)" = '$(CURRENT_PROJECT_VERSION)'
+          test "$(/usr/libexec/PlistBuddy -c 'Print :ITSAppUsesNonExemptEncryption' iosApp/SalatApp/Info.plist)" = 'false'
+          test "$(/usr/libexec/PlistBuddy -c 'Print :NSExtension:NSExtensionPointIdentifier' iosApp/SalatWidget/Info.plist)" = 'com.apple.widgetkit-extension'
+          test "$(/usr/libexec/PlistBuddy -c 'Print :com.apple.security.application-groups:0' iosApp/SalatApp/SalatApp.entitlements)" = 'group.app.salat.mobile'
+          test "$(/usr/libexec/PlistBuddy -c 'Print :com.apple.security.application-groups:0' iosApp/SalatWidget/SalatWidget.entitlements)" = 'group.app.salat.mobile'
+
       - name: Build unsigned Release archive
         run: |
           set -o pipefail
@@ -125,19 +141,33 @@ jobs:
           test -f "$APP/Assets.car"
           test -f "$APP/city_catalog.tsv"
 
-          # Xcode may package privacy manifests at a bundle-relative location that
-          # differs across toolchain versions. Their presence in the final bundles
-          # is what matters for App Store submission.
-          APP_PRIVACY="$(find "$APP" -name PrivacyInfo.xcprivacy -type f -print -quit)"
-          WIDGET_PRIVACY="$(find "$WIDGET" -name PrivacyInfo.xcprivacy -type f -print -quit)"
-          test -n "$APP_PRIVACY"
-          test -n "$WIDGET_PRIVACY"
+          APP_PRIVACY="$APP/PrivacyInfo.xcprivacy"
+          WIDGET_PRIVACY="$WIDGET/PrivacyInfo.xcprivacy"
+          test -f "$APP_PRIVACY"
+          test -f "$WIDGET_PRIVACY"
           plutil -lint "$APP_PRIVACY"
           plutil -lint "$WIDGET_PRIVACY"
 
-          test "$(/usr/libexec/PlistBuddy -c 'Print :CFBundleShortVersionString' "$APP/Info.plist")" = "$MARKETING_VERSION"
-          test "$(/usr/libexec/PlistBuddy -c 'Print :CFBundleVersion' "$APP/Info.plist")" = "$BUILD_NUMBER"
-          test "$(/usr/libexec/PlistBuddy -c 'Print :ITSAppUsesNonExemptEncryption' "$APP/Info.plist")" = "false"
+          assert_plist_value() {
+            local plist="$1"
+            local key="$2"
+            local expected="$3"
+            local actual
+            actual="$(/usr/libexec/PlistBuddy -c "Print :$key" "$plist")"
+            if [[ "$actual" != "$expected" ]]; then
+              echo "::error file=$plist::$key expected '$expected' but archive contains '$actual'"
+              return 1
+            fi
+          }
+
+          assert_plist_value "$APP/Info.plist" CFBundleIdentifier app.salat.mobile
+          assert_plist_value "$APP/Info.plist" CFBundleShortVersionString "$MARKETING_VERSION"
+          assert_plist_value "$APP/Info.plist" CFBundleVersion "$BUILD_NUMBER"
+          assert_plist_value "$APP/Info.plist" ITSAppUsesNonExemptEncryption false
+          assert_plist_value "$WIDGET/Info.plist" CFBundleIdentifier app.salat.mobile.widget
+          assert_plist_value "$WIDGET/Info.plist" CFBundleShortVersionString "$MARKETING_VERSION"
+          assert_plist_value "$WIDGET/Info.plist" CFBundleVersion "$BUILD_NUMBER"
+          assert_plist_value "$WIDGET/Info.plist" NSExtension:NSExtensionPointIdentifier com.apple.widgetkit-extension
 
           EXPECTED="$(shasum -a 256 resources/city_catalog.tsv | awk '{print $1}')"
           ACTUAL="$(shasum -a 256 "$APP/city_catalog.tsv" | awk '{print $1}')"

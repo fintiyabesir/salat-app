@@ -78,6 +78,19 @@ jobs:
         run: brew install xcodegen
       - name: Generate Xcode project
         run: xcodegen generate --spec iosApp/project.yml --project iosApp
+      - name: Verify XcodeGen preserves app metadata
+        run: |
+          git diff --exit-code -- \
+            iosApp/SalatApp/Info.plist \
+            iosApp/SalatApp/SalatApp.entitlements \
+            iosApp/SalatWidget/Info.plist \
+            iosApp/SalatWidget/SalatWidget.entitlements
+          test "$(/usr/libexec/PlistBuddy -c 'Print :CFBundleShortVersionString' iosApp/SalatApp/Info.plist)" = '$(MARKETING_VERSION)'
+          test "$(/usr/libexec/PlistBuddy -c 'Print :CFBundleVersion' iosApp/SalatApp/Info.plist)" = '$(CURRENT_PROJECT_VERSION)'
+          test "$(/usr/libexec/PlistBuddy -c 'Print :ITSAppUsesNonExemptEncryption' iosApp/SalatApp/Info.plist)" = 'false'
+          test "$(/usr/libexec/PlistBuddy -c 'Print :NSExtension:NSExtensionPointIdentifier' iosApp/SalatWidget/Info.plist)" = 'com.apple.widgetkit-extension'
+          test "$(/usr/libexec/PlistBuddy -c 'Print :com.apple.security.application-groups:0' iosApp/SalatApp/SalatApp.entitlements)" = 'group.app.salat.mobile'
+          test "$(/usr/libexec/PlistBuddy -c 'Print :com.apple.security.application-groups:0' iosApp/SalatWidget/SalatWidget.entitlements)" = 'group.app.salat.mobile'
       - name: Build iOS simulator app
         run: |
           set -o pipefail
