@@ -49,7 +49,7 @@ class PrayerNotificationReceiver : BroadcastReceiver() {
         )
 
         val notification = Notification.Builder(context, channelId)
-            .setSmallIcon(android.R.drawable.ic_lock_idle_alarm)
+            .setSmallIcon(R.drawable.ic_notification)
             .setContentTitle(prayerName)
             .setContentText(body)
             .setCategory(Notification.CATEGORY_ALARM)

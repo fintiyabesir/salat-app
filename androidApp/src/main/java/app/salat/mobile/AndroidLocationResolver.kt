@@ -20,6 +20,8 @@ import java.util.Locale
 /**
  * Uses Android platform services only: no Google Play Services SDK and no Salat backend.
  */
+private const val FIX_TIMEOUT_MS = 15_000L
+
 class AndroidLocationResolver(private val activity: Activity) {
     private val manager = activity.getSystemService(LocationManager::class.java)
 
@@ -55,20 +57,41 @@ class AndroidLocationResolver(private val activity: Activity) {
             return
         }
 
+        // A single update with no timeout leaves the UI on an indefinite spinner when no
+        // fix ever arrives. Deliver at most once, and give up after FIX_TIMEOUT_MS.
+        val delivered = java.util.concurrent.atomic.AtomicBoolean(false)
+        val handler = android.os.Handler(Looper.getMainLooper())
+
+        val listener = object : LocationListener {
+            override fun onLocationChanged(location: Location) {
+                if (delivered.compareAndSet(false, true)) {
+                    handler.removeCallbacksAndMessages(null)
+                    enrich(location, onResult)
+                }
+            }
+
+            override fun onProviderEnabled(provider: String) = Unit
+            override fun onProviderDisabled(provider: String) = Unit
+
+            @Deprecated("Legacy callback")
+            override fun onStatusChanged(provider: String?, status: Int, extras: Bundle?) = Unit
+        }
+
         @Suppress("DEPRECATION")
         runCatching {
-            manager.requestSingleUpdate(
-                provider,
-                object : LocationListener {
-                    override fun onLocationChanged(location: Location) = enrich(location, onResult)
-                    override fun onProviderEnabled(provider: String) = Unit
-                    override fun onProviderDisabled(provider: String) = Unit
-                    @Deprecated("Legacy callback")
-                    override fun onStatusChanged(provider: String?, status: Int, extras: Bundle?) = Unit
+            manager.requestSingleUpdate(provider, listener, Looper.getMainLooper())
+            handler.postDelayed(
+                {
+                    if (delivered.compareAndSet(false, true)) {
+                        runCatching { manager.removeUpdates(listener) }
+                        deliver(onResult, null)
+                    }
                 },
-                Looper.getMainLooper()
+                FIX_TIMEOUT_MS
             )
-        }.onFailure { deliver(onResult, null) }
+        }.onFailure {
+            if (delivered.compareAndSet(false, true)) deliver(onResult, null)
+        }
     }
 
     private fun enrich(location: Location, onResult: (ResolvedLocation?) -> Unit) {

@@ -1,6 +1,21 @@
 import SwiftUI
 import WidgetKit
 
+/// The widget used a hardcoded cream background while SwiftUI kept resolving
+/// .primary/.secondary against the system appearance, so in dark mode the text came
+/// out near-white on cream and was unreadable. Both canvas and accent adapt now.
+private let widgetCanvas = Color(uiColor: UIColor { traits in
+    traits.userInterfaceStyle == .dark
+        ? UIColor(red: 0.10, green: 0.11, blue: 0.10, alpha: 1)
+        : UIColor(red: 0.98, green: 0.97, blue: 0.94, alpha: 1)
+})
+
+private let widgetAccent = Color(uiColor: UIColor { traits in
+    traits.userInterfaceStyle == .dark
+        ? UIColor(red: 0.47, green: 0.78, blue: 0.65, alpha: 1)
+        : UIColor(red: 0.27, green: 0.48, blue: 0.41, alpha: 1)
+})
+
 private struct SalatWidgetEntry: TimelineEntry {
     let date: Date
     let locationName: String?
@@ -67,7 +82,7 @@ private struct SalatWidgetView: View {
             }
         }
         .containerBackground(for: .widget) {
-            Color(red: 0.98, green: 0.97, blue: 0.94)
+            widgetCanvas
         }
     }
 
@@ -115,7 +130,7 @@ private struct SalatWidgetView: View {
             Text(GlanceL10n.text("watch.brand_name", fallback: "Awqat"))
                 .font(.caption2.weight(.semibold))
                 .tracking(2)
-                .foregroundStyle(Color(red: 0.27, green: 0.48, blue: 0.41))
+                .foregroundStyle(widgetAccent)
             if let locationName = entry.locationName {
                 Text(locationName)
                     .font(.caption)
@@ -132,7 +147,7 @@ private struct SalatWidgetView: View {
                     Spacer(minLength: 4)
                     Text(prayer.date, style: .timer)
                         .font(.caption)
-                        .foregroundStyle(Color(red: 0.27, green: 0.48, blue: 0.41))
+                        .foregroundStyle(widgetAccent)
                 }
             } else {
                 Text(GlanceL10n.text("watch.open_app", fallback: "Open the app"))
@@ -166,7 +181,10 @@ struct SalatNextPrayerWidget: Widget {
             SalatWidgetView(entry: entry)
         }
         .configurationDisplayName(GlanceL10n.text("watch.brand_name", fallback: "Awqat"))
-        .description("Next prayer and remaining time")
+        .description(GlanceL10n.text(
+            "watch.widget_description",
+            fallback: "Next prayer and remaining time"
+        ))
         .supportedFamilies([
             .systemSmall,
             .accessoryInline,

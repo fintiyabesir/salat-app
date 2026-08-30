@@ -1,0 +1,10 @@
+<resources>
+    <!-- Widget colours were hardcoded in the layout, so the widget stayed a cream card
+         on a dark home screen. values-night/ overrides these. -->
+    <color name="widget_surface">#FAF8F3</color>
+    <color name="widget_stroke">#1A467A69</color>
+    <color name="widget_brand">#467A69</color>
+    <color name="widget_text_primary">#20221F</color>
+    <color name="widget_text_secondary">#6D716E</color>
+    <color name="window_background">#FAF8F3</color>
+</resources>

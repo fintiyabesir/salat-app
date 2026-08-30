@@ -27,6 +27,10 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.foundation.layout.width
+import androidx.compose.runtime.produceState
+import androidx.compose.ui.Alignment
+import kotlinx.coroutines.delay
 import app.salat.domain.SalatEngine
 import app.salat.model.AppPreferences
 import app.salat.model.PrayerDay
@@ -162,7 +166,40 @@ private fun AdaptiveHero(next: NextPrayerUi, zone: ZoneId, locale: Locale) {
             letterSpacing = 1.2.sp
         )
         Text(next.prayer.adaptiveLabel(), fontSize = 26.sp, fontWeight = FontWeight.Medium)
-        Text(adaptiveFormat(next.epochMillis, zone, locale), fontSize = 58.sp, fontWeight = FontWeight.Light)
+        Row(verticalAlignment = Alignment.Bottom) {
+            Text(adaptiveFormat(next.epochMillis, zone, locale), fontSize = 58.sp, fontWeight = FontWeight.Light)
+            Spacer(Modifier.width(10.dp))
+            Text(
+                countdownText(next.epochMillis, locale),
+                fontSize = 20.sp,
+                fontWeight = FontWeight.Medium,
+                color = MaterialTheme.colorScheme.primary,
+                modifier = Modifier.padding(bottom = 10.dp)
+            )
+        }
+    }
+}
+
+/**
+ * Live countdown to the next prayer. Both widgets already showed remaining time and
+ * the phone did not, which is the number people actually look for.
+ */
+@Composable
+private fun countdownText(epochMillis: Long, locale: Locale): String {
+    val remaining by produceState(initialValue = epochMillis - System.currentTimeMillis(), epochMillis) {
+        while (true) {
+            value = epochMillis - System.currentTimeMillis()
+            delay(1_000L)
+        }
+    }
+    val total = (remaining / 1000L).coerceAtLeast(0L)
+    val hours = total / 3600L
+    val minutes = (total % 3600L) / 60L
+    val seconds = total % 60L
+    return if (hours > 0L) {
+        String.format(locale, "%d:%02d:%02d", hours, minutes, seconds)
+    } else {
+        String.format(locale, "%d:%02d", minutes, seconds)
     }
 }
 
