@@ -46,8 +46,11 @@ jobs:
             --report build/city-catalog/report.json
       - name: Measure Android package impact
         run: |
-          mkdir -p androidApp/src/main/assets
-          cp build/city-catalog/city_catalog.tsv.gz androidApp/src/main/assets/city_catalog.tsv.gz
+          # Replace the bundled catalog rather than adding a second asset. The app
+          # packages resources/city_catalog.tsv; dropping a .gz beside it measured a
+          # file the app never reads, and AGP strips the .gz suffix when merging
+          # assets, so the two collided as duplicates.
+          cp build/city-catalog/city_catalog.tsv resources/city_catalog.tsv
           ./gradlew :androidApp:assembleDebug --stacktrace
           test -f androidApp/build/outputs/apk/debug/androidApp-debug.apk
           python3 - <<'PY'
