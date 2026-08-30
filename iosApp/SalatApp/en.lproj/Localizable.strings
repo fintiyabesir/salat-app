@@ -1,6 +1,6 @@
-"brand_name" = "SALAT";
+"brand_name" = "AWQAT";
 "location_title" = "Prayer times for where you are";
-"location_privacy" = "Your coordinates are used on this device to calculate prayer times and Qibla. Salat has no location server.";
+"location_privacy" = "Your coordinates are used on this device to calculate prayer times and Qibla. They are never sent to a server.";
 "use_current_location" = "Use current location";
 "location_unavailable" = "Location is unavailable. Choose a city manually instead.";
 "next_prayer" = "NEXT PRAYER";

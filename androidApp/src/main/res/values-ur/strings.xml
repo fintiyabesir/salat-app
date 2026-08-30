@@ -1,9 +1,12 @@
 <resources>
-    <string name="app_name">Salat</string><string name="brand_name">SALAT</string>
-    <string name="location_title">آپ کے مقام کے مطابق نماز کے اوقات</string><string name="location_privacy">آپ کا مقام اسی ڈیوائس پر نماز کے اوقات اور قبلہ معلوم کرنے کے لیے استعمال ہوتا ہے۔ Salat آپ کا مقام کسی سرور کو نہیں بھیجتا۔</string>
+    <string name="app_name">اوقاتِ نماز</string><string name="brand_name">اوقاتِ نماز</string>
+    <string name="location_title">آپ کے مقام کے مطابق نماز کے اوقات</string><string name="location_privacy">آپ کا مقام اسی ڈیوائس پر نماز کے اوقات اور قبلہ معلوم کرنے کے لیے استعمال ہوتا ہے اور کسی سرور کو نہیں بھیجا جاتا۔</string>
     <string name="use_current_location">موجودہ مقام استعمال کریں</string><string name="location_unavailable">مقام دستیاب نہیں۔ شہر دستی طور پر منتخب کریں۔</string>
     <string name="next_prayer">اگلی نماز</string><string name="today">آج</string><string name="calendar">تقویم</string><string name="qibla">قبلہ</string><string name="settings">ترتیبات</string><string name="notifications">اطلاعات</string>
     <string name="prayer_fajr">فجر</string><string name="prayer_sunrise">طلوعِ آفتاب</string><string name="prayer_dhuhr">ظہر</string><string name="prayer_asr">عصر</string><string name="prayer_maghrib">مغرب</string><string name="prayer_isha">عشاء</string>
     <string name="prayer_in_minutes">%1$s میں %2$d منٹ باقی</string><string name="prayer_time_now">%1$s کا وقت</string>
     <string name="notification_at_time">نماز کے وقت</string><string name="notification_minutes_before">%1$d منٹ پہلے</string><string name="notification_sound_system">سسٹم آواز</string><string name="notification_sound_silent">خاموش</string><string name="notification_sound_short_adhan">مختصر اذان</string>
+    <string name="notification_channel_default">نماز کی یاد دہانی</string>
+    <string name="notification_channel_silent">نماز کی یاد دہانی · خاموش</string>
+    <string name="notification_channel_short_adhan">نماز کی یاد دہانی · مختصر اذان</string>
 </resources>

@@ -1,6 +1,6 @@
 # Prayer notifications
 
-Salat uses **device-local notifications only**. There is no push server and no account requirement.
+Awqat uses **device-local notifications only**. There is no push server and no account requirement.
 
 ## Product rules
 
@@ -15,7 +15,7 @@ Salat uses **device-local notifications only**. There is no push server and no a
 
 Delivery uses `UNUserNotificationCenter` and `UNNotificationRequest`.
 
-Apple custom notification sounds must be included on-device and must be **less than 30 seconds**. If a sound is longer, iOS uses the default alert sound instead. Salat therefore reserves a `SHORT_ADHAN` mode for a properly licensed `<30s` asset. Until such an asset is selected and bundled as `adhan_short.caf`, the implementation safely falls back to the system sound.
+Apple custom notification sounds must be included on-device and must be **less than 30 seconds**. If a sound is longer, iOS uses the default alert sound instead. Awqat therefore reserves a `SHORT_ADHAN` mode for a properly licensed `<30s` asset. Until such an asset is selected and bundled as `adhan_short.caf`, the implementation safely falls back to the system sound.
 
 Official reference: https://developer.apple.com/documentation/usernotifications/unnotificationsound
 
@@ -25,7 +25,7 @@ A full multi-minute adhan is not promised as a background notification feature o
 
 Delivery uses `AlarmManager` with a `BroadcastReceiver`.
 
-- When `canScheduleExactAlarms()` is true, Salat uses `setExactAndAllowWhileIdle()`.
+- When `canScheduleExactAlarms()` is true, Awqat uses `setExactAndAllowWhileIdle()`.
 - Otherwise it gracefully falls back to `setAndAllowWhileIdle()` rather than silently dropping the reminder.
 - `SCHEDULE_EXACT_ALARM` is a user-controlled special app access on modern Android versions and is not assumed to be granted.
 - The app exposes the system exact-alarm settings intent, but should present it only from a user-initiated explanation flow.

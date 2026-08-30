@@ -1,6 +1,6 @@
 # TestFlight release guide
 
-Salat's first internal TestFlight candidate was version **0.1.0 (2)** for iPhone and iPad. Build 2 was validated by App Store Connect, uploaded successfully and installed from TestFlight on a physical iPhone. Apple Watch is included from the next beta after its identifiers are configured; Wear OS is shipped through the Android release path.
+Awqat's first internal TestFlight candidate was version **0.1.0 (2)** for iPhone and iPad, validated by App Store Connect and installed from TestFlight on a physical iPhone. The most recent verified upload was workflow run **#38** (manual `workflow_dispatch`). Apple Watch is included from the next beta after its identifiers are configured; Wear OS is shipped through the Android release path.
 
 ## Current Apple identifiers
 
@@ -10,7 +10,8 @@ Salat's first internal TestFlight candidate was version **0.1.0 (2)** for iPhone
 - Apple Watch complication bundle ID: `app.salat.mobile.watchapp.complicationextension`
 - App Group: `group.app.salat.mobile`
 - Marketing version: `0.1.0`
-- Latest verified internal TestFlight build: `2`
+- Build number source: `github.run_number` for automatic runs, the `build_number` input for `workflow_dispatch`
+- Latest verified upload: workflow run `#38`
 
 The committed app, widget and watch property lists are the release metadata source of truth. XcodeGen references them without regenerating them, so `MARKETING_VERSION`, `CURRENT_PROJECT_VERSION`, export-compliance metadata, extension metadata and App Group entitlements survive project generation.
 
@@ -54,12 +55,22 @@ Signing material is stored only in the runner's temporary keychain and deleted a
 
 ## Privacy / export compliance assumptions for build 1
 
-The current app has no account, no analytics, no advertising and no Salat backend. Prayer calculation, settings, manual city data and current-location handling are device-local. The privacy manifests declare no tracking and no collected data. `UserDefaults` required-reason API usage is declared for app-local settings (`CA92.1`) and the App Group used by the widget (`1C8F.1`).
+The current app has no account, no analytics, no advertising and no Awqat backend. Prayer calculation, settings, manual city data and current-location handling are device-local. The privacy manifests declare no tracking and no collected data. `UserDefaults` required-reason API usage is declared for app-local settings (`CA92.1`) and the App Group used by the widget (`1C8F.1`).
 
 If a future official-source verification implementation transmits location or another user-related value off-device, this declaration and the App Store Connect App Privacy answers must be reviewed before that build is uploaded.
 
-`ITSAppUsesNonExemptEncryption` is `false`; Salat does not implement non-exempt encryption. Revisit this if cryptographic functionality beyond Apple's exempt/system-provided mechanisms is introduced.
+`ITSAppUsesNonExemptEncryption` is `false`; Awqat does not implement non-exempt encryption. Revisit this if cryptographic functionality beyond Apple's exempt/system-provided mechanisms is introduced.
 
 ## Build-number policy
 
 Keep marketing version `0.1.0` during the initial internal beta. Automatic `main` uploads use the monotonically increasing GitHub Actions workflow run number as `CFBundleVersion`; manual uploads use the build number entered when dispatching the workflow. This makes rapid internal iterations easy to identify without creating unnecessary App Store versions. A manually supplied build number must not duplicate an existing App Store Connect build.
+
+## Automatic uploads
+
+`AUTO_TESTFLIGHT_UPLOAD` is set to `true`, so **every successful Core CI run on `main`
+uploads a build to TestFlight**. Set the variable to `false` while doing development
+merges that should not reach testers:
+
+```bash
+gh variable set AUTO_TESTFLIGHT_UPLOAD --body false
+```

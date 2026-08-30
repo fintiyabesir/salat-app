@@ -1,10 +1,10 @@
 # Offline global city data
 
-Manual city selection works without a Salat backend or a runtime GeoNames API call.
+Manual city selection works without an Awqat backend or a runtime GeoNames API call.
 
 ## Source and license
 
-Salat uses a reduced GeoNames city dump. GeoNames identifies the gazetteer as CC BY 4.0. The application exposes GeoNames / CC BY 4.0 attribution in Settings and the repository carries the detailed notice in `THIRD_PARTY_NOTICES.md`.
+Awqat uses a reduced GeoNames city dump. GeoNames identifies the gazetteer as CC BY 4.0. The application exposes GeoNames / CC BY 4.0 attribution in Settings and the repository carries the detailed notice in `THIRD_PARTY_NOTICES.md`.
 
 Build inputs:
 - `cities5000.zip`
@@ -31,11 +31,11 @@ For `cities5000`, the real iOS Simulator build measured 12.42 MB uncompressed `.
 
 ## Multilingual aliases
 
-The convenience `alternatenames` column in the city dump is not sufficient by itself for Salat's launch languages. A quality check found that a small arbitrary alias limit could miss native-script searches such as `İstanbul`, `北京`, `ঢাকা`, `تهران`, and `کراچی`.
+The convenience `alternatenames` column in the city dump is not sufficient by itself for Awqat's launch languages. A quality check found that a small arbitrary alias limit could miss native-script searches such as `İstanbul`, `北京`, `ঢাকা`, `تهران`, and `کراچی`.
 
 The production generator therefore also streams `alternateNamesV2.zip` and gives priority to:
 1. current preferred/official GeoNames names;
-2. names tagged for Salat's launch languages: English, Chinese, Arabic, Turkish, Bengali, Malay, Urdu, and Persian;
+2. names tagged for Awqat's launch languages: English, Chinese, Arabic, Turkish, Bengali, Malay, Urdu, and Persian;
 3. remaining useful city-dump aliases.
 
 Pseudo aliases such as postal codes, IATA/ICAO codes, links, and Wikidata ids are excluded. The generation workflow explicitly fails if representative launch-language native-script aliases are absent.
@@ -68,4 +68,4 @@ The bundled order supplies default relevance ranking, so mobile search can stop 
 
 `scripts/process_geonames_cities.py` performs the deterministic reduction. `.github/workflows/generate-city-catalog.yml` downloads the permitted source dumps and emits the final artifact. Before a future dataset refresh, re-check GeoNames licensing, regenerate the artifact, verify multilingual aliases, record the new report/hash, and run the full Android + iOS CI builds.
 
-Do not confuse the main gazetteer license with separate GeoNames postal-code datasets, which can carry different notices and are not used by Salat.
+Do not confuse the main gazetteer license with separate GeoNames postal-code datasets, which can carry different notices and are not used by Awqat.

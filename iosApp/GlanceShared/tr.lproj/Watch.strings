@@ -4,5 +4,8 @@
 "prayer.asr" = "İkindi";
 "prayer.maghrib" = "Akşam";
 "prayer.isha" = "Yatsı";
-"watch.open_phone_to_sync" = "Namaz vakitlerini eşzamanlamak için Salat’ı iPhone’da bir kez açın.";
+"watch.open_phone_to_sync" = "Namaz vakitlerini eşzamanlamak için uygulamayı iPhone’da bir kez açın.";
 "watch.complication_description" = "Bir bakışta sıradaki namaz vakti";
+"watch.brand_name" = "NAMAZ VAKTİ";
+"watch.open_app" = "Uygulamayı aç";
+"watch.update_prayer_times" = "Namaz vakitlerini güncelle";

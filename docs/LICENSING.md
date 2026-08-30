@@ -1,6 +1,6 @@
 # Licensing status
 
-The repository is intended to be public. A project-wide open-source license has **not yet been selected**; until one is selected, normal copyright rules apply to Salat's original source code.
+The repository is intended to be public. A project-wide open-source license has **not yet been selected**; until one is selected, normal copyright rules apply to Awqat's original source code.
 
 Runtime dependencies and official-source data must be reviewed independently:
 

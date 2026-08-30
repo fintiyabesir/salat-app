@@ -1,6 +1,6 @@
-"brand_name" = "SALAT";
+"brand_name" = "禮拜時間";
 "location_title" = "您所在位置的禮拜時間";
-"location_privacy" = "您的位置僅在本裝置上用於計算禮拜時間和朝向。Salat 不會把您的位置傳送到伺服器。";
+"location_privacy" = "您的位置僅在本裝置上用於計算禮拜時間和朝向，不會傳送到任何伺服器。";
 "use_current_location" = "使用目前位置";
 "location_unavailable" = "無法取得位置。請手動選擇城市。";
 "next_prayer" = "下一次禮拜";

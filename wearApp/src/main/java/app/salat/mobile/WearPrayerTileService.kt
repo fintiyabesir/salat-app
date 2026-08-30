@@ -27,7 +27,7 @@ class WearPrayerTileService : TileService() {
         val next = WearTimelineStore(this).load()?.next()
         val content = if (next == null) {
             listOf(
-                tileText("Salat", 18f, Color.WHITE),
+                tileText(getString(R.string.app_name), 18f, Color.WHITE),
                 tileText(getString(R.string.open_phone_to_sync), 11f, Color.LTGRAY)
             )
         } else {

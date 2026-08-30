@@ -4,5 +4,8 @@
 "prayer.asr" = "Asr";
 "prayer.maghrib" = "Maghrib";
 "prayer.isha" = "Isha";
-"watch.open_phone_to_sync" = "Open Salat on iPhone once to sync prayer times.";
+"watch.open_phone_to_sync" = "Open the app on iPhone once to sync prayer times.";
 "watch.complication_description" = "Next prayer at a glance";
+"watch.brand_name" = "AWQAT";
+"watch.open_app" = "Open the app";
+"watch.update_prayer_times" = "Update prayer times";

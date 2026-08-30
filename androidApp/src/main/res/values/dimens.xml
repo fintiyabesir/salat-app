@@ -1,0 +1,4 @@
+<resources>
+    <!-- Arabic-script locales override this to 0: letter spacing breaks cursive joining. -->
+    <item name="brand_letter_spacing" format="float" type="dimen">0.14</item>
+</resources>

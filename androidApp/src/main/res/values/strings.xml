@@ -1,8 +1,8 @@
 <resources>
-    <string name="app_name">Salat</string>
-    <string name="brand_name">SALAT</string>
+    <string name="app_name">Awqat</string>
+    <string name="brand_name">AWQAT</string>
     <string name="location_title">Prayer times for where you are</string>
-    <string name="location_privacy">Your coordinates are used on this device to calculate prayer times and Qibla. Salat has no location server.</string>
+    <string name="location_privacy">Your coordinates are used on this device to calculate prayer times and Qibla. They are never sent to a server.</string>
     <string name="use_current_location">Use current location</string>
     <string name="location_unavailable">Location is unavailable. Choose a city manually instead.</string>
     <string name="next_prayer">NEXT PRAYER</string>
@@ -24,4 +24,7 @@
     <string name="notification_sound_system">System sound</string>
     <string name="notification_sound_silent">Silent</string>
     <string name="notification_sound_short_adhan">Short adhan</string>
+    <string name="notification_channel_default">Prayer reminders</string>
+    <string name="notification_channel_silent">Prayer reminders · silent</string>
+    <string name="notification_channel_short_adhan">Prayer reminders · short adhan</string>
 </resources>

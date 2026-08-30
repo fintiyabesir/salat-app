@@ -1,6 +1,6 @@
-"brand_name" = "SALAT";
+"brand_name" = "礼拜时间";
 "location_title" = "您所在位置的礼拜时间";
-"location_privacy" = "您的位置仅在本设备上用于计算礼拜时间和朝向。Salat 不会把您的位置发送到服务器。";
+"location_privacy" = "您的位置仅在本设备上用于计算礼拜时间和朝向，不会发送到任何服务器。";
 "use_current_location" = "使用当前位置";
 "location_unavailable" = "无法获取位置。请手动选择城市。";
 "next_prayer" = "下一次礼拜";

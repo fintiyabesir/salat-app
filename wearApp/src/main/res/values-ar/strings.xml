@@ -1,7 +1,7 @@
 <resources>
-    <string name="app_name">Salat</string>
+    <string name="app_name">مواقيت الصلاة</string>
     <string name="next_prayer">الصلاة القادمة</string>
-    <string name="open_phone_to_sync">افتح Salat على هاتفك مرة واحدة لمزامنة مواقيت الصلاة.</string>
+    <string name="open_phone_to_sync">افتح التطبيق على هاتفك مرة واحدة لمزامنة مواقيت الصلاة.</string>
     <string name="tile_label">الصلاة القادمة</string>
     <string name="tile_description">الصلاة القادمة ووقتها متاحان دون اتصال.</string>
     <string name="complication_label">الصلاة القادمة</string>

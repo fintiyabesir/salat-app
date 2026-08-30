@@ -1,6 +1,6 @@
-"brand_name" = "SALAT";
+"brand_name" = "NAMAZ VAKTİ";
 "location_title" = "Bulunduğun yer için namaz vakitleri";
-"location_privacy" = "Konumun namaz vakitlerini ve kıbleyi cihazında hesaplamak için kullanılır. Salat’ın konum sunucusu yoktur.";
+"location_privacy" = "Konumun namaz vakitlerini ve kıbleyi cihazında hesaplamak için kullanılır. Hiçbir sunucuya gönderilmez.";
 "use_current_location" = "Mevcut konumumu kullan";
 "location_unavailable" = "Konum kullanılamıyor. Bunun yerine bir şehir seç.";
 "next_prayer" = "SONRAKİ VAKİT";

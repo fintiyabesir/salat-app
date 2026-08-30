@@ -1,8 +1,21 @@
-# Salat
+# Awqat
 
 A calm, global, privacy-first prayer times app for phones, tablets and smartwatches.
 
 **Scope:** Prayer times · Qibla · Calendar
+
+## Naming
+
+**Awqat** is the product name and the only name used in English. Every other supported
+language uses a fully localized name (`Namaz Vakti`, `مواقيت الصلاة`, `اوقات شرعی`,
+`اوقاتِ نماز`, `নামাজের সময়`, `Waktu Solat`, `礼拜时间`, `禮拜時間`); the on-device
+launcher label and the store listing both follow the locale.
+
+`salat` remains the **code name** and is deliberately not renamed: the repository
+(`salat-app`), Kotlin package (`app.salat`), bundle identifiers (`app.salat.mobile`),
+App Group (`group.app.salat.mobile`) and build products (`SalatShared`, `SalatApp`,
+`Salat.app`) must stay stable, because changing them would break existing installs,
+signing identifiers and the App Store record.
 
 ## Product principles
 
@@ -97,4 +110,4 @@ The CI workflow validates both platform paths: Ubuntu builds/tests shared + Andr
 - [Licensing status](docs/LICENSING.md)
 
 ### Current platform starters
-Android and iOS now resolve device location with contextual permission and feed coordinates, country and timezone into the shared `SalatEngine`. Prayer calculation remains local; platform location data is not sent to a Salat backend.
+Android and iOS now resolve device location with contextual permission and feed coordinates, country and timezone into the shared `SalatEngine`. Prayer calculation remains local; platform location data is not sent to an Awqat backend.

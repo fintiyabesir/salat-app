@@ -1,7 +1,7 @@
 <resources>
-    <string name="app_name">Salat</string>
+    <string name="app_name">اوقاتِ نماز</string>
     <string name="next_prayer">اگلی نماز</string>
-    <string name="open_phone_to_sync">نماز کے اوقات ہم آہنگ کرنے کے لیے فون پر Salat ایک بار کھولیں۔</string>
+    <string name="open_phone_to_sync">نماز کے اوقات ہم آہنگ کرنے کے لیے ایپ فون پر ایک بار کھولیں۔</string>
     <string name="tile_label">اگلی نماز</string>
     <string name="tile_description">اگلی نماز اور اس کا وقت آف لائن دستیاب ہے۔</string>
     <string name="complication_label">اگلی نماز</string>

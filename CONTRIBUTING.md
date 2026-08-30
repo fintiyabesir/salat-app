@@ -1,6 +1,6 @@
 # Contributing
 
-Keep Salat narrow: prayer times, Qibla and calendar.
+Keep Awqat narrow: prayer times, Qibla and calendar.
 
 Before adding a dependency, check:
 1. Is it required for one of those three jobs?
