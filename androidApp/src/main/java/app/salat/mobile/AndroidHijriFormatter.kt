@@ -3,6 +3,7 @@ package app.salat.mobile
 import android.icu.text.SimpleDateFormat
 import android.icu.util.IslamicCalendar
 import android.icu.util.TimeZone as IcuTimeZone
+import android.icu.util.ULocale
 import app.salat.model.HijriCalendarMethodId
 import java.time.LocalDate
 import java.time.ZoneId
@@ -28,7 +29,19 @@ object AndroidHijriFormatter {
             }
             time = Date.from(instant)
         }
-        return SimpleDateFormat("d MMMM y", locale).apply {
+        // SimpleDateFormat binds its month names to the calendar it is constructed
+        // with. Assigning .calendar afterwards swaps the arithmetic but keeps the
+        // Gregorian symbols, which rendered Hijri dates as "17 March 1448". Building
+        // the formatter from a locale that carries the calendar keyword makes ICU
+        // load the Islamic month names.
+        val icuLocale = ULocale.forLocale(locale).setKeywordValue(
+            "calendar",
+            when (method) {
+                HijriCalendarMethodId.TABULAR -> "islamic-civil"
+                else -> "islamic-umalqura"
+            }
+        )
+        return SimpleDateFormat("d MMMM y", icuLocale).apply {
             this.calendar = calendar
             timeZone = icuZone
         }.format(Date.from(instant))
