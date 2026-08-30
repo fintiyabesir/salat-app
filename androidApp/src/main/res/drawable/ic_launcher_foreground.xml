@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Diamond ring, compass needle and hub, scaled into the adaptive icon safe zone. -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+    <path
+        android:fillColor="#2F6865"
+        android:fillType="evenOdd"
+        android:pathData="M54,28.16L79.84,54L54,79.84L28.16,54Z M54,37.12L70.88,54L54,70.88L37.12,54Z" />
+    <path
+        android:fillColor="#C29653"
+        android:pathData="M54,40.08L59.91,59.7L54,56.64L48.09,59.7Z" />
+    <path
+        android:fillColor="#2F6865"
+        android:pathData="M54,51.47a2.53,2.53 0 1,1 -0.01,0z" />
+</vector>

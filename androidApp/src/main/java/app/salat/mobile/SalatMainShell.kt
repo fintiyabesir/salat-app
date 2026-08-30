@@ -65,10 +65,6 @@ import kotlin.math.abs
 
 private enum class MainSection { TODAY, CALENDAR, QIBLA }
 
-private val ShellCanvas = Color(0xFFFAF8F3)
-private val ShellCanvasDark = Color(0xFF171916)
-private val ShellSage = Color(0xFF467A69)
-private val ShellCardDark = Color(0xFF242823)
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -90,23 +86,7 @@ fun SalatMainShell(
         AppearanceMode.LIGHT -> false
     }
     val canvas = if (dark) ShellCanvasDark else ShellCanvas
-    val colorScheme = if (dark) {
-        darkColorScheme(
-            primary = Color(0xFF91C9B5),
-            background = ShellCanvasDark,
-            surface = ShellCardDark,
-            onBackground = Color(0xFFF2F1EC),
-            onSurface = Color(0xFFF2F1EC)
-        )
-    } else {
-        lightColorScheme(
-            primary = ShellSage,
-            background = ShellCanvas,
-            surface = Color.White,
-            onBackground = Color(0xFF20221F),
-            onSurface = Color(0xFF20221F)
-        )
-    }
+    val colorScheme = awqatColorScheme(settings.appearance)
 
     fun persist(next: AppPreferences) {
         val languageChanged = next.languageTag != settings.languageTag
