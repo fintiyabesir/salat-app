@@ -1,0 +1,20 @@
+version: 2
+updates:
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
+    groups:
+      actions:
+        patterns: ["*"]
+
+  - package-ecosystem: gradle
+    directory: /
+    schedule:
+      interval: weekly
+    groups:
+      # Compose and AGP/Kotlin move as sets; batching them keeps PRs reviewable.
+      androidx-compose:
+        patterns: ["androidx.compose*"]
+      kotlin-and-agp:
+        patterns: ["org.jetbrains.kotlin*", "com.android*"]

@@ -1,0 +1,31 @@
+Awqat
+Copyright 2026 Beşir Ünlü
+
+Licensed under the Apache License, Version 2.0. See the LICENSE file in this
+repository for the full terms.
+
+
+TRADEMARKS AND BRAND
+--------------------
+Section 6 of the Apache License grants no permission to use the licensor's trade
+names, trademarks or product names. Accordingly, the following are NOT covered by
+the Apache License and remain reserved:
+
+  - the product name "Awqat" and its localized product names
+    (Namaz Vakti, مواقيت الصلاة, اوقات شرعی, اوقاتِ نماز, নামাজের সময়,
+     Waktu Solat, 礼拜时间, 禮拜時間);
+  - the application icon and any store listing artwork.
+
+The source code may be used under the Apache License, but a fork distributed to
+users must carry a different name and a different icon.
+
+
+THIRD-PARTY COMPONENTS
+----------------------
+See THIRD_PARTY_NOTICES.md for full details.
+
+  - BatoulApps Adhan (adhan2) — MIT License.
+  - Data derived from the GeoNames geographical database — Creative Commons
+    Attribution 4.0 International (CC BY 4.0), https://www.geonames.org/
+  - Prayer timetable data from named religious authorities is used only where its
+    own licence permits; see docs/OFFICIAL_SOURCES.md.
