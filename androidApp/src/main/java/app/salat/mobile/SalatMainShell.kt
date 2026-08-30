@@ -39,6 +39,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
@@ -47,6 +48,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import app.salat.domain.SalatEngine
@@ -122,7 +124,14 @@ fun SalatMainShell(
             containerColor = canvas,
             topBar = {
                 TopAppBar(
-                    title = { Text(stringResource(R.string.brand_name), color = MaterialTheme.colorScheme.primary, letterSpacing = 2.sp) },
+                    title = {
+                        Text(
+                            stringResource(R.string.brand_name),
+                            color = MaterialTheme.colorScheme.primary,
+                            // Arabic-script locales join their letters; spacing them breaks the word.
+                            letterSpacing = if (LocalLayoutDirection.current == LayoutDirection.Rtl) 0.sp else 2.sp
+                        )
+                    },
                     actions = {
                         IconButton(onClick = onChooseCity) {
                             Text("⌖", fontSize = 22.sp)

@@ -29,10 +29,8 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import app.salat.model.ResolvedLocation
@@ -141,15 +139,6 @@ internal fun LocationStartScreen(
                 Modifier.padding(horizontal = 26.dp, vertical = 52.dp),
                 verticalArrangement = Arrangement.Center
             ) {
-                Text(
-                    stringResource(R.string.brand_name),
-                    color = Sage,
-                    fontSize = 14.sp,
-                    // Arabic-script locales join their letters; spacing them breaks the word.
-                    letterSpacing = if (LocalLayoutDirection.current == LayoutDirection.Rtl) 0.sp else 3.sp,
-                    fontWeight = FontWeight.SemiBold
-                )
-                Spacer(Modifier.height(16.dp))
                 Text(
                     stringResource(R.string.location_title),
                     fontSize = 34.sp,
