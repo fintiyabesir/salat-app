@@ -48,6 +48,12 @@ struct SalatRootView: View {
                 }
             }
             .onAppear {
+                // A restored location never fires onChange, so without this the widget
+                // and the watch are never refreshed on a launch that reused it.
+                if let location = locationModel.location {
+                    notificationCoordinator.rebuild(location: location, appSettings: settingsStore.value)
+                    glanceTimelineStore.rebuild(location: location, settings: settingsStore.value)
+                }
                 locationModel.resolveIfAlreadyAuthorized()
             }
         }

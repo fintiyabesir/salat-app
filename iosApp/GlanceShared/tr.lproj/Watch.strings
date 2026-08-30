@@ -9,3 +9,4 @@
 "watch.brand_name" = "NAMAZ VAKTİ";
 "watch.open_app" = "Uygulamayı aç";
 "watch.update_prayer_times" = "Namaz vakitlerini güncelle";
+"watch.widget_description" = "Sıradaki namaz vakti ve kalan süre";
