@@ -1,0 +1,3 @@
+"CFBundleDisplayName" = "مواقيت الصلاة";
+"CFBundleName" = "مواقيت الصلاة";
+"NSLocationWhenInUseUsageDescription" = "يُستخدم موقعك على هذا الجهاز لحساب مواقيت الصلاة والقبلة في مكانك.";

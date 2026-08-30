@@ -97,10 +97,6 @@ struct SalatRootView: View {
     private var locationStartContent: some View {
         VStack(alignment: .leading, spacing: 18) {
             Spacer()
-            Text(L10n.text("brand_name"))
-                .font(.caption.weight(.semibold))
-                .tracking(3)
-                .foregroundStyle(.tint)
             Text(L10n.text("location_title"))
                 .font(.system(size: 34, weight: .medium))
             Text(L10n.text("location_privacy"))

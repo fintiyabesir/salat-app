@@ -19,18 +19,16 @@ jobs:
       matrix:
         dataset: [cities15000, cities5000, cities1000, cities500]
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-java@v5
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - uses: actions/setup-java@b6effb05e454b25005698d916606bdc6ffcbf961 # v5
         with:
           distribution: temurin
           java-version: '21'
-      - uses: android-actions/setup-android@v4
+      - uses: android-actions/setup-android@40fd30fb8d7440372e1316f5d1809ec01dcd3699 # v4
         with:
           packages: platform-tools
       - run: sdkmanager "platforms;android-36" "build-tools;36.0.0"
-      - uses: gradle/actions/setup-gradle@v4
-        with:
-          gradle-version: '9.5.1'
+      - uses: gradle/actions/setup-gradle@ed408507eac070d1f99cc633dbcf757c94c7933a # v4
       - name: Download permitted GeoNames build inputs
         run: |
           mkdir -p build/geonames
@@ -48,9 +46,12 @@ jobs:
             --report build/city-catalog/report.json
       - name: Measure Android package impact
         run: |
-          mkdir -p androidApp/src/main/assets
-          cp build/city-catalog/city_catalog.tsv.gz androidApp/src/main/assets/city_catalog.tsv.gz
-          gradle :androidApp:assembleDebug --stacktrace
+          # Replace the bundled catalog rather than adding a second asset. The app
+          # packages resources/city_catalog.tsv; dropping a .gz beside it measured a
+          # file the app never reads, and AGP strips the .gz suffix when merging
+          # assets, so the two collided as duplicates.
+          cp build/city-catalog/city_catalog.tsv resources/city_catalog.tsv
+          ./gradlew :androidApp:assembleDebug --stacktrace
           test -f androidApp/build/outputs/apk/debug/androidApp-debug.apk
           python3 - <<'PY'
           import json, pathlib
@@ -60,7 +61,7 @@ jobs:
           report_path.write_text(json.dumps(report, ensure_ascii=False, indent=2) + '\n')
           print(json.dumps(report, ensure_ascii=False, indent=2))
           PY
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
           name: city-catalog-${{ matrix.dataset }}
           path: |
@@ -76,27 +77,25 @@ jobs:
       matrix:
         dataset: [cities15000, cities5000, cities1000, cities500]
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
       - uses: actions/download-artifact@v4
         with:
           name: city-catalog-${{ matrix.dataset }}
           path: build/city-catalog
-      - uses: actions/setup-java@v5
+      - uses: actions/setup-java@b6effb05e454b25005698d916606bdc6ffcbf961 # v5
         with:
           distribution: temurin
           java-version: '21'
-      - uses: android-actions/setup-android@v4
+      - uses: android-actions/setup-android@40fd30fb8d7440372e1316f5d1809ec01dcd3699 # v4
         with:
           packages: platform-tools
       - run: sdkmanager "platforms;android-36" "build-tools;36.0.0"
-      - uses: gradle/actions/setup-gradle@v4
-        with:
-          gradle-version: '9.5.1'
+      - uses: gradle/actions/setup-gradle@ed408507eac070d1f99cc633dbcf757c94c7933a # v4
       - name: Bundle catalog into iOS source resources
         run: |
           mkdir -p iosApp/SalatApp/Resources
           cp build/city-catalog/city_catalog.tsv.gz iosApp/SalatApp/Resources/city_catalog.tsv.gz
-      - run: gradle :shared:linkDebugFrameworkIosSimulatorArm64 --stacktrace
+      - run: ./gradlew :shared:linkDebugFrameworkIosSimulatorArm64 --stacktrace
       - run: brew install xcodegen
       - run: xcodegen generate --spec iosApp/project.yml --project iosApp
       - name: Build and measure iOS app
@@ -105,7 +104,6 @@ jobs:
             -project iosApp/SalatApp.xcodeproj \
             -scheme SalatApp \
             -configuration Debug \
-            -sdk iphonesimulator \
             -destination 'generic/platform=iOS Simulator' \
             -derivedDataPath "$RUNNER_TEMP/SalatDerivedData" \
             ARCHS=arm64 ONLY_ACTIVE_ARCH=YES CODE_SIGNING_ALLOWED=NO build
@@ -122,7 +120,7 @@ jobs:
           report_path.write_text(json.dumps(report, ensure_ascii=False, indent=2) + '\n')
           print(json.dumps(report, ensure_ascii=False, indent=2))
           PY
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
           name: city-catalog-ios-${{ matrix.dataset }}
           path: build/city-catalog/report.json

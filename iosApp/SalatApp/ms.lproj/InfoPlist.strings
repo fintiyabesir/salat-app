@@ -1,0 +1,3 @@
+"CFBundleDisplayName" = "Waktu Solat";
+"CFBundleName" = "Waktu Solat";
+"NSLocationWhenInUseUsageDescription" = "Lokasi anda digunakan pada peranti ini untuk mengira waktu solat dan kiblat bagi tempat anda.";

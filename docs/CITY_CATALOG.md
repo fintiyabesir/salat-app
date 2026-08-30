@@ -1,10 +1,10 @@
 # Offline city catalog
 
-Salat's manual-location flow must remain fully functional without a backend or runtime geocoding API. The production catalog is generated from GeoNames at build time and bundled with the application.
+Awqat's manual-location flow must remain fully functional without a backend or runtime geocoding API. The production catalog is generated from GeoNames at build time and bundled with the application.
 
 ## Source and license
 
-GeoNames publishes downloadable UTF-8 gazetteer extracts under CC BY 4.0. Salat uses the city extracts plus `countryInfo.txt` and `admin1CodesASCII.txt`. Attribution is maintained in `THIRD_PARTY_NOTICES.md` and must also be exposed from the app's About / Licenses screen.
+GeoNames publishes downloadable UTF-8 gazetteer extracts under CC BY 4.0. Awqat uses the city extracts plus `countryInfo.txt` and `admin1CodesASCII.txt`. Attribution is maintained in `THIRD_PARTY_NOTICES.md` and must also be exposed from the app's About / Licenses screen.
 
 ## Build pipeline
 

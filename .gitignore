@@ -8,3 +8,5 @@ DerivedData/
 *.xcuserstate
 xcuserdata/
 **/AppIcon.appiconset/AppIcon.png
+iosApp/SalatApp.xcodeproj/
+iosApp/project.release.generated.yml

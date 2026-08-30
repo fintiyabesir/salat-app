@@ -139,7 +139,7 @@ The phone, widget, Apple Watch, Wear OS app, tile and complications read checked
 - no analytics SDK, ad SDK, account SDK, or remote config SDK in binary
 
 ## Implemented in bootstrap repository
-- `AdhanPrayerCalculator` maps Salat calculation profiles to Adhan parameters.
+- `AdhanPrayerCalculator` maps Awqat calculation profiles to Adhan parameters.
 - `QiblaCalculator` calculates true-north bearing to the Kaaba without network access.
 - `PrayerComparator` computes maximum minute delta between local and official sets.
 - `MuisOpenDataAdapter` parses the licensed MUIS/data.gov.sg consolidated dataset and returns its full published range for annual caching.

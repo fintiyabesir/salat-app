@@ -62,7 +62,7 @@ struct SalatWatchComplicationView: View {
                     }
                 }
             } else {
-                Text("Salat")
+                Text(GlanceL10n.text("watch.brand_name", fallback: "Awqat"))
             }
         }
         .containerBackground(for: .widget) { Color.clear }
@@ -77,7 +77,7 @@ struct SalatWatchComplication: Widget {
         StaticConfiguration(kind: kind, provider: SalatWatchProvider()) { entry in
             SalatWatchComplicationView(entry: entry)
         }
-        .configurationDisplayName("Salat")
+        .configurationDisplayName(GlanceL10n.text("watch.brand_name", fallback: "Awqat"))
         .description(GlanceL10n.text(
             "watch.complication_description",
             fallback: "Next prayer at a glance"

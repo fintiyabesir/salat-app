@@ -1,7 +1,7 @@
 <resources>
-    <string name="app_name">Salat</string>
+    <string name="app_name">礼拜时间</string>
     <string name="next_prayer">下一次礼拜</string>
-    <string name="open_phone_to_sync">请在手机上打开一次 Salat 以同步礼拜时间。</string>
+    <string name="open_phone_to_sync">请在手机上打开一次应用以同步礼拜时间。</string>
     <string name="tile_label">下一次礼拜</string>
     <string name="tile_description">可离线查看下一次礼拜及其时间。</string>
     <string name="complication_label">下一次礼拜</string>

@@ -1,6 +1,6 @@
-"brand_name" = "SALAT";
+"brand_name" = "WAKTU SOLAT";
 "location_title" = "Waktu solat untuk lokasi anda";
-"location_privacy" = "Lokasi anda digunakan pada peranti ini untuk mengira waktu solat dan kiblat. Salat tidak menghantar lokasi anda ke pelayan.";
+"location_privacy" = "Lokasi anda digunakan pada peranti ini untuk mengira waktu solat dan kiblat. Ia tidak dihantar ke mana-mana pelayan.";
 "use_current_location" = "Gunakan lokasi semasa";
 "location_unavailable" = "Lokasi tidak tersedia. Pilih bandar secara manual.";
 "next_prayer" = "SOLAT SETERUSNYA";

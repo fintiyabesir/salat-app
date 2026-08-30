@@ -1,0 +1,3 @@
+"CFBundleDisplayName" = "礼拜时间";
+"CFBundleName" = "礼拜时间";
+"NSLocationWhenInUseUsageDescription" = "您的位置仅在本设备上用于计算您所在位置的礼拜时间和朝向。";

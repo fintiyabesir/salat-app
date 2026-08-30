@@ -76,7 +76,7 @@ private struct SalatWidgetView: View {
             if let prayer = entry.nextPrayer {
                 Text("\(prayer.prayerName) · \(time(prayer.date))")
             } else {
-                Text("SALAT")
+                Text(GlanceL10n.text("watch.brand_name", fallback: "Awqat"))
             }
         }
     }
@@ -91,7 +91,7 @@ private struct SalatWidgetView: View {
                     .font(.caption2)
                     .minimumScaleFactor(0.6)
             } else {
-                Text("SALAT").font(.caption2.weight(.semibold))
+                Text(GlanceL10n.text("watch.brand_name", fallback: "Awqat")).font(.caption2.weight(.semibold))
             }
         }
     }
@@ -105,14 +105,14 @@ private struct SalatWidgetView: View {
                     Text(prayer.date, style: .timer).foregroundStyle(.secondary)
                 }
             } else {
-                Text("SALAT").font(.headline)
+                Text(GlanceL10n.text("watch.brand_name", fallback: "Awqat")).font(.headline)
             }
         }
     }
 
     private var homeView: some View {
         VStack(alignment: .leading, spacing: 6) {
-            Text("SALAT")
+            Text(GlanceL10n.text("watch.brand_name", fallback: "Awqat"))
                 .font(.caption2.weight(.semibold))
                 .tracking(2)
                 .foregroundStyle(Color(red: 0.27, green: 0.48, blue: 0.41))
@@ -135,9 +135,9 @@ private struct SalatWidgetView: View {
                         .foregroundStyle(Color(red: 0.27, green: 0.48, blue: 0.41))
                 }
             } else {
-                Text("Open Salat")
+                Text(GlanceL10n.text("watch.open_app", fallback: "Open the app"))
                     .font(.headline)
-                Text("Update prayer times")
+                Text(GlanceL10n.text("watch.update_prayer_times", fallback: "Update prayer times"))
                     .font(.caption)
                     .foregroundStyle(.secondary)
             }
@@ -165,7 +165,7 @@ struct SalatNextPrayerWidget: Widget {
         StaticConfiguration(kind: kind, provider: SalatWidgetProvider()) { entry in
             SalatWidgetView(entry: entry)
         }
-        .configurationDisplayName("Salat")
+        .configurationDisplayName(GlanceL10n.text("watch.brand_name", fallback: "Awqat"))
         .description("Next prayer and remaining time")
         .supportedFamilies([
             .systemSmall,

@@ -7,7 +7,7 @@ The optional offline manual-city catalog is derived from the GeoNames geographic
 - Source: GeoNames — https://www.geonames.org/
 - License: Creative Commons Attribution 4.0 International (CC BY 4.0)
 - License text: https://creativecommons.org/licenses/by/4.0/
-- Salat transforms a GeoNames city dump at build time to retain only the fields required for offline city selection and prayer-time calculation.
+- Awqat transforms a GeoNames city dump at build time to retain only the fields required for offline city selection and prayer-time calculation.
 - No GeoNames API or web service is called by the installed application.
 
 GeoNames states that its data is provided as-is without warranty or representation of accuracy, timeliness, or completeness.

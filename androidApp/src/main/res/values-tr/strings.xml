@@ -1,10 +1,13 @@
 <resources>
-    <string name="app_name">Salat</string><string name="brand_name">SALAT</string>
+    <string name="app_name">Namaz Vakti</string><string name="brand_name">NAMAZ VAKTİ</string>
     <string name="location_title">Bulunduğun yer için namaz vakitleri</string>
-    <string name="location_privacy">Konumun namaz vakitlerini ve kıbleyi cihazında hesaplamak için kullanılır. Salat’ın konum sunucusu yoktur.</string>
+    <string name="location_privacy">Konumun namaz vakitlerini ve kıbleyi cihazında hesaplamak için kullanılır. Hiçbir sunucuya gönderilmez.</string>
     <string name="use_current_location">Mevcut konumumu kullan</string><string name="location_unavailable">Konum kullanılamıyor. Bunun yerine bir şehir seç.</string>
     <string name="next_prayer">SONRAKİ VAKİT</string><string name="today">Bugün</string><string name="calendar">Takvim</string><string name="qibla">Kıble</string><string name="settings">Ayarlar</string><string name="notifications">Bildirimler</string>
     <string name="prayer_fajr">İmsak</string><string name="prayer_sunrise">Güneş</string><string name="prayer_dhuhr">Öğle</string><string name="prayer_asr">İkindi</string><string name="prayer_maghrib">Akşam</string><string name="prayer_isha">Yatsı</string>
     <string name="prayer_in_minutes">%1$s vaktine %2$d dk</string><string name="prayer_time_now">%1$s vakti</string>
     <string name="notification_at_time">Vaktinde</string><string name="notification_minutes_before">%1$d dk önce</string><string name="notification_sound_system">Sistem sesi</string><string name="notification_sound_silent">Sessiz</string><string name="notification_sound_short_adhan">Kısa ezan</string>
+    <string name="notification_channel_default">Namaz hatırlatmaları</string>
+    <string name="notification_channel_silent">Namaz hatırlatmaları · sessiz</string>
+    <string name="notification_channel_short_adhan">Namaz hatırlatmaları · kısa ezan</string>
 </resources>

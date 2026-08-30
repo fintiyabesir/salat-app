@@ -55,11 +55,11 @@ private struct WatchPrayerView: View {
                     Image(systemName: "clock")
                         .font(.title2)
                         .foregroundStyle(.tint)
-                    Text("Salat")
+                    Text(GlanceL10n.text("watch.brand_name", fallback: "Awqat"))
                         .font(.headline)
                     Text(GlanceL10n.text(
                         "watch.open_phone_to_sync",
-                        fallback: "Open Salat on iPhone once to sync prayer times."
+                        fallback: "Open the app on iPhone once to sync prayer times."
                     ))
                         .font(.caption2)
                         .multilineTextAlignment(.center)

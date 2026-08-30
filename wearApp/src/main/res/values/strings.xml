@@ -1,7 +1,7 @@
 <resources>
-    <string name="app_name">Salat</string>
+    <string name="app_name">Awqat</string>
     <string name="next_prayer">Next prayer</string>
-    <string name="open_phone_to_sync">Open Salat on your phone once to sync prayer times.</string>
+    <string name="open_phone_to_sync">Open the app on your phone once to sync prayer times.</string>
     <string name="tile_label">Next prayer</string>
     <string name="tile_description">Next prayer and its time, available offline.</string>
     <string name="complication_label">Next prayer</string>

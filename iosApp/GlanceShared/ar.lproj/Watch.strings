@@ -4,5 +4,8 @@
 "prayer.asr" = "العصر";
 "prayer.maghrib" = "المغرب";
 "prayer.isha" = "العشاء";
-"watch.open_phone_to_sync" = "افتح Salat على iPhone مرة واحدة لمزامنة مواقيت الصلاة.";
+"watch.open_phone_to_sync" = "افتح التطبيق على iPhone مرة واحدة لمزامنة مواقيت الصلاة.";
 "watch.complication_description" = "الصلاة القادمة في لمحة";
+"watch.brand_name" = "مواقيت الصلاة";
+"watch.open_app" = "افتح التطبيق";
+"watch.update_prayer_times" = "لتحديث مواقيت الصلاة";

@@ -1,7 +1,7 @@
 <resources>
-    <string name="app_name">Salat</string>
+    <string name="app_name">اوقات شرعی</string>
     <string name="next_prayer">نماز بعدی</string>
-    <string name="open_phone_to_sync">برای همگام‌سازی اوقات نماز، Salat را یک‌بار در تلفن باز کنید.</string>
+    <string name="open_phone_to_sync">برای همگام‌سازی اوقات شرعی، برنامه را یک‌بار در تلفن باز کنید.</string>
     <string name="tile_label">نماز بعدی</string>
     <string name="tile_description">نماز بعدی و زمان آن به‌صورت آفلاین در دسترس است.</string>
     <string name="complication_label">نماز بعدی</string>

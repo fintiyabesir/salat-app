@@ -1,7 +1,7 @@
 <resources>
-    <string name="app_name">Salat</string>
+    <string name="app_name">Waktu Solat</string>
     <string name="next_prayer">Solat seterusnya</string>
-    <string name="open_phone_to_sync">Buka Salat pada telefon sekali untuk menyegerakkan waktu solat.</string>
+    <string name="open_phone_to_sync">Buka aplikasi pada telefon sekali untuk menyegerakkan waktu solat.</string>
     <string name="tile_label">Solat seterusnya</string>
     <string name="tile_description">Solat seterusnya dan waktunya tersedia di luar talian.</string>
     <string name="complication_label">Solat seterusnya</string>

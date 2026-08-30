@@ -83,7 +83,7 @@ private fun WearPrayerScreen(store: WearTimelineStore) {
         if (timeline == null || next == null) {
             Spacer(Modifier.height(28.dp))
             Text(
-                text = "Salat",
+                text = context.getString(R.string.app_name),
                 color = MaterialTheme.colorScheme.primary,
                 fontSize = 20.sp,
                 fontWeight = FontWeight.SemiBold

@@ -1,0 +1,3 @@
+"CFBundleDisplayName" = "Namaz Vakti";
+"CFBundleName" = "Namaz Vakti";
+"NSLocationWhenInUseUsageDescription" = "Konumun, bulunduğun yerin namaz vakitlerini ve kıbleyi bu cihazda hesaplamak için kullanılır.";

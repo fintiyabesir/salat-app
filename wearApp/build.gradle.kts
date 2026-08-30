@@ -11,8 +11,33 @@ android {
         applicationId = "app.salat.mobile"
         minSdk = 30
         targetSdk = 36
-        versionCode = 1
-        versionName = "0.1.0"
+        versionCode = rootProject.extra["appVersionCode"] as Int
+        versionName = rootProject.extra["appVersionName"] as String
+    }
+
+    signingConfigs {
+        create("release") {
+            // Only populated when the release secrets are present. Local builds and
+            // pull-request CI have no keystore and must still be able to assemble.
+            val keystorePath = providers.environmentVariable("ANDROID_KEYSTORE_PATH").orNull
+            if (!keystorePath.isNullOrBlank()) {
+                storeFile = file(keystorePath)
+                storePassword = providers.environmentVariable("ANDROID_KEYSTORE_PASSWORD").orNull
+                keyAlias = providers.environmentVariable("ANDROID_KEY_ALIAS").orNull
+                keyPassword = providers.environmentVariable("ANDROID_KEY_PASSWORD").orNull
+            }
+        }
+    }
+
+    buildTypes {
+        getByName("release") {
+            // R8 stays off until a shrunk build has been smoke-tested on a device.
+            // Turning it on untested is how a release ships with a broken screen.
+            isMinifyEnabled = false
+            signingConfig = signingConfigs.getByName("release").takeIf {
+                !providers.environmentVariable("ANDROID_KEYSTORE_PATH").orNull.isNullOrBlank()
+            }
+        }
     }
 
     buildFeatures { compose = true }

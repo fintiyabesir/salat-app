@@ -120,6 +120,12 @@ class AndroidPrayerNotificationScheduler(private val context: Context) {
     }
 }
 
+/**
+ * Channel names surface in Android system settings, so they are localized and
+ * rewritten on every call: createNotificationChannel() updates the name of an
+ * existing channel, which keeps it correct after an in-app language change.
+ * Sound configuration is only honoured at first creation, so it is applied once.
+ */
 internal object PrayerNotificationChannels {
     private const val SILENT = "prayer-silent"
     private const val SYSTEM = "prayer-system"
@@ -132,19 +138,21 @@ internal object PrayerNotificationChannels {
             NotificationSoundMode.SYSTEM -> SYSTEM
             NotificationSoundMode.SHORT_ADHAN -> ADHAN
         }
-        if (manager.getNotificationChannel(channelId) != null) return channelId
+        val alreadyExists = manager.getNotificationChannel(channelId) != null
 
         val channel = NotificationChannel(
             channelId,
-            when (mode) {
-                NotificationSoundMode.SILENT -> "Prayer reminders · silent"
-                NotificationSoundMode.SYSTEM -> "Prayer reminders"
-                NotificationSoundMode.SHORT_ADHAN -> "Prayer reminders · short adhan"
-            },
+            context.getString(
+                when (mode) {
+                    NotificationSoundMode.SILENT -> R.string.notification_channel_silent
+                    NotificationSoundMode.SYSTEM -> R.string.notification_channel_default
+                    NotificationSoundMode.SHORT_ADHAN -> R.string.notification_channel_short_adhan
+                }
+            ),
             NotificationManager.IMPORTANCE_HIGH
         )
 
-        when (mode) {
+        if (!alreadyExists) when (mode) {
             NotificationSoundMode.SILENT -> channel.setSound(null, null)
             NotificationSoundMode.SYSTEM -> Unit
             NotificationSoundMode.SHORT_ADHAN -> {

@@ -4,5 +4,8 @@
 "prayer.asr" = "晡禮";
 "prayer.maghrib" = "昏禮";
 "prayer.isha" = "宵禮";
-"watch.open_phone_to_sync" = "請在 iPhone 上開啟一次 Salat 以同步禮拜時間。";
+"watch.open_phone_to_sync" = "請在 iPhone 上開啟一次應用程式以同步禮拜時間。";
 "watch.complication_description" = "一覽下一次禮拜";
+"watch.brand_name" = "禮拜時間";
+"watch.open_app" = "開啟應用程式";
+"watch.update_prayer_times" = "更新禮拜時間";

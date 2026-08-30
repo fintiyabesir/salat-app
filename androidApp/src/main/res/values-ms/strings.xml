@@ -1,9 +1,12 @@
 <resources>
-    <string name="app_name">Salat</string><string name="brand_name">SALAT</string>
-    <string name="location_title">Waktu solat untuk lokasi anda</string><string name="location_privacy">Lokasi anda digunakan pada peranti ini untuk mengira waktu solat dan kiblat. Salat tidak menghantar lokasi anda ke pelayan.</string>
+    <string name="app_name">Waktu Solat</string><string name="brand_name">WAKTU SOLAT</string>
+    <string name="location_title">Waktu solat untuk lokasi anda</string><string name="location_privacy">Lokasi anda digunakan pada peranti ini untuk mengira waktu solat dan kiblat. Ia tidak dihantar ke mana-mana pelayan.</string>
     <string name="use_current_location">Gunakan lokasi semasa</string><string name="location_unavailable">Lokasi tidak tersedia. Pilih bandar secara manual.</string>
     <string name="next_prayer">SOLAT SETERUSNYA</string><string name="today">Hari ini</string><string name="calendar">Kalendar</string><string name="qibla">Kiblat</string><string name="settings">Tetapan</string><string name="notifications">Pemberitahuan</string>
     <string name="prayer_fajr">Subuh</string><string name="prayer_sunrise">Syuruk</string><string name="prayer_dhuhr">Zohor</string><string name="prayer_asr">Asar</string><string name="prayer_maghrib">Maghrib</string><string name="prayer_isha">Isyak</string>
     <string name="prayer_in_minutes">%1$s dalam %2$d minit</string><string name="prayer_time_now">Waktu %1$s</string>
     <string name="notification_at_time">Pada waktu solat</string><string name="notification_minutes_before">%1$d minit sebelum</string><string name="notification_sound_system">Bunyi sistem</string><string name="notification_sound_silent">Senyap</string><string name="notification_sound_short_adhan">Azan pendek</string>
+    <string name="notification_channel_default">Peringatan solat</string>
+    <string name="notification_channel_silent">Peringatan solat · senyap</string>
+    <string name="notification_channel_short_adhan">Peringatan solat · azan pendek</string>
 </resources>

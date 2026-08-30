@@ -1,6 +1,6 @@
 # Apple build pipeline
 
-Salat treats Apple builds as first-class CI outputs.
+Awqat treats Apple builds as first-class CI outputs.
 
 ## Pull request and main CI
 

@@ -1,0 +1,518 @@
+name: Release
+
+# Releases are triggered by tags, not by merges. A merge to main publishes to the
+# internal track only; a tag is the immutable record of what a version actually was.
+#
+#   push to main    -> internal  (TestFlight internal, Play internal)
+#   tag v1.2.3-beta -> beta      (TestFlight external, Play closed testing)
+#   tag v1.2.3      -> production (App Store Connect, Play production draft)
+#
+# The production environment carries a required reviewer, so a tag prepares the
+# build and then waits for a human to approve before anything reaches users.
+
+on:
+  push:
+    branches: [ main ]
+    tags: [ 'v*' ]
+  workflow_dispatch:
+    inputs:
+      track:
+        description: Release track
+        type: choice
+        options: [ internal, beta, production ]
+        default: internal
+
+permissions:
+  contents: read
+
+concurrency:
+  group: release-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  plan:
+    runs-on: ubuntu-latest
+    outputs:
+      track: ${{ steps.plan.outputs.track }}
+      environment: ${{ steps.plan.outputs.track }}
+      version: ${{ steps.plan.outputs.version }}
+      build_number: ${{ steps.plan.outputs.build_number }}
+      play_track: ${{ steps.plan.outputs.play_track }}
+      play_status: ${{ steps.plan.outputs.play_status }}
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          fetch-depth: 0
+
+      - name: Resolve track, version and build number
+        id: plan
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          if [[ "$GITHUB_EVENT_NAME" == "workflow_dispatch" ]]; then
+            TRACK="${{ inputs.track }}"
+          elif [[ "$GITHUB_REF" == refs/tags/* ]]; then
+            TAG="${GITHUB_REF#refs/tags/}"
+            # A prerelease suffix (v1.2.3-beta.1) means beta; a bare tag means production.
+            if [[ "$TAG" == *-* ]]; then TRACK=beta; else TRACK=production; fi
+          else
+            TRACK=internal
+          fi
+
+          VERSION="$(grep '^versionName=' version.properties | cut -d= -f2)"
+          test -n "$VERSION"
+
+          # A tag that disagrees with version.properties means the release would be
+          # labelled wrong in one of the two stores. Fail loudly instead.
+          if [[ "$GITHUB_REF" == refs/tags/* ]]; then
+            TAG="${GITHUB_REF#refs/tags/}"
+            TAG_VERSION="${TAG#v}"
+            TAG_VERSION="${TAG_VERSION%%-*}"
+            if [[ "$TAG_VERSION" != "$VERSION" ]]; then
+              echo "::error::Tag $TAG declares version $TAG_VERSION but version.properties says $VERSION"
+              exit 1
+            fi
+          fi
+
+          # Must match the commit count the Gradle build derives, so the Apple and
+          # Android build numbers for one commit are always identical.
+          BUILD_NUMBER="$(git rev-list --count HEAD)"
+
+          case "$TRACK" in
+            internal)   PLAY_TRACK=internal;   PLAY_STATUS=completed ;;
+            beta)       PLAY_TRACK=beta;       PLAY_STATUS=completed ;;
+            production) PLAY_TRACK=production; PLAY_STATUS=draft ;;
+          esac
+
+          {
+            echo "track=$TRACK"
+            echo "version=$VERSION"
+            echo "build_number=$BUILD_NUMBER"
+            echo "play_track=$PLAY_TRACK"
+            echo "play_status=$PLAY_STATUS"
+          } >> "$GITHUB_OUTPUT"
+
+          echo "### $TRACK release: $VERSION ($BUILD_NUMBER)" >> "$GITHUB_STEP_SUMMARY"
+
+  # The identical gate that guards main. A tag never reaches a store without it.
+  verify:
+    uses: ./.github/workflows/core-ci.yml
+
+  apple:
+    needs: [ plan, verify ]
+    environment: ${{ needs.plan.outputs.environment }}
+    runs-on: macos-15
+    env:
+      MARKETING_VERSION: ${{ needs.plan.outputs.version }}
+      BUILD_NUMBER: ${{ needs.plan.outputs.build_number }}
+      APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
+      APPLE_DISTRIBUTION_CERTIFICATE_BASE64: ${{ secrets.APPLE_DISTRIBUTION_CERTIFICATE_BASE64 }}
+      APPLE_DISTRIBUTION_CERTIFICATE_PASSWORD: ${{ secrets.APPLE_DISTRIBUTION_CERTIFICATE_PASSWORD }}
+      APP_STORE_CONNECT_API_KEY_ID: ${{ secrets.APP_STORE_CONNECT_API_KEY_ID }}
+      APP_STORE_CONNECT_ISSUER_ID: ${{ secrets.APP_STORE_CONNECT_ISSUER_ID }}
+      APP_STORE_CONNECT_API_PRIVATE_KEY_BASE64: ${{ secrets.APP_STORE_CONNECT_API_PRIVATE_KEY_BASE64 }}
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          fetch-depth: 0
+
+      - name: Select App Store compatible Xcode
+        run: |
+          sudo xcode-select -s /Applications/Xcode_26.3.app/Contents/Developer
+          xcodebuild -version | grep -q '^Xcode 26\.'
+
+      - uses: actions/setup-java@b6effb05e454b25005698d916606bdc6ffcbf961 # v5
+        with:
+          distribution: temurin
+          java-version: '21'
+
+      - uses: android-actions/setup-android@40fd30fb8d7440372e1316f5d1809ec01dcd3699 # v4
+        with:
+          packages: platform-tools
+
+      - name: Install Android SDK for KMP configuration
+        run: sdkmanager "platforms;android-36" "build-tools;36.0.0"
+
+      - uses: gradle/actions/setup-gradle@ed408507eac070d1f99cc633dbcf757c94c7933a # v4
+
+      - name: Build release KMP framework for physical iOS devices
+        run: ./gradlew :shared:linkReleaseFrameworkIosArm64 --stacktrace
+
+      - name: Install XcodeGen
+        run: brew install xcodegen
+
+      - name: Generate release Xcode project
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          source = Path('iosApp/project.yml').read_text(encoding='utf-8')
+          debug_framework = '../shared/build/bin/iosSimulatorArm64/debugFramework/SalatShared.framework'
+          release_framework = '../shared/build/bin/iosArm64/releaseFramework/SalatShared.framework'
+          if debug_framework not in source:
+              raise SystemExit('Expected simulator framework dependency was not found in project.yml')
+          Path('iosApp/project.release.generated.yml').write_text(
+              source.replace(debug_framework, release_framework), encoding='utf-8'
+          )
+          PY
+          xcodegen generate --spec "$GITHUB_WORKSPACE/iosApp/project.release.generated.yml" --project "$GITHUB_WORKSPACE/iosApp"
+
+      - name: Validate privacy manifests
+        run: |
+          plutil -lint iosApp/SalatApp/PrivacyInfo.xcprivacy
+          plutil -lint iosApp/SalatWidget/PrivacyInfo.xcprivacy
+          plutil -lint iosApp/SalatWatch/PrivacyInfo.xcprivacy
+          plutil -lint iosApp/SalatWatchComplication/PrivacyInfo.xcprivacy
+          grep -q 'NSPrivacyAccessedAPICategoryUserDefaults' iosApp/SalatApp/PrivacyInfo.xcprivacy
+          grep -q 'CA92.1' iosApp/SalatApp/PrivacyInfo.xcprivacy
+          grep -q '1C8F.1' iosApp/SalatApp/PrivacyInfo.xcprivacy
+          grep -q '1C8F.1' iosApp/SalatWatch/PrivacyInfo.xcprivacy
+          grep -q '1C8F.1' iosApp/SalatWatchComplication/PrivacyInfo.xcprivacy
+
+      - name: Validate App Store metadata and entitlements
+        shell: bash
+        run: |
+          set -euo pipefail
+          git diff --exit-code -- \
+            iosApp/SalatApp/Info.plist \
+            iosApp/SalatApp/SalatApp.entitlements \
+            iosApp/SalatWidget/Info.plist \
+            iosApp/SalatWidget/SalatWidget.entitlements \
+            iosApp/SalatWatch/Info.plist \
+            iosApp/SalatWatch/SalatWatch.entitlements \
+            iosApp/SalatWatchComplication/Info.plist \
+            iosApp/SalatWatchComplication/SalatWatchComplication.entitlements
+          test "$(/usr/libexec/PlistBuddy -c 'Print :CFBundleShortVersionString' iosApp/SalatApp/Info.plist)" = '$(MARKETING_VERSION)'
+          test "$(/usr/libexec/PlistBuddy -c 'Print :CFBundleVersion' iosApp/SalatApp/Info.plist)" = '$(CURRENT_PROJECT_VERSION)'
+          test "$(/usr/libexec/PlistBuddy -c 'Print :ITSAppUsesNonExemptEncryption' iosApp/SalatApp/Info.plist)" = 'false'
+          test "$(/usr/libexec/PlistBuddy -c 'Print :UISupportedInterfaceOrientations:0' iosApp/SalatApp/Info.plist)" = 'UIInterfaceOrientationPortrait'
+          test "$(/usr/libexec/PlistBuddy -c 'Print :UISupportedInterfaceOrientations:1' iosApp/SalatApp/Info.plist)" = 'UIInterfaceOrientationPortraitUpsideDown'
+          test "$(/usr/libexec/PlistBuddy -c 'Print :UISupportedInterfaceOrientations:2' iosApp/SalatApp/Info.plist)" = 'UIInterfaceOrientationLandscapeLeft'
+          test "$(/usr/libexec/PlistBuddy -c 'Print :UISupportedInterfaceOrientations:3' iosApp/SalatApp/Info.plist)" = 'UIInterfaceOrientationLandscapeRight'
+          test "$(/usr/libexec/PlistBuddy -c 'Print :CFBundleExecutable' iosApp/SalatWidget/Info.plist)" = '$(EXECUTABLE_NAME)'
+          test "$(/usr/libexec/PlistBuddy -c 'Print :NSExtension:NSExtensionPointIdentifier' iosApp/SalatWidget/Info.plist)" = 'com.apple.widgetkit-extension'
+          test "$(/usr/libexec/PlistBuddy -c 'Print :com.apple.security.application-groups:0' iosApp/SalatApp/SalatApp.entitlements)" = 'group.app.salat.mobile'
+          test "$(/usr/libexec/PlistBuddy -c 'Print :com.apple.security.application-groups:0' iosApp/SalatWidget/SalatWidget.entitlements)" = 'group.app.salat.mobile'
+          test "$(/usr/libexec/PlistBuddy -c 'Print :CFBundleIdentifier' iosApp/SalatWatch/Info.plist)" = '$(PRODUCT_BUNDLE_IDENTIFIER)'
+          test "$(/usr/libexec/PlistBuddy -c 'Print :CFBundleExecutable' iosApp/SalatWatch/Info.plist)" = '$(EXECUTABLE_NAME)'
+          test "$(/usr/libexec/PlistBuddy -c 'Print :CFBundleIdentifier' iosApp/SalatWatchComplication/Info.plist)" = '$(PRODUCT_BUNDLE_IDENTIFIER)'
+          test "$(/usr/libexec/PlistBuddy -c 'Print :CFBundleExecutable' iosApp/SalatWatchComplication/Info.plist)" = '$(EXECUTABLE_NAME)'
+          test "$(/usr/libexec/PlistBuddy -c 'Print :com.apple.security.application-groups:0' iosApp/SalatWatch/SalatWatch.entitlements)" = 'group.app.salat.mobile'
+          test "$(/usr/libexec/PlistBuddy -c 'Print :com.apple.security.application-groups:0' iosApp/SalatWatchComplication/SalatWatchComplication.entitlements)" = 'group.app.salat.mobile'
+
+      - name: Check Apple release secrets
+        id: apple_secrets
+        shell: bash
+        run: |
+          missing=0
+          for name in APPLE_TEAM_ID APPLE_DISTRIBUTION_CERTIFICATE_BASE64 \
+                      APPLE_DISTRIBUTION_CERTIFICATE_PASSWORD APP_STORE_CONNECT_API_KEY_ID \
+                      APP_STORE_CONNECT_ISSUER_ID APP_STORE_CONNECT_API_PRIVATE_KEY_BASE64; do
+            [[ -z "${!name}" ]] && { echo "::warning::$name is not configured"; missing=1; }
+          done
+          # Without signing secrets the job still builds and verifies the archive; it
+          # simply cannot upload. That keeps the pipeline useful before secrets exist.
+          echo "available=$([[ $missing -eq 0 ]] && echo true || echo false)" >> "$GITHUB_OUTPUT"
+
+      - name: Install Apple distribution certificate
+        if: steps.apple_secrets.outputs.available == 'true'
+        shell: bash
+        run: |
+          CERTIFICATE_PATH="$RUNNER_TEMP/distribution.p12"
+          KEYCHAIN_PATH="$RUNNER_TEMP/awqat-signing.keychain-db"
+          KEYCHAIN_PASSWORD="$(uuidgen)"
+          echo "$APPLE_DISTRIBUTION_CERTIFICATE_BASE64" | base64 --decode > "$CERTIFICATE_PATH"
+          security create-keychain -p "$KEYCHAIN_PASSWORD" "$KEYCHAIN_PATH"
+          security set-keychain-settings -lut 21600 "$KEYCHAIN_PATH"
+          security unlock-keychain -p "$KEYCHAIN_PASSWORD" "$KEYCHAIN_PATH"
+          # -T scopes key access to codesign instead of every tool on the runner.
+          security import "$CERTIFICATE_PATH" -P "$APPLE_DISTRIBUTION_CERTIFICATE_PASSWORD" \
+            -t cert -f pkcs12 -k "$KEYCHAIN_PATH" -T /usr/bin/codesign
+          security set-key-partition-list -S apple-tool:,apple: -k "$KEYCHAIN_PASSWORD" "$KEYCHAIN_PATH"
+          security list-keychain -d user -s "$KEYCHAIN_PATH" login.keychain-db
+          echo "SIGNING_KEYCHAIN=$KEYCHAIN_PATH" >> "$GITHUB_ENV"
+
+      - name: Install App Store Connect API key
+        if: steps.apple_secrets.outputs.available == 'true'
+        shell: bash
+        run: |
+          API_KEY_DIR="$RUNNER_TEMP/private_keys"
+          mkdir -p "$API_KEY_DIR"
+          API_KEY_PATH="$API_KEY_DIR/AuthKey_${APP_STORE_CONNECT_API_KEY_ID}.p8"
+          echo "$APP_STORE_CONNECT_API_PRIVATE_KEY_BASE64" | base64 --decode > "$API_KEY_PATH"
+          chmod 600 "$API_KEY_PATH"
+          echo "API_KEY_PATH=$API_KEY_PATH" >> "$GITHUB_ENV"
+
+      - name: Archive signed App Store build
+        if: steps.apple_secrets.outputs.available == 'true'
+        run: |
+          set -o pipefail
+          xcodebuild -project iosApp/SalatApp.xcodeproj -scheme SalatApp -configuration Release \
+            -destination 'generic/platform=iOS' -archivePath "$RUNNER_TEMP/Salat.xcarchive" \
+            DEVELOPMENT_TEAM="$APPLE_TEAM_ID" CODE_SIGN_STYLE=Automatic \
+            CURRENT_PROJECT_VERSION="$BUILD_NUMBER" MARKETING_VERSION="$MARKETING_VERSION" \
+            -allowProvisioningUpdates \
+            -authenticationKeyPath "$API_KEY_PATH" \
+            -authenticationKeyID "$APP_STORE_CONNECT_API_KEY_ID" \
+            -authenticationKeyIssuerID "$APP_STORE_CONNECT_ISSUER_ID" \
+            clean archive
+
+      - name: Archive unsigned build
+        if: steps.apple_secrets.outputs.available != 'true'
+        run: |
+          set -o pipefail
+          xcodebuild -project iosApp/SalatApp.xcodeproj -scheme SalatApp -configuration Release \
+            -destination 'generic/platform=iOS' -archivePath "$RUNNER_TEMP/Salat.xcarchive" \
+            CURRENT_PROJECT_VERSION="$BUILD_NUMBER" MARKETING_VERSION="$MARKETING_VERSION" \
+            CODE_SIGNING_ALLOWED=NO CODE_SIGNING_REQUIRED=NO \
+            clean archive
+
+      - name: Verify release archive contents
+        shell: bash
+        run: |
+          set -euo pipefail
+          APP="$RUNNER_TEMP/Salat.xcarchive/Products/Applications/Salat.app"
+          WIDGET="$APP/PlugIns/SalatWidgetExtension.appex"
+          WATCH="$APP/Watch/SalatWatch.app"
+          COMPLICATION="$WATCH/PlugIns/SalatWatchComplication.appex"
+
+          test -d "$APP"
+          test -f "$APP/Info.plist"
+          test -d "$WIDGET"
+          test -f "$WIDGET/Info.plist"
+          test -d "$WATCH"
+          test -f "$WATCH/Info.plist"
+          test -d "$COMPLICATION"
+          test -f "$COMPLICATION/Info.plist"
+          test -f "$APP/Assets.car"
+          test -f "$WATCH/Assets.car"
+          test -f "$APP/city_catalog.tsv"
+
+          APP_PRIVACY="$APP/PrivacyInfo.xcprivacy"
+          WIDGET_PRIVACY="$WIDGET/PrivacyInfo.xcprivacy"
+          WATCH_PRIVACY="$WATCH/PrivacyInfo.xcprivacy"
+          COMPLICATION_PRIVACY="$COMPLICATION/PrivacyInfo.xcprivacy"
+          test -f "$APP_PRIVACY"
+          test -f "$WIDGET_PRIVACY"
+          test -f "$WATCH_PRIVACY"
+          test -f "$COMPLICATION_PRIVACY"
+          plutil -lint "$APP_PRIVACY"
+          plutil -lint "$WIDGET_PRIVACY"
+          plutil -lint "$WATCH_PRIVACY"
+          plutil -lint "$COMPLICATION_PRIVACY"
+          for locale in en tr ar fa ur bn ms zh-Hans zh-Hant; do
+            test -f "$WATCH/$locale.lproj/Watch.strings"
+            test -f "$COMPLICATION/$locale.lproj/Watch.strings"
+          done
+
+          assert_plist_value() {
+            local plist="$1"
+            local key="$2"
+            local expected="$3"
+            local actual
+            actual="$(/usr/libexec/PlistBuddy -c "Print :$key" "$plist")"
+            if [[ "$actual" != "$expected" ]]; then
+              echo "::error file=$plist::$key expected '$expected' but archive contains '$actual'"
+              return 1
+            fi
+          }
+
+          assert_plist_value "$APP/Info.plist" CFBundleIdentifier app.salat.mobile
+          assert_plist_value "$APP/Info.plist" CFBundleShortVersionString "$MARKETING_VERSION"
+          assert_plist_value "$APP/Info.plist" CFBundleVersion "$BUILD_NUMBER"
+          assert_plist_value "$APP/Info.plist" ITSAppUsesNonExemptEncryption false
+          assert_plist_value "$APP/Info.plist" UISupportedInterfaceOrientations:0 UIInterfaceOrientationPortrait
+          assert_plist_value "$APP/Info.plist" UISupportedInterfaceOrientations:1 UIInterfaceOrientationPortraitUpsideDown
+          assert_plist_value "$APP/Info.plist" UISupportedInterfaceOrientations:2 UIInterfaceOrientationLandscapeLeft
+          assert_plist_value "$APP/Info.plist" UISupportedInterfaceOrientations:3 UIInterfaceOrientationLandscapeRight
+          assert_plist_value "$WIDGET/Info.plist" CFBundleIdentifier app.salat.mobile.widget
+          assert_plist_value "$WIDGET/Info.plist" CFBundleExecutable SalatWidgetExtension
+          assert_plist_value "$WIDGET/Info.plist" CFBundleShortVersionString "$MARKETING_VERSION"
+          assert_plist_value "$WIDGET/Info.plist" CFBundleVersion "$BUILD_NUMBER"
+          assert_plist_value "$WIDGET/Info.plist" NSExtension:NSExtensionPointIdentifier com.apple.widgetkit-extension
+          assert_plist_value "$WATCH/Info.plist" CFBundleIdentifier app.salat.mobile.watchapp
+          assert_plist_value "$WATCH/Info.plist" CFBundleExecutable SalatWatch
+          assert_plist_value "$WATCH/Info.plist" CFBundleShortVersionString "$MARKETING_VERSION"
+          assert_plist_value "$WATCH/Info.plist" CFBundleVersion "$BUILD_NUMBER"
+          assert_plist_value "$WATCH/Info.plist" CFBundleIconName AppIcon
+          assert_plist_value "$WATCH/Info.plist" CFBundleIcons:CFBundlePrimaryIcon:CFBundleIconName AppIcon
+          assert_plist_value "$WATCH/Info.plist" DTPlatformName watchos
+          assert_plist_value "$WATCH/Info.plist" MinimumOSVersion 10.0
+          assert_plist_value "$WATCH/Info.plist" UIDeviceFamily:0 4
+          assert_plist_value "$WATCH/Info.plist" WKCompanionAppBundleIdentifier app.salat.mobile
+          assert_plist_value "$COMPLICATION/Info.plist" CFBundleIdentifier app.salat.mobile.watchapp.complicationextension
+          assert_plist_value "$COMPLICATION/Info.plist" CFBundleExecutable SalatWatchComplication
+          assert_plist_value "$COMPLICATION/Info.plist" CFBundleShortVersionString "$MARKETING_VERSION"
+          assert_plist_value "$COMPLICATION/Info.plist" CFBundleVersion "$BUILD_NUMBER"
+          assert_plist_value "$COMPLICATION/Info.plist" DTPlatformName watchos
+          assert_plist_value "$COMPLICATION/Info.plist" MinimumOSVersion 10.0
+          assert_plist_value "$COMPLICATION/Info.plist" NSExtension:NSExtensionPointIdentifier com.apple.widgetkit-extension
+          test -x "$WIDGET/SalatWidgetExtension"
+          otool -l "$WIDGET/SalatWidgetExtension" | grep -q '__swift5_entry'
+          test -x "$WATCH/SalatWatch"
+          test -x "$COMPLICATION/SalatWatchComplication"
+          otool -l "$WATCH/SalatWatch" | grep -q '__swift5_entry'
+          otool -l "$COMPLICATION/SalatWatchComplication" | grep -q '__swift5_entry'
+          xcrun vtool -show-build "$WATCH/SalatWatch" | grep -q 'platform WATCHOS'
+          xcrun vtool -show-build "$COMPLICATION/SalatWatchComplication" | grep -q 'platform WATCHOS'
+          lipo -archs "$WATCH/SalatWatch" | grep -qw arm64_32
+          lipo -archs "$WATCH/SalatWatch" | grep -qw arm64
+          lipo -archs "$COMPLICATION/SalatWatchComplication" | grep -qw arm64_32
+          lipo -archs "$COMPLICATION/SalatWatchComplication" | grep -qw arm64
+
+          EXPECTED="$(shasum -a 256 resources/city_catalog.tsv | awk '{print $1}')"
+          ACTUAL="$(shasum -a 256 "$APP/city_catalog.tsv" | awk '{print $1}')"
+          test "$ACTUAL" = "$EXPECTED"
+
+          echo "Release archive verified: $APP"
+          echo "App privacy manifest: $APP_PRIVACY"
+          echo "Widget privacy manifest: $WIDGET_PRIVACY"
+          echo "Watch privacy manifest: $WATCH_PRIVACY"
+          echo "Complication privacy manifest: $COMPLICATION_PRIVACY"
+
+      - name: Export signed IPA
+        if: steps.apple_secrets.outputs.available == 'true'
+        shell: bash
+        run: |
+          cp iosApp/ExportOptions-AppStore.plist "$RUNNER_TEMP/ExportOptions.plist"
+          /usr/libexec/PlistBuddy -c "Add :teamID string $APPLE_TEAM_ID" "$RUNNER_TEMP/ExportOptions.plist"
+          xcodebuild -exportArchive -archivePath "$RUNNER_TEMP/Salat.xcarchive" \
+            -exportPath "$RUNNER_TEMP/export" -exportOptionsPlist "$RUNNER_TEMP/ExportOptions.plist" \
+            -allowProvisioningUpdates \
+            -authenticationKeyPath "$API_KEY_PATH" \
+            -authenticationKeyID "$APP_STORE_CONNECT_API_KEY_ID" \
+            -authenticationKeyIssuerID "$APP_STORE_CONNECT_ISSUER_ID"
+          IPA="$(find "$RUNNER_TEMP/export" -maxdepth 1 -name '*.ipa' -print -quit)"
+          test -n "$IPA"
+          echo "IPA_PATH=$IPA" >> "$GITHUB_ENV"
+
+      - name: Validate and upload to App Store Connect
+        if: steps.apple_secrets.outputs.available == 'true'
+        env:
+          API_PRIVATE_KEYS_DIR: ${{ runner.temp }}/private_keys
+        shell: bash
+        run: |
+          set -euo pipefail
+          run_altool() {
+            local action="$1" log="$RUNNER_TEMP/altool-${1#--}.log"
+            xcrun altool "$action" --type ios --file "$IPA_PATH" \
+              --apiKey "$APP_STORE_CONNECT_API_KEY_ID" \
+              --apiIssuer "$APP_STORE_CONNECT_ISSUER_ID" 2>&1 | tee "$log"
+            if grep -Eiq 'ERROR:|Validation failed|UPLOAD FAILED|Failed to (validate|upload)' "$log"; then
+              echo "::error::altool $action reported errors"
+              return 1
+            fi
+          }
+          run_altool --validate-app
+          run_altool --upload-app
+          echo "Uploaded ${MARKETING_VERSION} (${BUILD_NUMBER}) to App Store Connect" >> "$GITHUB_STEP_SUMMARY"
+
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        if: steps.apple_secrets.outputs.available == 'true'
+        with:
+          name: awqat-ios-${{ needs.plan.outputs.track }}-${{ needs.plan.outputs.build_number }}
+          path: ${{ env.IPA_PATH }}
+          retention-days: 14
+
+      - name: Remove temporary signing keychain
+        if: always()
+        run: |
+          if [[ -n "${SIGNING_KEYCHAIN:-}" && -f "$SIGNING_KEYCHAIN" ]]; then
+            security delete-keychain "$SIGNING_KEYCHAIN" || true
+          fi
+
+  android:
+    needs: [ plan, verify ]
+    environment: ${{ needs.plan.outputs.environment }}
+    runs-on: ubuntu-latest
+    env:
+      ANDROID_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+      ANDROID_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
+      ANDROID_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          # versionCode is the commit count; a shallow clone would make every build 1.
+          fetch-depth: 0
+
+      - uses: actions/setup-java@b6effb05e454b25005698d916606bdc6ffcbf961 # v5
+        with:
+          distribution: temurin
+          java-version: '21'
+
+      - uses: android-actions/setup-android@40fd30fb8d7440372e1316f5d1809ec01dcd3699 # v4
+        with:
+          packages: platform-tools
+
+      - name: Install Android compile SDK
+        run: sdkmanager "platforms;android-36" "build-tools;36.0.0"
+
+      - uses: gradle/actions/setup-gradle@ed408507eac070d1f99cc633dbcf757c94c7933a # v4
+
+      - name: Install upload keystore
+        id: keystore
+        shell: bash
+        env:
+          ANDROID_KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
+        run: |
+          if [[ -z "$ANDROID_KEYSTORE_BASE64" ]]; then
+            echo "::warning::ANDROID_KEYSTORE_BASE64 is not configured; building unsigned"
+            echo "signed=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          KEYSTORE="$RUNNER_TEMP/upload.jks"
+          echo "$ANDROID_KEYSTORE_BASE64" | base64 --decode > "$KEYSTORE"
+          chmod 600 "$KEYSTORE"
+          # The Gradle signing config reads this path from the environment.
+          echo "ANDROID_KEYSTORE_PATH=$KEYSTORE" >> "$GITHUB_ENV"
+          echo "signed=true" >> "$GITHUB_OUTPUT"
+
+      - name: Build release bundles
+        run: ./gradlew :androidApp:bundleRelease :wearApp:bundleRelease --stacktrace
+
+      - name: Verify bundle version
+        shell: bash
+        run: |
+          set -euo pipefail
+          EXPECTED="${{ needs.plan.outputs.build_number }}"
+          ACTUAL="$(gradle -q :androidApp:properties | grep '^versionCode:' | awk '{print $2}')"
+          if [[ "$ACTUAL" != "$EXPECTED" ]]; then
+            echo "::error::Gradle produced versionCode $ACTUAL but the release plan expects $EXPECTED"
+            exit 1
+          fi
+
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: awqat-android-${{ needs.plan.outputs.track }}-${{ needs.plan.outputs.build_number }}
+          path: |
+            androidApp/build/outputs/bundle/release/androidApp-release.aab
+            wearApp/build/outputs/bundle/release/wearApp-release.aab
+          retention-days: 14
+
+      # Only the phone bundle is published. Wear OS distribution in the same Play
+      # listing needs a version-code scheme decision that has not been made yet;
+      # see docs/RELEASING.md. The wear bundle is archived above in the meantime.
+      # A step's own env is not visible to that step's `if`, so the presence of the
+      # service account is resolved into an output first.
+      - name: Check Play credentials
+        id: play
+        shell: bash
+        env:
+          PLAY_SERVICE_ACCOUNT: ${{ secrets.GOOGLE_PLAY_SERVICE_ACCOUNT_JSON }}
+        run: |
+          if [[ -z "$PLAY_SERVICE_ACCOUNT" ]]; then
+            echo "::warning::GOOGLE_PLAY_SERVICE_ACCOUNT_JSON is not configured; skipping Play upload"
+            echo "available=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "available=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Upload to Google Play
+        if: steps.keystore.outputs.signed == 'true' && steps.play.outputs.available == 'true'
+        uses: r0adkll/upload-google-play@e738b9dd8f2476ea806d921b64aacd24f34515a5 # v1
+        with:
+          serviceAccountJsonPlainText: ${{ secrets.GOOGLE_PLAY_SERVICE_ACCOUNT_JSON }}
+          packageName: app.salat.mobile
+          releaseFiles: androidApp/build/outputs/bundle/release/androidApp-release.aab
+          track: ${{ needs.plan.outputs.play_track }}
+          status: ${{ needs.plan.outputs.play_status }}

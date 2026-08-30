@@ -15,7 +15,7 @@
         android:textSize="11sp"
         android:textStyle="bold"
         android:textColor="#467A69"
-        android:letterSpacing="0.14" />
+        android:letterSpacing="@dimen/brand_letter_spacing" />
 
     <TextView
         android:id="@+id/widget_location"

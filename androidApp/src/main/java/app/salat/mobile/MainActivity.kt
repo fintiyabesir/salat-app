@@ -140,14 +140,6 @@ internal fun LocationStartScreen(
                 verticalArrangement = Arrangement.Center
             ) {
                 Text(
-                    stringResource(R.string.brand_name),
-                    color = Sage,
-                    fontSize = 14.sp,
-                    letterSpacing = 3.sp,
-                    fontWeight = FontWeight.SemiBold
-                )
-                Spacer(Modifier.height(16.dp))
-                Text(
                     stringResource(R.string.location_title),
                     fontSize = 34.sp,
                     lineHeight = 40.sp,

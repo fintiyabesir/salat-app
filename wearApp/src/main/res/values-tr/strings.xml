@@ -1,7 +1,7 @@
 <resources>
-    <string name="app_name">Salat</string>
+    <string name="app_name">Namaz Vakti</string>
     <string name="next_prayer">Sonraki vakit</string>
-    <string name="open_phone_to_sync">Namaz vakitlerini eşzamanlamak için Salat’ı telefonda bir kez açın.</string>
+    <string name="open_phone_to_sync">Namaz vakitlerini eşzamanlamak için uygulamayı telefonda bir kez açın.</string>
     <string name="tile_label">Sonraki vakit</string>
     <string name="tile_description">Sıradaki namaz ve vakti çevrimdışı kullanılabilir.</string>
     <string name="complication_label">Sonraki vakit</string>

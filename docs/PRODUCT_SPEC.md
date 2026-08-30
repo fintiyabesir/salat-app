@@ -1,4 +1,4 @@
-# Salat v1 — Product & Prototype Notes
+# Awqat v1 — Product & Prototype Notes
 
 ## Product principles
 - Global from day one; no default country.
