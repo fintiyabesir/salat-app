@@ -18,3 +18,8 @@ updates:
         patterns: ["androidx.compose*"]
       kotlin-and-agp:
         patterns: ["org.jetbrains.kotlin*", "com.android*"]
+    ignore:
+      # Compose BOM 2026.05+ requires an API 37 compile SDK that is not in the stable
+      # channel CI uses; the bump fails with "requires a newer compileSdk". Drop this
+      # entry once API 37 is available and compileSdk is raised.
+      - dependency-name: "androidx.compose:compose-bom"
