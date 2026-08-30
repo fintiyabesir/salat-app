@@ -475,7 +475,7 @@ jobs:
         run: |
           set -euo pipefail
           EXPECTED="${{ needs.plan.outputs.build_number }}"
-          ACTUAL="$(gradle -q :androidApp:properties | grep '^versionCode:' | awk '{print $2}')"
+          ACTUAL="$(./gradlew -q printVersion | grep '^appVersionCode=' | cut -d= -f2)"
           if [[ "$ACTUAL" != "$EXPECTED" ]]; then
             echo "::error::Gradle produced versionCode $ACTUAL but the release plan expects $EXPECTED"
             exit 1

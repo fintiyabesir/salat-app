@@ -23,3 +23,14 @@ val appVersionCode: Int = runCatching {
 
 extra["appVersionName"] = appVersionName
 extra["appVersionCode"] = appVersionCode
+
+// Lets CI assert the values it is about to ship. Guards the case that matters: a
+// checkout without fetch-depth: 0 would silently make every build number 1.
+tasks.register("printVersion") {
+    val name = appVersionName
+    val code = appVersionCode
+    doLast {
+        println("appVersionName=$name")
+        println("appVersionCode=$code")
+    }
+}
