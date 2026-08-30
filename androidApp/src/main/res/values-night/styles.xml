@@ -1,7 +1,9 @@
 <resources>
-    <style name="AppTheme" parent="android:style/Theme.Material.Light.NoActionBar">
+    <!-- The light-only window theme produced a white flash on launch and light system
+         bars over a dark app. -->
+    <style name="AppTheme" parent="android:style/Theme.Material.NoActionBar">
         <item name="android:fontFamily">sans</item>
-        <item name="android:windowLightStatusBar">true</item>
+        <item name="android:windowLightStatusBar">false</item>
         <item name="android:windowBackground">@color/window_background</item>
         <item name="android:navigationBarColor">@color/window_background</item>
         <item name="android:statusBarColor">@color/window_background</item>

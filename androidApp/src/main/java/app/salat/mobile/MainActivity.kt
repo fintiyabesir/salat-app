@@ -28,11 +28,13 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import app.salat.model.AppearanceMode
 import app.salat.model.ResolvedLocation
 
 class MainActivity : ComponentActivity() {
@@ -42,32 +44,39 @@ class MainActivity : ComponentActivity() {
         val resolver = AndroidLocationResolver(this)
         val notificationCoordinator = AndroidPrayerNotificationCoordinator(this)
         val glanceTimelineStore = AndroidGlanceTimelineStore(this)
-        setContent { SalatApp(resolver, notificationCoordinator, glanceTimelineStore) }
+        val locationStore = AndroidLocationStore(this)
+        setContent { SalatApp(resolver, notificationCoordinator, glanceTimelineStore, locationStore) }
     }
 }
-
-private val Canvas = Color(0xFFFAF8F3)
-private val Sage = Color(0xFF467A69)
 
 @Composable
 private fun SalatApp(
     resolver: AndroidLocationResolver,
     notificationCoordinator: AndroidPrayerNotificationCoordinator,
-    glanceTimelineStore: AndroidGlanceTimelineStore
+    glanceTimelineStore: AndroidGlanceTimelineStore,
+    locationStore: AndroidLocationStore
 ) {
-    var location by remember { mutableStateOf<ResolvedLocation?>(null) }
+    // Start from the remembered location so the app opens on prayer times instead of
+    // the picker; a fresh device fix replaces it when one arrives.
+    val context = LocalContext.current
+    val appearance = remember { AndroidAppSettingsStore(context).load().appearance }
+    var location by remember { mutableStateOf(locationStore.load()) }
     var resolving by remember { mutableStateOf(false) }
     var locationError by remember { mutableStateOf(false) }
     var showCityPicker by remember { mutableStateOf(false) }
 
     fun applyLocation(resolved: ResolvedLocation?) {
-        location = resolved
         resolving = false
-        locationError = resolved == null
-        if (resolved != null) {
-            notificationCoordinator.rebuild(resolved)
-            glanceTimelineStore.rebuild(resolved)
+        if (resolved == null) {
+            // A failed fix must not drop a user back to the picker mid-use.
+            locationError = location == null
+            return
         }
+        location = resolved
+        locationError = false
+        locationStore.save(resolved)
+        notificationCoordinator.rebuild(resolved)
+        glanceTimelineStore.rebuild(resolved)
     }
 
     fun resolveDeviceLocation() {
@@ -93,6 +102,12 @@ private fun SalatApp(
     }
 
     LaunchedEffect(Unit) {
+        // A restored location still needs the widget, watch and alarms rebuilt, since
+        // nothing else runs on a launch that reuses it.
+        location?.let { restored ->
+            notificationCoordinator.rebuild(restored)
+            glanceTimelineStore.rebuild(restored)
+        }
         if (resolver.hasPermission()) resolveDeviceLocation()
     }
 
@@ -101,7 +116,8 @@ private fun SalatApp(
             resolving = resolving,
             showError = locationError,
             onUseLocation = ::requestOrResolveDeviceLocation,
-            onChooseCity = { showCityPicker = true }
+            onChooseCity = { showCityPicker = true },
+            appearance = appearance
         )
     } else {
         SalatMainShell(
@@ -131,10 +147,11 @@ internal fun LocationStartScreen(
     resolving: Boolean,
     showError: Boolean,
     onUseLocation: () -> Unit,
-    onChooseCity: () -> Unit
+    onChooseCity: () -> Unit,
+    appearance: AppearanceMode = AppearanceMode.SYSTEM
 ) {
-    MaterialTheme {
-        Surface(modifier = Modifier.fillMaxSize(), color = Canvas) {
+    AwqatTheme(appearance) {
+        Surface(modifier = Modifier.fillMaxSize(), color = MaterialTheme.colorScheme.background) {
             Column(
                 Modifier.padding(horizontal = 26.dp, vertical = 52.dp),
                 verticalArrangement = Arrangement.Center
@@ -148,14 +165,14 @@ internal fun LocationStartScreen(
                 Spacer(Modifier.height(14.dp))
                 Text(
                     stringResource(R.string.location_privacy),
-                    color = Color(0xFF6D716E),
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
                     lineHeight = 22.sp
                 )
                 Spacer(Modifier.height(28.dp))
                 Button(
                     onClick = onUseLocation,
                     enabled = !resolving,
-                    colors = ButtonDefaults.buttonColors(containerColor = Sage),
+                    colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary),
                     shape = RoundedCornerShape(18.dp),
                     modifier = Modifier.fillMaxWidth().height(56.dp)
                 ) {
@@ -174,7 +191,7 @@ internal fun LocationStartScreen(
                     Spacer(Modifier.height(14.dp))
                     Text(
                         stringResource(R.string.location_unavailable),
-                        color = Color(0xFF9A5B45),
+                        color = MaterialTheme.colorScheme.error,
                         lineHeight = 20.sp
                     )
                 }
