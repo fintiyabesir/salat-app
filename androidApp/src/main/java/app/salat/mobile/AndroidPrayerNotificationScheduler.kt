@@ -82,6 +82,22 @@ class AndroidPrayerNotificationScheduler(private val context: Context) {
         }
     }
 
+    /**
+     * A single inexact alarm that wakes the app to rebuild the rolling plan. Inexact is
+     * deliberate: this is housekeeping, not a prayer alert, and it must not consume the
+     * exact-alarm budget.
+     */
+    fun scheduleReplan(date: java.time.LocalDate, zone: java.time.ZoneId) {
+        val triggerAt = date.atTime(3, 0).atZone(zone).toInstant().toEpochMilli()
+        val pending = PendingIntent.getBroadcast(
+            context,
+            REQUEST_REPLAN,
+            Intent(context, PrayerScheduleLifecycleReceiver::class.java).setAction(ACTION_REPLAN),
+            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+        )
+        alarms.setAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, triggerAt, pending)
+    }
+
     fun cancelAll() {
         cancel(storedIds())
         preferences.edit().remove(KEY_SCHEDULED_IDS).apply()
@@ -110,6 +126,8 @@ class AndroidPrayerNotificationScheduler(private val context: Context) {
 
     companion object {
         const val ACTION_PRAYER_ALERT = "app.salat.mobile.PRAYER_ALERT"
+        const val ACTION_REPLAN = "app.salat.mobile.PRAYER_REPLAN"
+        private const val REQUEST_REPLAN = 90_210
         const val EXTRA_STABLE_ID = "stable_id"
         const val EXTRA_PRAYER_NAME = "prayer_name"
         const val EXTRA_PRAYER_AT = "prayer_at"

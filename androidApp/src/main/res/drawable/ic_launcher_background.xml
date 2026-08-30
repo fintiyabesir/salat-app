@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Mirrors scripts/generate_app_icon.py so the Android icon matches the Apple one. -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+    <path
+        android:fillColor="#F7F4EC"
+        android:pathData="M0,0h108v108h-108z" />
+    <path
+        android:fillColor="#E5EFEC"
+        android:pathData="M54,8.6a45.4,45.4 0 1,1 -0.01,0z" />
+    <path
+        android:fillColor="#DDEAE6"
+        android:pathData="M54,19.2a34.8,34.8 0 1,1 -0.01,0z" />
+</vector>
