@@ -108,6 +108,7 @@ The CI workflow validates both platform paths: Ubuntu builds/tests shared + Andr
 - [Privacy design](docs/PRIVACY.md)
 - [Official source strategy](docs/OFFICIAL_SOURCES.md)
 - [Licensing status](docs/LICENSING.md)
+- [Release process](docs/RELEASING.md)
 
 ### Current platform starters
 Android and iOS now resolve device location with contextual permission and feed coordinates, country and timezone into the shared `SalatEngine`. Prayer calculation remains local; platform location data is not sent to an Awqat backend.

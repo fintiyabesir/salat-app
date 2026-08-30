@@ -65,12 +65,9 @@ If a future official-source verification implementation transmits location or an
 
 Keep marketing version `0.1.0` during the initial internal beta. Automatic `main` uploads use the monotonically increasing GitHub Actions workflow run number as `CFBundleVersion`; manual uploads use the build number entered when dispatching the workflow. This makes rapid internal iterations easy to identify without creating unnecessary App Store versions. A manually supplied build number must not duplicate an existing App Store Connect build.
 
+
 ## Automatic uploads
 
-`AUTO_TESTFLIGHT_UPLOAD` is set to `true`, so **every successful Core CI run on `main`
-uploads a build to TestFlight**. Set the variable to `false` while doing development
-merges that should not reach testers:
-
-```bash
-gh variable set AUTO_TESTFLIGHT_UPLOAD --body false
-```
+Superseded. Releases are now tag-driven and documented in [RELEASING.md](RELEASING.md);
+a merge to `main` reaches the internal track only. The `AUTO_TESTFLIGHT_UPLOAD`
+repository variable is no longer read by any workflow and can be deleted.
