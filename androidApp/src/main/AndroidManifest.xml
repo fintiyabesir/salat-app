@@ -8,6 +8,8 @@
     <application
         android:theme="@style/AppTheme"
         android:label="@string/app_name"
+        android:icon="@mipmap/ic_launcher"
+        android:roundIcon="@mipmap/ic_launcher_round"
         android:localeConfig="@xml/locales_config"
         android:supportsRtl="true">
         <activity android:name=".MainActivity" android:exported="true">
@@ -31,6 +33,7 @@
                 <action android:name="android.intent.action.TIME_SET" />
                 <action android:name="android.intent.action.MY_PACKAGE_REPLACED" />
                 <action android:name="android.app.action.SCHEDULE_EXACT_ALARM_PERMISSION_STATE_CHANGED" />
+                <action android:name="app.salat.mobile.PRAYER_REPLAN" />
             </intent-filter>
         </receiver>
 

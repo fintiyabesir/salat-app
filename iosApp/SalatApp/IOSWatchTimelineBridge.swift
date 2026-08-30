@@ -26,6 +26,7 @@ final class IOSWatchTimelineBridge: NSObject, WCSessionDelegate {
     private func publishPendingIfPossible() {
         guard let session,
               session.activationState == .activated,
+              session.isWatchAppInstalled,
               let payload = pendingPayload,
               let data = try? JSONEncoder().encode(payload) else {
             return
@@ -47,6 +48,14 @@ final class IOSWatchTimelineBridge: NSObject, WCSessionDelegate {
         if activationState == .activated {
             publishPendingIfPossible()
         }
+    }
+
+    /// Fires when the watch app is installed or the paired watch changes. Without this,
+    /// a timeline that failed with WCErrorCodeWatchAppNotInstalled stays pending until
+    /// something else calls rebuild(), so installing the watch app after choosing a
+    /// location leaves the watch empty.
+    func sessionWatchStateDidChange(_ session: WCSession) {
+        publishPendingIfPossible()
     }
 
     func sessionDidBecomeInactive(_ session: WCSession) {}

@@ -65,8 +65,18 @@ struct TodayView: View {
                 .tracking(1.2)
                 .foregroundStyle(.tint)
             Text(model.nextPrayer.name).font(.title2)
-            Text(model.nextPrayer.time)
-                .font(.system(size: horizontalSizeClass == .regular ? 64 : 56, weight: .light, design: .rounded))
+            HStack(alignment: .firstTextBaseline, spacing: 10) {
+                Text(model.nextPrayer.time)
+                    .font(.system(size: horizontalSizeClass == .regular ? 64 : 56, weight: .light, design: .rounded))
+                // .timer keeps itself current without a Timer publisher, and counts
+                // down because the prayer instant is in the future.
+                Text(
+                    Date(timeIntervalSince1970: Double(model.nextPrayer.epochMillis) / 1000.0),
+                    style: .timer
+                )
+                .font(.title3.weight(.medium).monospacedDigit())
+                .foregroundStyle(.tint)
+            }
         }
         .padding(horizontalSizeClass == .regular ? 28 : 24)
         .frame(maxWidth: .infinity, alignment: .leading)

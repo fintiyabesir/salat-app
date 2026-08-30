@@ -41,7 +41,17 @@ class AndroidPrayerNotificationCoordinator(context: Context) {
             now = Instant.fromEpochMilliseconds(System.currentTimeMillis())
         )
         scheduler.reschedule(plan)
+        // The plan only covers `horizonDays`. Without a self-rearm the alerts simply
+        // stop for anyone who does not open the app before the horizon runs out.
+        scheduler.scheduleReplan(start.plusDays((horizonDays - 2).coerceAtLeast(1).toLong()), zone)
         replanStore.clear()
+    }
+
+    /** Rebuilds from the remembered location. Used by boot and horizon re-arm. */
+    fun rebuildFromStoredLocation(): Boolean {
+        val stored = AndroidLocationStore(appContext).load() ?: return false
+        rebuild(stored)
+        return true
     }
 
     fun cancelAll() = scheduler.cancelAll()

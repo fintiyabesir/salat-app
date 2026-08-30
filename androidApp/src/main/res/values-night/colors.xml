@@ -1,0 +1,8 @@
+<resources>
+    <color name="widget_surface">#171916</color>
+    <color name="widget_stroke">#3391C9B5</color>
+    <color name="widget_brand">#91C9B5</color>
+    <color name="widget_text_primary">#F2F1EC</color>
+    <color name="widget_text_secondary">#AAB0A8</color>
+    <color name="window_background">#171916</color>
+</resources>
