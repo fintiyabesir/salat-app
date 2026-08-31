@@ -25,6 +25,7 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
+import androidx.compose.material3.NavigationBarItemDefaults
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
@@ -123,24 +124,36 @@ fun SalatMainShell(
                 )
             },
             bottomBar = {
+                // Material3's item defaults pull roles this app does not define, which
+                // put a lavender label on the selected tab. Set them explicitly.
+                val navColors = NavigationBarItemDefaults.colors(
+                    selectedIconColor = MaterialTheme.colorScheme.primary,
+                    selectedTextColor = MaterialTheme.colorScheme.primary,
+                    indicatorColor = MaterialTheme.colorScheme.secondaryContainer,
+                    unselectedIconColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                    unselectedTextColor = MaterialTheme.colorScheme.onSurfaceVariant
+                )
                 NavigationBar(containerColor = canvas) {
                     NavigationBarItem(
                         selected = section == MainSection.TODAY,
                         onClick = { section = MainSection.TODAY },
                         icon = { Text("●") },
-                        label = { Text(stringResource(R.string.today)) }
+                        label = { Text(stringResource(R.string.today)) },
+                        colors = navColors
                     )
                     NavigationBarItem(
                         selected = section == MainSection.CALENDAR,
                         onClick = { section = MainSection.CALENDAR },
                         icon = { Text("▦") },
-                        label = { Text(stringResource(R.string.calendar)) }
+                        label = { Text(stringResource(R.string.calendar)) },
+                        colors = navColors
                     )
                     NavigationBarItem(
                         selected = section == MainSection.QIBLA,
                         onClick = { section = MainSection.QIBLA },
                         icon = { Text("⌁") },
-                        label = { Text(stringResource(R.string.qibla)) }
+                        label = { Text(stringResource(R.string.qibla)) },
+                        colors = navColors
                     )
                 }
             }

@@ -31,6 +31,10 @@ internal fun awqatColorScheme(appearance: AppearanceMode): ColorScheme {
             // Without an explicit onPrimary, Material3's default indigo lands on the
             // mint button and reads as another product's palette.
             onPrimary = Color(0xFF10231D),
+            // Without these, Material3's default indigo lands on the selected prayer
+            // row and the bottom navigation pill.
+            secondaryContainer = Color(0xFF2C3A33),
+            onSecondaryContainer = Color(0xFFDCEDE4),
             background = ShellCanvasDark,
             surface = ShellCardDark,
             surfaceVariant = ShellCardDark,
@@ -42,6 +46,8 @@ internal fun awqatColorScheme(appearance: AppearanceMode): ColorScheme {
         lightColorScheme(
             primary = ShellSage,
             onPrimary = Color.White,
+            secondaryContainer = Color(0xFFDCEDE4),
+            onSecondaryContainer = Color(0xFF20221F),
             background = ShellCanvas,
             surface = Color.White,
             onBackground = Color(0xFF20221F),
