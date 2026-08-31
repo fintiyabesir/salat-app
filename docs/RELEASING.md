@@ -71,6 +71,8 @@ repository-level copies with `gh secret delete <NAME>`.
 | `APPLE_TEAM_ID` | Apple Developer team |
 | `APPLE_DISTRIBUTION_CERTIFICATE_BASE64` | Distribution certificate, base64 `.p12` |
 | `APPLE_DISTRIBUTION_CERTIFICATE_PASSWORD` | Password for that `.p12` |
+| `APPLE_DEVELOPMENT_CERTIFICATE_BASE64` | Development certificate, base64 `.p12` — see below |
+| `APPLE_DEVELOPMENT_CERTIFICATE_PASSWORD` | Password for that `.p12` |
 | `APP_STORE_CONNECT_API_KEY_ID` | ASC API key id |
 | `APP_STORE_CONNECT_ISSUER_ID` | ASC issuer id |
 | `APP_STORE_CONNECT_API_PRIVATE_KEY_BASE64` | ASC `.p8`, base64 |
@@ -82,6 +84,24 @@ repository-level copies with `gh secret delete <NAME>`.
 
 Every upload step is skipped with a warning when its secrets are absent, so the pipeline
 stays useful before they all exist.
+
+## Why a development certificate is needed
+
+`xcodebuild archive` signs with a **development** identity and `-exportArchive` then
+re-signs for distribution. That is Apple's flow, not a misconfiguration.
+
+A certificate's private key never leaves the machine that generated it, and every CI
+runner is a fresh machine. Without a development identity to import, automatic signing
+asks Apple for a **new certificate on every run** — which silently consumed the
+account's certificate limit until every release failed with "Your account has reached
+the maximum number of certificates".
+
+Supplying one development `.p12` fixes it permanently: Xcode finds an identity and
+reuses it. Export it from Keychain Access under **My Certificates** (that category only
+lists certificates whose private key you hold), as Personal Information Exchange.
+
+The release job prints `security find-identity` after import, so a future signing
+failure shows what the runner actually had.
 
 ## Google Play setup
 
