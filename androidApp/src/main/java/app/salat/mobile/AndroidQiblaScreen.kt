@@ -120,11 +120,14 @@ internal fun AndroidQiblaScreen(location: ResolvedLocation, settings: AppPrefere
                     textAlign = TextAlign.Center
                 )
             } else {
-                QiblaRose(
-                    headingDegrees = heading?.degrees,
-                    deviationDegrees = deviation,
-                    aligned = aligned
-                )
+                Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                    QiblaRose(
+                        headingDegrees = heading?.degrees,
+                        deviationDegrees = deviation
+                    )
+                    Spacer(Modifier.height(10.dp))
+                    QiblaReading(deviation, aligned)
+                }
             }
         }
 
@@ -142,8 +145,35 @@ internal fun AndroidQiblaScreen(location: ResolvedLocation, settings: AppPrefere
     }
 }
 
+/**
+ * The dial only. The reading deliberately sits outside it: placed inside, it
+ * covers the needle tip and the Kaaba medallion exactly when the bearing is
+ * southerly — hiding the one thing the screen exists to show.
+ */
 @Composable
-private fun QiblaRose(headingDegrees: Float?, deviationDegrees: Float?, aligned: Boolean) {
+private fun QiblaReading(deviationDegrees: Float?, aligned: Boolean) {
+    val scheme = MaterialTheme.colorScheme
+    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+        if (deviationDegrees == null) {
+            Text("—°", fontSize = 40.sp, fontWeight = FontWeight.Light, color = scheme.onSurfaceVariant)
+        } else {
+            Text("${abs(deviationDegrees).roundToInt()}°", fontSize = 40.sp, fontWeight = FontWeight.Light)
+            Text(
+                when {
+                    aligned -> stringResource(R.string.qibla_aligned)
+                    deviationDegrees > 0 -> stringResource(R.string.qibla_turn_right)
+                    else -> stringResource(R.string.qibla_turn_left)
+                },
+                fontSize = 14.sp,
+                color = if (aligned) scheme.primary else scheme.onSurfaceVariant,
+                modifier = Modifier.padding(top = 2.dp)
+            )
+        }
+    }
+}
+
+@Composable
+private fun QiblaRose(headingDegrees: Float?, deviationDegrees: Float?) {
     val scheme = MaterialTheme.colorScheme
     val tick = scheme.onSurfaceVariant.copy(alpha = 0.35f)
     val face = scheme.surface
@@ -177,37 +207,6 @@ private fun QiblaRose(headingDegrees: Float?, deviationDegrees: Float?, aligned:
 
         // Cardinal letters ride the same rotation as the ticks but stay upright.
         CardinalLetters(headingDegrees ?: 0f)
-
-        // Artboard 2a puts the reading below the hub. The mock only ever shows a
-        // needle pointing up, but at southerly bearings it swings straight through
-        // this text, so the reading gets its own backing to stay legible.
-        Column(
-            horizontalAlignment = Alignment.CenterHorizontally,
-            modifier = Modifier
-                .offset(y = 74.dp)
-                .background(scheme.surface.copy(alpha = 0.88f), RoundedCornerShape(18.dp))
-                .padding(horizontal = 14.dp, vertical = 4.dp)
-        ) {
-            if (deviationDegrees == null) {
-                Text("—°", fontSize = 34.sp, fontWeight = FontWeight.Light, color = scheme.onSurfaceVariant)
-            } else {
-                Text(
-                    "${abs(deviationDegrees).roundToInt()}°",
-                    fontSize = 34.sp,
-                    fontWeight = FontWeight.Light
-                )
-                Text(
-                    when {
-                        aligned -> stringResource(R.string.qibla_aligned)
-                        deviationDegrees > 0 -> stringResource(R.string.qibla_turn_right)
-                        else -> stringResource(R.string.qibla_turn_left)
-                    },
-                    fontSize = 14.sp,
-                    color = if (aligned) scheme.primary else scheme.onSurfaceVariant,
-                    modifier = Modifier.padding(top = 2.dp)
-                )
-            }
-        }
     }
 }
 
