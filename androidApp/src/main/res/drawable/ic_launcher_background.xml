@@ -1,17 +1,17 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Mirrors scripts/generate_app_icon.py so the Android icon matches the Apple one. -->
+<!-- Artboard 2d from docs/design/awqat-final-designs.dc.html.
+     The design's dashed ring cannot be expressed as stroke-dasharray in a
+     VectorDrawable, so its 30 dashes are emitted as individual radial ticks. -->
 <vector xmlns:android="http://schemas.android.com/apk/res/android"
     android:width="108dp"
     android:height="108dp"
     android:viewportWidth="108"
     android:viewportHeight="108">
     <path
-        android:fillColor="#F7F4EC"
+        android:fillColor="#1E3A32"
         android:pathData="M0,0h108v108h-108z" />
     <path
-        android:fillColor="#E5EFEC"
-        android:pathData="M54,8.6a45.4,45.4 0 1,1 -0.01,0z" />
-    <path
-        android:fillColor="#DDEAE6"
-        android:pathData="M54,19.2a34.8,34.8 0 1,1 -0.01,0z" />
+        android:strokeColor="#467A69"
+        android:strokeWidth="1.0"
+        android:pathData="M92.70,54.00L95.30,54.00M91.89,61.88L94.44,62.41M89.49,69.43L91.88,70.46M85.61,76.33L87.73,77.83M80.40,82.30L82.18,84.20M74.09,87.08L75.44,89.30M66.94,90.47L67.80,92.92M59.24,92.34L59.59,94.92M51.32,92.61L51.14,95.20M43.52,91.25L42.82,93.76M36.16,88.34L34.96,90.65M29.54,83.99L27.90,86.00M23.95,78.38L21.93,80.02M19.61,71.75L17.30,72.95M16.72,64.38L14.21,65.08M15.39,56.58L12.79,56.75M15.67,48.66L13.09,48.30M17.56,40.97L15.11,40.09M20.98,33.82L18.76,32.47M25.77,27.52L23.88,25.75M31.75,22.33L30.26,20.21M38.67,18.47L37.64,16.08M46.22,16.09L45.70,13.54M54.10,15.30L54.11,12.70M61.98,16.13L62.51,13.59M69.52,18.55L70.56,16.17M76.41,22.45L77.92,20.33M82.36,27.67L84.27,25.90M87.13,34.00L89.36,32.65M90.51,41.16L92.96,40.30" />
 </vector>
