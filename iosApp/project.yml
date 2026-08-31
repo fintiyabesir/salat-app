@@ -41,6 +41,12 @@ targets:
         SUPPORTS_MACCATALYST: NO
         CODE_SIGN_STYLE: Automatic
         ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
+      configs:
+        Release:
+          # Without this the archive resolves to Apple Development and asks Apple for a
+          # development certificate on every ephemeral CI runner, which is what exhausted
+          # the account's certificate limit. Profiles are not capped; certificates are.
+          CODE_SIGN_IDENTITY: "Apple Distribution"
     dependencies:
       - framework: ../shared/build/bin/iosSimulatorArm64/debugFramework/SalatShared.framework
         embed: false
@@ -70,6 +76,12 @@ targets:
         APPLICATION_EXTENSION_API_ONLY: YES
         CODE_SIGN_STYLE: Automatic
 
+      configs:
+        Release:
+          # Without this the archive resolves to Apple Development and asks Apple for a
+          # development certificate on every ephemeral CI runner, which is what exhausted
+          # the account's certificate limit. Profiles are not capped; certificates are.
+          CODE_SIGN_IDENTITY: "Apple Distribution"
   SalatWatch:
     type: application
     platform: watchOS
@@ -96,6 +108,12 @@ targets:
         SKIP_INSTALL: YES
         CODE_SIGN_STYLE: Automatic
         ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
+      configs:
+        Release:
+          # Without this the archive resolves to Apple Development and asks Apple for a
+          # development certificate on every ephemeral CI runner, which is what exhausted
+          # the account's certificate limit. Profiles are not capped; certificates are.
+          CODE_SIGN_IDENTITY: "Apple Distribution"
     dependencies:
       - target: SalatWatchComplication
 
@@ -120,6 +138,12 @@ targets:
         APPLICATION_EXTENSION_API_ONLY: YES
         CODE_SIGN_STYLE: Automatic
 
+      configs:
+        Release:
+          # Without this the archive resolves to Apple Development and asks Apple for a
+          # development certificate on every ephemeral CI runner, which is what exhausted
+          # the account's certificate limit. Profiles are not capped; certificates are.
+          CODE_SIGN_IDENTITY: "Apple Distribution"
 schemes:
   SalatApp:
     build:
