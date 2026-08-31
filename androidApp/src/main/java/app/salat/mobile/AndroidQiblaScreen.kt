@@ -200,7 +200,7 @@ private fun QiblaRose(headingDegrees: Float?, deviationDegrees: Float?) {
                 rotate(deviation, centre) {
                     drawNeedle(centre, radius * 0.86f, needle, tail)
                 }
-                drawKaabaBadge(centre, radius, deviation, face, tick)
+                drawKaabaBadge(centre, radius, deviation)
             }
             drawCircle(hub, radius = radius * 0.030f, center = centre)
         }
@@ -364,9 +364,7 @@ private fun DrawScope.drawNeedle(centre: Offset, radius: Float, head: Color, tai
 private fun DrawScope.drawKaabaBadge(
     centre: Offset,
     radius: Float,
-    angleDegrees: Float,
-    face: Color,
-    outline: Color
+    angleDegrees: Float
 ) {
     val radians = Math.toRadians((angleDegrees - 90f).toDouble())
     val at = Offset(
@@ -374,8 +372,10 @@ private fun DrawScope.drawKaabaBadge(
         centre.y + radius * 0.62f * sin(radians).toFloat()
     )
     val badge = radius * 0.125f
-    drawCircle(face, radius = badge, center = at)
-    drawCircle(outline, radius = badge, center = at, style = Stroke(width = radius * 0.008f))
+    // Artboard 2b keeps the medallion light even on the dark dial; taking the dial's
+    // own face here would sink the Kaaba into it.
+    drawCircle(ShellCanvas, radius = badge, center = at)
+    drawCircle(MedallionOutline, radius = badge, center = at, style = Stroke(width = radius * 0.008f))
 
     val body = badge * 0.90f
     translate(at.x - body / 2f, at.y - body / 2f) {
@@ -386,6 +386,7 @@ private fun DrawScope.drawKaabaBadge(
 }
 
 private val KaabaBody = Color(0xFF1B1D1A)
+private val MedallionOutline = Color(0xFFD4DAD4)
 
 /** Groups thousands without pulling in a locale-specific number formatter. */
 private fun formatThousands(value: Int): String =

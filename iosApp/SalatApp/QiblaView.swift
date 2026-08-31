@@ -108,7 +108,7 @@ struct QiblaView: View {
 
             // Cardinal letters ride the same rotation as the ticks but stay upright.
             ForEach(cardinals, id: \.0) { label, angle in
-                let radians = ((angle - (headingModel.heading ?? 0)) - 90) * .pi / 180
+                let radians = CGFloat(angle - (headingModel.heading ?? 0) - 90) * .pi / 180
                 Text(label)
                     .font(.system(size: angle == 0 ? 16 : 15, weight: angle == 0 ? .semibold : .regular))
                     .foregroundStyle(Awqat.muted(colorScheme))
@@ -244,7 +244,7 @@ private struct QiblaRose: View {
             ticks.rotate(by: .degrees(-heading))
             for index in 0..<tickCount {
                 let major = index % 5 == 0
-                let angle = Double(index) * (360.0 / Double(tickCount)) - 90
+                let angle = CGFloat(index) * (360.0 / CGFloat(tickCount)) - 90
                 let radians = angle * .pi / 180
                 let outer = radius * 0.86
                 let inner = outer - (major ? 12 : 7)
@@ -304,7 +304,7 @@ private struct QiblaRose: View {
         radius: CGFloat,
         angle: Double
     ) {
-        let radians = (angle - 90) * .pi / 180
+        let radians = CGFloat(angle - 90) * .pi / 180
         let at = CGPoint(
             x: centre.x + radius * 0.62 * cos(radians),
             y: centre.y + radius * 0.62 * sin(radians)
@@ -313,8 +313,10 @@ private struct QiblaRose: View {
         let circle = Path(ellipseIn: CGRect(
             x: at.x - badge, y: at.y - badge, width: badge * 2, height: badge * 2
         ))
-        context.fill(circle, with: .color(face))
-        context.stroke(circle, with: .color(tick), lineWidth: radius * 0.008)
+        // Artboard 2b keeps the medallion light even on the dark dial; taking the
+        // dial's own face here would sink the Kaaba into it.
+        context.fill(circle, with: .color(Awqat.canvasLight))
+        context.stroke(circle, with: .color(MedallionOutline), lineWidth: radius * 0.008)
 
         let body = badge * 0.90
         let origin = CGPoint(x: at.x - body / 2, y: at.y - body / 2)
@@ -335,3 +337,5 @@ private struct QiblaRose: View {
         )
     }
 }
+
+private let MedallionOutline = Color(red: 0.831, green: 0.855, blue: 0.831)  // #D4DAD4
