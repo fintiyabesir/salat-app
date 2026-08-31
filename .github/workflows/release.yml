@@ -109,6 +109,8 @@ jobs:
       APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
       APPLE_DISTRIBUTION_CERTIFICATE_BASE64: ${{ secrets.APPLE_DISTRIBUTION_CERTIFICATE_BASE64 }}
       APPLE_DISTRIBUTION_CERTIFICATE_PASSWORD: ${{ secrets.APPLE_DISTRIBUTION_CERTIFICATE_PASSWORD }}
+      APPLE_DEVELOPMENT_CERTIFICATE_BASE64: ${{ secrets.APPLE_DEVELOPMENT_CERTIFICATE_BASE64 }}
+      APPLE_DEVELOPMENT_CERTIFICATE_PASSWORD: ${{ secrets.APPLE_DEVELOPMENT_CERTIFICATE_PASSWORD }}
       APP_STORE_CONNECT_API_KEY_ID: ${{ secrets.APP_STORE_CONNECT_API_KEY_ID }}
       APP_STORE_CONNECT_ISSUER_ID: ${{ secrets.APP_STORE_CONNECT_ISSUER_ID }}
       APP_STORE_CONNECT_API_PRIVATE_KEY_BASE64: ${{ secrets.APP_STORE_CONNECT_API_PRIVATE_KEY_BASE64 }}
@@ -231,6 +233,28 @@ jobs:
           security set-key-partition-list -S apple-tool:,apple: -k "$KEYCHAIN_PASSWORD" "$KEYCHAIN_PATH"
           security list-keychain -d user -s "$KEYCHAIN_PATH" login.keychain-db
           echo "SIGNING_KEYCHAIN=$KEYCHAIN_PATH" >> "$GITHUB_ENV"
+
+          # xcodebuild archive signs with a DEVELOPMENT identity; -exportArchive then
+          # re-signs for distribution. A runner is a fresh machine with no development
+          # identity, and a certificate's private key never leaves the machine that made
+          # it, so automatic signing used to mint a new certificate on every single run
+          # until the account hit its limit. Importing one lets Xcode reuse it instead.
+          if [[ -n "$APPLE_DEVELOPMENT_CERTIFICATE_BASE64" ]]; then
+            DEV_CERTIFICATE_PATH="$RUNNER_TEMP/development.p12"
+            echo "$APPLE_DEVELOPMENT_CERTIFICATE_BASE64" | base64 --decode > "$DEV_CERTIFICATE_PATH"
+            security import "$DEV_CERTIFICATE_PATH" -P "$APPLE_DEVELOPMENT_CERTIFICATE_PASSWORD" \
+              -t cert -f pkcs12 -k "$KEYCHAIN_PATH" -T /usr/bin/codesign
+            security set-key-partition-list -S apple-tool:,apple: -k "$KEYCHAIN_PASSWORD" "$KEYCHAIN_PATH"
+            rm -f "$DEV_CERTIFICATE_PATH"
+          else
+            echo "::warning::APPLE_DEVELOPMENT_CERTIFICATE_BASE64 is not set; Xcode will create a new development certificate on this run"
+          fi
+          rm -f "$CERTIFICATE_PATH"
+
+          # Names and hashes only, no key material. Makes a signing failure readable
+          # instead of guesswork about what the runner actually had.
+          echo "Signing identities available to this run:"
+          security find-identity -v -p codesigning "$KEYCHAIN_PATH"
 
       - name: Install App Store Connect API key
         if: steps.apple_secrets.outputs.available == 'true'
