@@ -10,3 +10,14 @@
 "watch.open_app" = "افتح التطبيق";
 "watch.update_prayer_times" = "لتحديث مواقيت الصلاة";
 "watch.widget_description" = "الصلاة القادمة والوقت المتبقي";
+"countdown_hours_minutes" = "%d س %d د";
+"countdown_minutes" = "%d د";
+"prayer.fajr.short" = "فجر";
+"prayer.sunrise.short" = "شروق";
+"prayer.dhuhr.short" = "ظهر";
+"prayer.asr.short" = "عصر";
+"prayer.maghrib.short" = "مغرب";
+"prayer.isha.short" = "عشاء";
+"watch.widget_large_title" = "أوقات · خط كبير";
+"watch.widget_large_description" = "الصلاة القادمة بأكبر خط ممكن";
+"watch.today" = "اليوم";

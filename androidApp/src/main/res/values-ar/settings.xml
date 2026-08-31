@@ -22,4 +22,8 @@
     <string name="settings_method">الطريقة</string>
     <string name="settings_day_adjustment">تعديل اليوم</string>
     <string name="settings_minutes">%1$d د</string>
+    <string name="settings_done">تم</string>
+    <string name="settings_data_credit">بيانات المدن: GeoNames · CC BY 4.0</string>
+    <string name="settings_appearance_language">المظهر واللغة</string>
+    <string name="settings_theme">السمة</string>
 </resources>

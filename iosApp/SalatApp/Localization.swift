@@ -1,4 +1,5 @@
 import Foundation
+import SwiftUI
 
 enum L10n {
     private static let languageKey = "app.language"
@@ -47,4 +48,24 @@ enum L10n {
         }
         return .main
     }
+}
+
+extension L10n {
+    /// Countdown in units, as the design writes it, rather than a bare clock.
+    static func countdown(until epochMillis: Int64, now: Date = Date()) -> String {
+        let remaining = max(0, Int(Double(epochMillis) / 1000.0 - now.timeIntervalSince1970))
+        let hours = remaining / 3600
+        let minutes = (remaining % 3600) / 60
+        let seconds = remaining % 60
+        return hours > 0
+            ? L10n.format("countdown_hours_minutes", hours, minutes)
+            : L10n.format("countdown_minutes_seconds", minutes, seconds)
+    }
+
+    static func prayerShort(_ id: String) -> String {
+        text("prayer.\(id).short")
+    }
+
+    /// Arabic-script locales join their letters; spacing them breaks the word.
+    static var labelTracking: CGFloat { isRightToLeft ? 0 : 1.8 }
 }

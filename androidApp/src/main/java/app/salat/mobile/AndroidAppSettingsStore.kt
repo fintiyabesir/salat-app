@@ -39,6 +39,7 @@ class AndroidAppSettingsStore(context: Context) {
             ),
             hijriDayAdjustment = prefs.getInt(KEY_HIJRI_OFFSET, 0).coerceIn(-2, 2),
             languageTag = prefs.getString(KEY_LANGUAGE, null)?.takeIf { it.isNotBlank() },
+            qiblaAccuracyThresholdDegrees = prefs.getInt(KEY_QIBLA_THRESHOLD, 0).takeIf { it > 0 },
             appearance = enumOrDefault(
                 prefs.getString(KEY_APPEARANCE, null),
                 AppearanceMode.SYSTEM
@@ -59,6 +60,8 @@ class AndroidAppSettingsStore(context: Context) {
             .putInt(KEY_ADJ_ISHA, value.calculation.adjustments.isha)
             .putString(KEY_HIJRI_METHOD, value.hijriMethod.name)
             .putInt(KEY_HIJRI_OFFSET, value.hijriDayAdjustment)
+            // 0 stands for "decide from the hardware"; the range never includes it.
+            .putInt(KEY_QIBLA_THRESHOLD, value.qiblaAccuracyThresholdDegrees ?: 0)
             .putNullableString(KEY_LANGUAGE, value.languageTag)
             .putString(KEY_APPEARANCE, value.appearance.name)
             .apply()
@@ -91,6 +94,7 @@ class AndroidAppSettingsStore(context: Context) {
         private const val KEY_HIJRI_METHOD = "hijri_method"
         private const val KEY_HIJRI_OFFSET = "hijri_day_adjustment"
         private const val KEY_LANGUAGE = "language_tag"
+        private const val KEY_QIBLA_THRESHOLD = "qiblaAccuracyThresholdDegrees"
         private const val KEY_APPEARANCE = "appearance"
     }
 }

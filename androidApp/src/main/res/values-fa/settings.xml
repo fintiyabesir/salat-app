@@ -22,4 +22,8 @@
     <string name="settings_method">روش</string>
     <string name="settings_day_adjustment">تنظیم روز</string>
     <string name="settings_minutes">%1$d دقیقه</string>
+    <string name="settings_done">انجام شد</string>
+    <string name="settings_data_credit">داده‌های شهرها: GeoNames · CC BY 4.0</string>
+    <string name="settings_appearance_language">ظاهر و زبان</string>
+    <string name="settings_theme">پوسته</string>
 </resources>

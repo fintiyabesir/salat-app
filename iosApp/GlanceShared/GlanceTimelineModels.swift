@@ -22,6 +22,15 @@ enum GlanceL10n {
     static func prayer(_ id: String, fallback: String) -> String {
         text("prayer.\(id.lowercased())", fallback: fallback)
     }
+
+    /// Column headings on the glance surfaces; they must fit a sixth of the width.
+    static func prayerShort(_ id: String, fallback: String) -> String {
+        text("prayer.\(id.lowercased()).short", fallback: fallback)
+    }
+
+    static func format(_ key: String, fallback: String, _ arguments: CVarArg...) -> String {
+        String(format: text(key, fallback: fallback), locale: .current, arguments: arguments)
+    }
 }
 
 struct GlanceTimelinePayload: Codable {
@@ -29,10 +38,36 @@ struct GlanceTimelinePayload: Codable {
     let locationName: String
     let timeZoneId: String
     let events: [GlancePrayerEvent]
+    /// Optional so payloads written by an older build still decode; the glance
+    /// surfaces need them to print the same Hijri date the phone shows.
+    var hijriMethod: String?
+    var hijriDayAdjustment: Int?
 
     func next(after date: Date) -> GlancePrayerEvent? {
         let millis = Int64(date.timeIntervalSince1970 * 1000.0)
         return events.first(where: { $0.epochMillis > millis })
+    }
+
+    /// The Hijri date as the phone would print it, honouring the user's method and
+    /// day correction rather than guessing a default.
+    func hijriDateText(for date: Date, template: String = "d MMMM y") -> String {
+        let zone = TimeZone(identifier: timeZoneId) ?? .current
+        var gregorian = Calendar(identifier: .gregorian)
+        gregorian.timeZone = zone
+        let shifted = gregorian.date(
+            byAdding: .day,
+            value: min(2, max(-2, hijriDayAdjustment ?? 0)),
+            to: date
+        ) ?? date
+
+        var hijri = Calendar(identifier: hijriMethod == "TABULAR" ? .islamicTabular : .islamicUmmAlQura)
+        hijri.timeZone = zone
+
+        let formatter = DateFormatter()
+        formatter.calendar = hijri
+        formatter.timeZone = zone
+        formatter.dateFormat = template
+        return formatter.string(from: shifted)
     }
 
     func events(on date: Date) -> [GlancePrayerEvent] {

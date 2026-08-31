@@ -59,7 +59,10 @@ private fun SalatApp(
     // Start from the remembered location so the app opens on prayer times instead of
     // the picker; a fresh device fix replaces it when one arrives.
     val context = LocalContext.current
-    val appearance = remember { AndroidAppSettingsStore(context).load().appearance }
+    // Held here rather than inside the shell so sheets and dialogs hosted at this
+    // level are themed too; without it the city picker sat on Material3's default
+    // lavender surface.
+    var appearance by remember { mutableStateOf(AndroidAppSettingsStore(context).load().appearance) }
     var location by remember { mutableStateOf(locationStore.load()) }
     var resolving by remember { mutableStateOf(false) }
     var locationError by remember { mutableStateOf(false) }
@@ -111,6 +114,7 @@ private fun SalatApp(
         if (resolver.hasPermission()) resolveDeviceLocation()
     }
 
+    AwqatTheme(appearance) {
     if (location == null) {
         LocationStartScreen(
             resolving = resolving,
@@ -123,7 +127,7 @@ private fun SalatApp(
         SalatMainShell(
             location = requireNotNull(location),
             onChooseCity = { showCityPicker = true },
-            onUseDeviceLocation = ::requestOrResolveDeviceLocation
+            onAppearanceChanged = { appearance = it }
         )
     }
 
@@ -139,6 +143,7 @@ private fun SalatApp(
             },
             onDismiss = { showCityPicker = false }
         )
+    }
     }
 }
 

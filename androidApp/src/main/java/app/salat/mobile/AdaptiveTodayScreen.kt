@@ -1,8 +1,11 @@
 package app.salat.mobile
 
+import androidx.annotation.DrawableRes
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -11,25 +14,37 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.wrapContentWidth
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.Icon
+import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.produceState
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.platform.LocalLayoutDirection
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.compose.foundation.layout.width
-import androidx.compose.runtime.produceState
-import androidx.compose.ui.Alignment
 import kotlinx.coroutines.delay
 import app.salat.domain.SalatEngine
 import app.salat.model.AppPreferences
@@ -48,10 +63,16 @@ private data class NextPrayerUi(
     val isToday: Boolean
 )
 
+/** Times are columns of digits people compare down the screen, so they never reflow. */
+private val Tabular = TextStyle(fontFeatureSettings = "tnum")
+
 @Composable
 fun AdaptiveTodayScreen(
     location: ResolvedLocation,
-    settings: AppPreferences = AppPreferences()
+    settings: AppPreferences,
+    dark: Boolean,
+    onChooseCity: () -> Unit,
+    onOpenSettings: () -> Unit
 ) {
     val locale = LocalConfiguration.current.locales[0]
     val zone = remember(location.timeZoneId) { ZoneId.of(location.timeZoneId) }
@@ -94,7 +115,7 @@ fun AdaptiveTodayScreen(
         )
     }
     val gregorianDate = remember(today, locale) {
-        today.format(DateTimeFormatter.ofPattern("d MMM yyyy", locale))
+        today.format(DateTimeFormatter.ofPattern("d MMMM yyyy", locale))
     }
     val hijriDate = remember(today, zone, locale, settings.hijriMethod, settings.hijriDayAdjustment) {
         AndroidHijriFormatter.format(
@@ -105,30 +126,38 @@ fun AdaptiveTodayScreen(
             dayAdjustment = settings.hijriDayAdjustment
         )
     }
+    // Everything after the next prayer is still ahead; once the day is spent the
+    // whole strip reads as behind us.
+    val reached = if (next.isToday) PrayerName.entries.indexOf(next.prayer) else PrayerName.entries.size
 
     Surface(modifier = Modifier.fillMaxSize(), color = MaterialTheme.colorScheme.background) {
         BoxWithConstraints(Modifier.fillMaxSize()) {
             if (maxWidth >= 700.dp) {
-                Row(
-                    Modifier.fillMaxSize().padding(horizontal = 34.dp, vertical = 28.dp),
-                    horizontalArrangement = Arrangement.spacedBy(34.dp)
-                ) {
-                    Column(Modifier.weight(1f)) {
-                        LocationHeader(location, gregorianDate, hijriDate)
-                        Spacer(Modifier.height(32.dp))
-                        AdaptiveHero(next, zone, locale)
-                    }
-                    Column(Modifier.weight(1f)) {
-                        PrayerList(day, next.prayer.takeIf { next.isToday }, zone, locale) { selectedPrayer = it }
+                Column(Modifier.fillMaxSize().padding(horizontal = 30.dp)) {
+                    LocationHeader(location, gregorianDate, hijriDate, dark, onChooseCity, onOpenSettings)
+                    Row(
+                        Modifier.fillMaxWidth().padding(top = 20.dp),
+                        horizontalArrangement = Arrangement.spacedBy(30.dp)
+                    ) {
+                        Box(Modifier.weight(1f)) { HeroCard(next, reached, zone, locale, dark) }
+                        Column(Modifier.weight(1f).verticalScroll(rememberScrollState())) {
+                            PrayerList(day, next.prayer.takeIf { next.isToday }, zone, locale, dark) {
+                                selectedPrayer = it
+                            }
+                        }
                     }
                 }
             } else {
-                Column(Modifier.padding(horizontal = 22.dp, vertical = 20.dp)) {
-                    LocationHeader(location, gregorianDate, hijriDate)
-                    Spacer(Modifier.height(28.dp))
-                    AdaptiveHero(next, zone, locale)
-                    Spacer(Modifier.height(20.dp))
-                    PrayerList(day, next.prayer.takeIf { next.isToday }, zone, locale) { selectedPrayer = it }
+                Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState())) {
+                    LocationHeader(location, gregorianDate, hijriDate, dark, onChooseCity, onOpenSettings)
+                    Box(Modifier.padding(horizontal = 22.dp, vertical = 20.dp)) {
+                        HeroCard(next, reached, zone, locale, dark)
+                    }
+                    Column(Modifier.padding(horizontal = 22.dp).padding(bottom = 16.dp)) {
+                        PrayerList(day, next.prayer.takeIf { next.isToday }, zone, locale, dark) {
+                            selectedPrayer = it
+                        }
+                    }
                 }
             }
         }
@@ -144,40 +173,160 @@ fun AdaptiveTodayScreen(
 }
 
 @Composable
-private fun LocationHeader(location: ResolvedLocation, gregorianDate: String, hijriDate: String) {
-    Text(location.displayName, fontSize = 24.sp, fontWeight = FontWeight.SemiBold)
-    val region = listOfNotNull(location.regionName, location.countryCode).distinct().joinToString(" · ")
-    if (region.isNotBlank()) Text(region, color = MaterialTheme.colorScheme.onSurfaceVariant)
-    Text(gregorianDate, color = MaterialTheme.colorScheme.onSurfaceVariant)
-    Text(hijriDate, color = MaterialTheme.colorScheme.onSurfaceVariant, fontSize = 13.sp)
+private fun LocationHeader(
+    location: ResolvedLocation,
+    gregorianDate: String,
+    hijriDate: String,
+    dark: Boolean,
+    onChooseCity: () -> Unit,
+    onOpenSettings: () -> Unit
+) {
+    Row(
+        Modifier.fillMaxWidth().padding(start = 24.dp, end = 24.dp, top = 22.dp),
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.Top
+    ) {
+        Column(Modifier.weight(1f)) {
+            Text(location.displayName, fontSize = 26.sp, fontWeight = FontWeight.Bold)
+            Text(
+                "$gregorianDate · $hijriDate",
+                fontSize = 15.sp,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                modifier = Modifier.padding(top = 5.dp)
+            )
+        }
+        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+            HeaderAction(R.drawable.ic_action_search, stringResource(R.string.today_change_city), dark, onChooseCity)
+            HeaderAction(R.drawable.ic_action_settings, stringResource(R.string.settings), dark, onOpenSettings)
+        }
+    }
 }
 
 @Composable
-private fun AdaptiveHero(next: NextPrayerUi, zone: ZoneId, locale: Locale) {
-    Column(
-        Modifier.fillMaxWidth()
-            .background(MaterialTheme.colorScheme.surfaceVariant, RoundedCornerShape(28.dp))
-            .padding(26.dp)
+private fun HeaderAction(@DrawableRes id: Int, label: String, dark: Boolean, onClick: () -> Unit) {
+    Surface(
+        onClick = onClick,
+        shape = CircleShape,
+        color = if (dark) ShellCardDark else Color.White,
+        shadowElevation = if (dark) 0.dp else 3.dp,
+        modifier = Modifier.size(40.dp)
     ) {
-        Text(
-            stringResource(R.string.next_prayer),
-            color = MaterialTheme.colorScheme.primary,
-            fontSize = 12.sp,
-            letterSpacing = 1.2.sp
-        )
-        Text(next.prayer.adaptiveLabel(), fontSize = 26.sp, fontWeight = FontWeight.Medium)
-        Row(verticalAlignment = Alignment.Bottom) {
-            Text(adaptiveFormat(next.epochMillis, zone, locale), fontSize = 58.sp, fontWeight = FontWeight.Light)
-            Spacer(Modifier.width(10.dp))
-            Text(
-                countdownText(next.epochMillis, locale),
-                fontSize = 20.sp,
-                fontWeight = FontWeight.Medium,
-                color = MaterialTheme.colorScheme.primary,
-                modifier = Modifier.padding(bottom = 10.dp)
-            )
+        Box(contentAlignment = Alignment.Center) {
+            Icon(painterResource(id), contentDescription = label, modifier = Modifier.size(19.dp))
         }
     }
+}
+
+@Composable
+private fun HeroCard(
+    next: NextPrayerUi,
+    reached: Int,
+    zone: ZoneId,
+    locale: Locale,
+    dark: Boolean
+) {
+    val palette = heroPalette(dark)
+    val shape = RoundedCornerShape(30.dp)
+    CompositionLocalProvider(LocalContentColor provides palette.content) {
+        Column(
+            Modifier.fillMaxWidth()
+                .background(palette.surface, shape)
+                .then(palette.border?.let { Modifier.border(1.dp, it, shape) } ?: Modifier)
+                .padding(start = 26.dp, end = 26.dp, top = 26.dp, bottom = 22.dp)
+        ) {
+            Row(
+                Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+                    stringResource(R.string.next_prayer),
+                    color = palette.accent,
+                    fontSize = 12.sp,
+                    fontWeight = FontWeight.SemiBold,
+                    // Arabic-script locales join their letters; spacing them breaks the word.
+                    letterSpacing = if (LocalLayoutDirection.current == LayoutDirection.Rtl) 0.sp else 1.8.sp
+                )
+                Text(
+                    countdownText(next.epochMillis, locale),
+                    color = palette.accent,
+                    fontSize = 14.sp,
+                    style = Tabular,
+                    modifier = Modifier
+                        .background(palette.chip, RoundedCornerShape(20.dp))
+                        .padding(horizontal = 12.dp, vertical = 5.dp)
+                )
+            }
+            Text(
+                next.prayer.adaptiveLabel(),
+                fontSize = 26.sp,
+                fontWeight = FontWeight.Medium,
+                modifier = Modifier.padding(top = 14.dp)
+            )
+            Text(
+                adaptiveFormat(next.epochMillis, zone, locale),
+                fontSize = 72.sp,
+                fontWeight = FontWeight.ExtraLight,
+                style = Tabular
+            )
+            DayStrip(reached, palette)
+        }
+    }
+}
+
+/**
+ * The six prayers laid out as one line of the day, so "where am I in today" is a
+ * glance rather than a comparison of six timestamps. The gold marker is the same
+ * mark the next prayer carries in the list below.
+ */
+@Composable
+private fun DayStrip(reached: Int, palette: HeroPalette) {
+    Row(
+        Modifier.fillMaxWidth().padding(top = 18.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        PrayerName.entries.forEachIndexed { index, _ ->
+            if (index > 0) {
+                Box(
+                    Modifier.weight(1f)
+                        .height(2.dp)
+                        .background(if (index <= reached) palette.accent else palette.track)
+                )
+            }
+            Box(Modifier.size(21.dp), contentAlignment = Alignment.Center) {
+                when {
+                    index < reached -> Dot(9.dp, palette.accent)
+                    index == reached -> {
+                        Dot(21.dp, AwqatGold.copy(alpha = 0.22f))
+                        Dot(13.dp, AwqatGold)
+                    }
+                    else -> Dot(9.dp, palette.track)
+                }
+            }
+        }
+    }
+    // The labels mirror the dot row's own spacing so each one sits under its mark;
+    // distributing them evenly instead drifts the outer two off their dots.
+    Row(Modifier.fillMaxWidth().padding(top = 8.dp)) {
+        PrayerName.entries.forEachIndexed { index, prayer ->
+            if (index > 0) Spacer(Modifier.weight(1f))
+            Box(Modifier.width(21.dp), contentAlignment = Alignment.Center) {
+                Text(
+                    prayer.shortLabel(),
+                    fontSize = 11.sp,
+                    maxLines = 1,
+                    color = if (index == reached) AwqatGold else palette.trackLabel,
+                    fontWeight = if (index == reached) FontWeight.SemiBold else FontWeight.Normal,
+                    modifier = Modifier.wrapContentWidth(unbounded = true)
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun Dot(size: androidx.compose.ui.unit.Dp, color: Color) {
+    Box(Modifier.size(size).background(color, CircleShape))
 }
 
 /**
@@ -193,13 +342,13 @@ private fun countdownText(epochMillis: Long, locale: Locale): String {
         }
     }
     val total = (remaining / 1000L).coerceAtLeast(0L)
-    val hours = total / 3600L
-    val minutes = (total % 3600L) / 60L
-    val seconds = total % 60L
-    return if (hours > 0L) {
-        String.format(locale, "%d:%02d:%02d", hours, minutes, seconds)
+    val hours = (total / 3600L).toInt()
+    val minutes = ((total % 3600L) / 60L).toInt()
+    val seconds = (total % 60L).toInt()
+    return if (hours > 0) {
+        stringResource(R.string.countdown_hours_minutes, hours, minutes)
     } else {
-        String.format(locale, "%d:%02d", minutes, seconds)
+        stringResource(R.string.countdown_minutes_seconds, minutes, seconds)
     }
 }
 
@@ -209,24 +358,57 @@ private fun PrayerList(
     nextToday: PrayerName?,
     zone: ZoneId,
     locale: Locale,
+    dark: Boolean,
     onPrayer: (PrayerName) -> Unit
 ) {
+    val nowMillis = System.currentTimeMillis()
+    val activeShape = RoundedCornerShape(18.dp)
+    val spent = if (dark) Color(0xFF6D716E) else Color(0xFF9AA09A)
+    val activeContent = if (dark) Color(0xFF91C9B5) else AwqatHeroSurface
     PrayerName.entries.forEach { prayer ->
         val active = prayer == nextToday
+        val passed = !active && day.time(prayer).toEpochMilliseconds() <= nowMillis
+        val content = when {
+            active -> activeContent
+            passed -> spent
+            else -> MaterialTheme.colorScheme.onBackground
+        }
         Row(
             Modifier.fillMaxWidth()
-                .background(
-                    if (active) MaterialTheme.colorScheme.secondaryContainer else Color.Transparent,
-                    RoundedCornerShape(16.dp)
+                .padding(bottom = 4.dp)
+                .then(
+                    if (active) {
+                        Modifier.background(MaterialTheme.colorScheme.surface, activeShape)
+                            .then(
+                                if (dark) Modifier.border(1.dp, Color(0xFF2C3A33), activeShape)
+                                else Modifier
+                            )
+                    } else {
+                        Modifier
+                    }
                 )
                 .clickable { onPrayer(prayer) }
-                .padding(horizontal = 14.dp, vertical = 14.dp),
-            horizontalArrangement = Arrangement.SpaceBetween
+                .padding(horizontal = 16.dp, vertical = if (active) 15.dp else 13.dp),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
         ) {
-            Text(prayer.adaptiveLabel(), fontWeight = if (active) FontWeight.SemiBold else FontWeight.Normal)
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                if (active) {
+                    Dot(8.dp, AwqatGold)
+                    Spacer(Modifier.width(10.dp))
+                }
+                Text(
+                    prayer.adaptiveLabel(),
+                    fontSize = 18.sp,
+                    color = content,
+                    fontWeight = if (active) FontWeight.SemiBold else FontWeight.Normal
+                )
+            }
             Text(
                 adaptiveFormat(day.time(prayer).toEpochMilliseconds(), zone, locale),
-                color = if (active) MaterialTheme.colorScheme.primary else Color.Unspecified,
+                fontSize = 18.sp,
+                color = content,
+                style = Tabular,
                 fontWeight = if (active) FontWeight.SemiBold else FontWeight.Normal
             )
         }
@@ -239,11 +421,21 @@ private fun adaptiveFormat(epochMillis: Long, zone: ZoneId, locale: Locale): Str
         .format(Instant.ofEpochMilli(epochMillis))
 
 @Composable
-private fun PrayerName.adaptiveLabel(): String = when (this) {
+internal fun PrayerName.adaptiveLabel(): String = when (this) {
     PrayerName.FAJR -> stringResource(R.string.prayer_fajr)
     PrayerName.SUNRISE -> stringResource(R.string.prayer_sunrise)
     PrayerName.DHUHR -> stringResource(R.string.prayer_dhuhr)
     PrayerName.ASR -> stringResource(R.string.prayer_asr)
     PrayerName.MAGHRIB -> stringResource(R.string.prayer_maghrib)
     PrayerName.ISHA -> stringResource(R.string.prayer_isha)
+}
+
+@Composable
+internal fun PrayerName.shortLabel(): String = when (this) {
+    PrayerName.FAJR -> stringResource(R.string.prayer_fajr_short)
+    PrayerName.SUNRISE -> stringResource(R.string.prayer_sunrise_short)
+    PrayerName.DHUHR -> stringResource(R.string.prayer_dhuhr_short)
+    PrayerName.ASR -> stringResource(R.string.prayer_asr_short)
+    PrayerName.MAGHRIB -> stringResource(R.string.prayer_maghrib_short)
+    PrayerName.ISHA -> stringResource(R.string.prayer_isha_short)
 }

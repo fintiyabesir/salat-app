@@ -1,17 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Notification icons must be a flat white silhouette on transparent; the previous
-     android.R.drawable.ic_lock_idle_alarm was a system asset from another era. -->
+<!-- Notification icons must be a flat white silhouette on transparent. The design
+     keeps only the hizam and the door at this size; both are cut out with evenOdd. -->
 <vector xmlns:android="http://schemas.android.com/apk/res/android"
     android:width="24dp"
     android:height="24dp"
-    android:viewportWidth="24"
-    android:viewportHeight="24"
+    android:viewportWidth="48"
+    android:viewportHeight="48"
     android:tint="#FFFFFF">
     <path
         android:fillColor="#FFFFFF"
         android:fillType="evenOdd"
-        android:pathData="M12,1.5L22.5,12L12,22.5L1.5,12Z M12,5.7L18.3,12L12,18.3L5.7,12Z" />
-    <path
-        android:fillColor="#FFFFFF"
-        android:pathData="M12,7.2L14.6,15.9L12,14.5L9.4,15.9Z" />
+        android:pathData="M6.6,7h34.8a2.6,2.6 0 0 1 2.6,2.6v27.8a2.6,2.6 0 0 1 -2.6,2.6h-34.8a2.6,2.6 0 0 1 -2.6,-2.6v-27.8a2.6,2.6 0 0 1 2.6,-2.6z M4,13.4h40v5h-40z M28,26h8.4v14h-8.4z" />
 </vector>

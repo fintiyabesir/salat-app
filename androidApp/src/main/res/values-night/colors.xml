@@ -1,8 +1,13 @@
 <resources>
-    <color name="widget_surface">#171916</color>
+    <color name="widget_surface">#1A1C19</color>
     <color name="widget_stroke">#3391C9B5</color>
     <color name="widget_brand">#91C9B5</color>
     <color name="widget_text_primary">#F2F1EC</color>
     <color name="widget_text_secondary">#AAB0A8</color>
+    <color name="widget_divider">#2A2D28</color>
+    <color name="widget_slot_past">#55584F</color>
+    <color name="widget_slot_current">#E0B878</color>
+    <color name="widget_chip">#2491C9B5</color>
+    <color name="widget_countdown_large">#E0B878</color>
     <color name="window_background">#171916</color>
 </resources>

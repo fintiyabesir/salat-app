@@ -22,4 +22,8 @@
     <string name="settings_method">Method</string>
     <string name="settings_day_adjustment">Day adjustment</string>
     <string name="settings_minutes">%1$d min</string>
+    <string name="settings_done">Done</string>
+    <string name="settings_data_credit">City data: GeoNames · CC BY 4.0</string>
+    <string name="settings_appearance_language">Appearance &amp; language</string>
+    <string name="settings_theme">Theme</string>
 </resources>

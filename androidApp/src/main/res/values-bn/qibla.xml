@@ -1,6 +1,21 @@
 <resources>
-    <string name="qibla_compass_unavailable">কম্পাস সেন্সর উপলভ্য নয়</string>
-    <string name="qibla_calibrating">কম্পাস ক্যালিব্রেট করা হচ্ছে…</string>
-    <string name="qibla_aligned">কিবলার সঙ্গে সঠিকভাবে মিলেছে</string>
-    <string name="qibla_accuracy_hint">কম্পাসের নির্ভুলতা বাড়াতে ফোনটি ৮-এর মতো করে নাড়ান।</string>
+    <string name="qibla_cardinal_north">উ</string>
+    <string name="qibla_cardinal_east">পূ</string>
+    <string name="qibla_cardinal_south">দ</string>
+    <string name="qibla_cardinal_west">প</string>
+    <string name="qibla_mecca">মক্কা</string>
+    <string name="qibla_label_direction">দিক</string>
+    <string name="qibla_label_distance">দূরত্ব</string>
+    <string name="qibla_label_deviation">বিচ্যুতি</string>
+    <string name="qibla_turn_right">ডানে ঘুরুন</string>
+    <string name="qibla_turn_left">বাঁয়ে ঘুরুন</string>
+    <string name="qibla_aligned">সঠিক দিকে</string>
+    <string name="qibla_distance_km">%1$s কিমি</string>
+    <string name="qibla_low_accuracy_title">কম্পাসের নির্ভুলতা কম</string>
+    <string name="qibla_low_accuracy_body">দিকটি এখন নির্ভরযোগ্য নয়, তাই দেখানো হচ্ছে না। ফোনটি ৮-এর আকারে নাড়ুন।</string>
+    <string name="qibla_calibrating">ক্যালিব্রেট হচ্ছে…</string>
+    <string name="settings_qibla_threshold">কিবলা নির্ভুলতার সীমা</string>
+    <string name="settings_qibla_threshold_auto">স্বয়ংক্রিয়</string>
+    <string name="settings_qibla_threshold_degrees">±%1$d°</string>
+    <string name="qibla_compass_unavailable">কম্পাস সেন্সর নেই</string>
 </resources>

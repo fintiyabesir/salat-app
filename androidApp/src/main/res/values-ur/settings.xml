@@ -22,4 +22,8 @@
     <string name="settings_method">طریقہ</string>
     <string name="settings_day_adjustment">دن کی درستگی</string>
     <string name="settings_minutes">%1$d منٹ</string>
+    <string name="settings_done">مکمل</string>
+    <string name="settings_data_credit">شہروں کا ڈیٹا: GeoNames · CC BY 4.0</string>
+    <string name="settings_appearance_language">ظاہری شکل اور زبان</string>
+    <string name="settings_theme">تھیم</string>
 </resources>

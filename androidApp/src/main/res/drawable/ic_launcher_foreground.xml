@@ -1,18 +1,19 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Diamond ring, compass needle and hub, scaled into the adaptive icon safe zone. -->
+<!-- Kaaba foreground from artboard 2d, kept inside the 66dp safe area.
+     Always a dark body with a gold hizam — the design treats that as a rule. -->
 <vector xmlns:android="http://schemas.android.com/apk/res/android"
     android:width="108dp"
     android:height="108dp"
     android:viewportWidth="108"
     android:viewportHeight="108">
-    <path
-        android:fillColor="#2F6865"
-        android:fillType="evenOdd"
-        android:pathData="M54,28.16L79.84,54L54,79.84L28.16,54Z M54,37.12L70.88,54L54,70.88L37.12,54Z" />
-    <path
-        android:fillColor="#C29653"
-        android:pathData="M54,40.08L59.91,59.7L54,56.64L48.09,59.7Z" />
-    <path
-        android:fillColor="#2F6865"
-        android:pathData="M54,51.47a2.53,2.53 0 1,1 -0.01,0z" />
+    <path android:fillColor="#101613" android:pathData="M30.6,33h46.8a2.6,2.6 0 0 1 2.6,2.6v37.8a2.6,2.6 0 0 1 -2.6,2.6h-46.8a2.6,2.6 0 0 1 -2.6,-2.6v-37.8a2.6,2.6 0 0 1 2.6,-2.6z" />
+    <path android:fillColor="#2C4A3F" android:pathData="M29.8,33h48.4a1.8,1.8 0 0 1 0,3.6h-48.4a1.8,1.8 0 0 1 0,-3.6z" />
+    <path android:fillColor="#C29653" android:pathData="M28,40.5h52v6.6h-52z" />
+    <path android:fillColor="#9E7434" android:pathData="M33,42h5a1,1 0 0 1 1,1v1.6a1,1 0 0 1 -1,1h-5a1,1 0 0 1 -1,-1v-1.6a1,1 0 0 1 1,-1z" />
+    <path android:fillColor="#9E7434" android:pathData="M43,42h5a1,1 0 0 1 1,1v1.6a1,1 0 0 1 -1,1h-5a1,1 0 0 1 -1,-1v-1.6a1,1 0 0 1 1,-1z" />
+    <path android:fillColor="#9E7434" android:pathData="M53,42h5a1,1 0 0 1 1,1v1.6a1,1 0 0 1 -1,1h-5a1,1 0 0 1 -1,-1v-1.6a1,1 0 0 1 1,-1z" />
+    <path android:fillColor="#9E7434" android:pathData="M63,42h5a1,1 0 0 1 1,1v1.6a1,1 0 0 1 -1,1h-5a1,1 0 0 1 -1,-1v-1.6a1,1 0 0 1 1,-1z" />
+    <path android:fillColor="#9E7434" android:pathData="M71,42h5a1,1 0 0 1 1,1v1.6a1,1 0 0 1 -1,1h-5a1,1 0 0 1 -1,-1v-1.6a1,1 0 0 1 1,-1z" />
+    <path android:fillColor="#C29653" android:pathData="M67.6,60h6.8a1.6,1.6 0 0 1 1.6,1.6v12.8a1.6,1.6 0 0 1 -1.6,1.6h-6.8a1.6,1.6 0 0 1 -1.6,-1.6v-12.8a1.6,1.6 0 0 1 1.6,-1.6z" />
+    <path android:fillColor="#2C4A3F" android:pathData="M27.9,74h52.2a1.5,1.5 0 0 1 0,3h-52.2a1.5,1.5 0 0 1 0,-3z" />
 </vector>

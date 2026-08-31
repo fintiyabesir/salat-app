@@ -10,3 +10,14 @@
 "watch.open_app" = "Uygulamayı aç";
 "watch.update_prayer_times" = "Namaz vakitlerini güncelle";
 "watch.widget_description" = "Sıradaki namaz vakti ve kalan süre";
+"countdown_hours_minutes" = "%d sa %d dk";
+"countdown_minutes" = "%d dk";
+"prayer.fajr.short" = "İms";
+"prayer.sunrise.short" = "Gün";
+"prayer.dhuhr.short" = "Öğl";
+"prayer.asr.short" = "İkn";
+"prayer.maghrib.short" = "Akş";
+"prayer.isha.short" = "Yat";
+"watch.widget_large_title" = "Awqat · Büyük yazı";
+"watch.widget_large_description" = "Sonraki vakit, sığan en büyük yazıyla";
+"watch.today" = "Bugün";

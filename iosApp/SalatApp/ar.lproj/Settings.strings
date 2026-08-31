@@ -23,3 +23,6 @@
 "settings_day_adjustment" = "تعديل اليوم";
 "settings_done" = "تم";
 "settings_minutes_format" = "%d د";
+"settings_data_credit" = "بيانات المدن: GeoNames · CC BY 4.0";
+"settings_appearance_language" = "المظهر واللغة";
+"settings_theme" = "السمة";

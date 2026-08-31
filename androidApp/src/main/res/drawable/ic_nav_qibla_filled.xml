@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Kaaba with the hizam and door as cut-outs, so it reads on any background
+     rather than relying on a fill that matches the bar. The selected Qibla tab. -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="24dp" android:height="24dp"
+    android:viewportWidth="24" android:viewportHeight="24">
+    <path android:fillColor="#FF000000" android:fillType="evenOdd"
+        android:pathData="M5.6,6h12.8a1.8,1.8 0 0 1 1.8,1.8v10a1.8,1.8 0 0 1 -1.8,1.8h-12.8a1.8,1.8 0 0 1 -1.8,-1.8v-10a1.8,1.8 0 0 1 1.8,-1.8z M3.8,9.4h16.4v2.2h-16.4z M13.8,14.6h3.4v5h-3.4z" />
+</vector>

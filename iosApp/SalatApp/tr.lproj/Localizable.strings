@@ -22,3 +22,13 @@
 "notification_sound_system" = "Sistem sesi";
 "notification_sound_silent" = "Sessiz";
 "notification_sound_short_adhan" = "Kısa ezan";
+"today_change_city" = "Şehri değiştir";
+"countdown_hours_minutes" = "%d sa %d dk";
+"countdown_minutes_seconds" = "%d dk %d sn";
+"calendar_today_card" = "Bugün · %@";
+"prayer.fajr.short" = "İms";
+"prayer.sunrise.short" = "Gün";
+"prayer.dhuhr.short" = "Öğl";
+"prayer.asr.short" = "İkn";
+"prayer.maghrib.short" = "Akş";
+"prayer.isha.short" = "Yat";

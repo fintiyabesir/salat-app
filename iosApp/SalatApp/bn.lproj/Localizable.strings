@@ -22,3 +22,13 @@
 "notification_sound_system" = "সিস্টেম সাউন্ড";
 "notification_sound_silent" = "নীরব";
 "notification_sound_short_adhan" = "সংক্ষিপ্ত আজান";
+"today_change_city" = "শহর পরিবর্তন";
+"countdown_hours_minutes" = "%d ঘ %d মি";
+"countdown_minutes_seconds" = "%d মি %d সে";
+"calendar_today_card" = "আজ · %@";
+"prayer.fajr.short" = "ফজর";
+"prayer.sunrise.short" = "সূর্য";
+"prayer.dhuhr.short" = "যোহর";
+"prayer.asr.short" = "আসর";
+"prayer.maghrib.short" = "মাগ.";
+"prayer.isha.short" = "এশা";

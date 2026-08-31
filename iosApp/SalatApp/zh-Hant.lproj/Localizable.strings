@@ -22,3 +22,13 @@
 "notification_sound_system" = "系統聲音";
 "notification_sound_silent" = "靜音";
 "notification_sound_short_adhan" = "短宣禮聲";
+"today_change_city" = "更換城市";
+"countdown_hours_minutes" = "%d 小時 %d 分";
+"countdown_minutes_seconds" = "%d 分 %d 秒";
+"calendar_today_card" = "今天 · %@";
+"prayer.fajr.short" = "晨";
+"prayer.sunrise.short" = "日出";
+"prayer.dhuhr.short" = "晌";
+"prayer.asr.short" = "晡";
+"prayer.maghrib.short" = "昏";
+"prayer.isha.short" = "宵";

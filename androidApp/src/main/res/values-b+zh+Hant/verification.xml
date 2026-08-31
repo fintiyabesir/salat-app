@@ -1,6 +1,6 @@
 <resources>
     <string name="verification_official_source">官方參考</string>
     <string name="verification_adapter_ready">官方來源轉接器可用。今天的時間尚未在此裝置上進行比對。</string>
-    <string name="verification_reference_only">已設定官方參考。即時比對尚未啟用。</string>
+    <string name="verification_reference_only">禮拜時間在本機計算。官方來源僅供參考，不會從中取得資料。</string>
     <string name="verification_local_only">尚未設定官方參考，目前使用本機計算。</string>
 </resources>

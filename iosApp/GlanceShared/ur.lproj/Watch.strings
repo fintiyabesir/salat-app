@@ -10,3 +10,14 @@
 "watch.open_app" = "ایپ کھولیں";
 "watch.update_prayer_times" = "نماز کے اوقات اپ ڈیٹ کریں";
 "watch.widget_description" = "اگلی نماز اور باقی وقت";
+"countdown_hours_minutes" = "%d گھ %d منٹ";
+"countdown_minutes" = "%d منٹ";
+"prayer.fajr.short" = "فجر";
+"prayer.sunrise.short" = "طلوع";
+"prayer.dhuhr.short" = "ظہر";
+"prayer.asr.short" = "عصر";
+"prayer.maghrib.short" = "مغرب";
+"prayer.isha.short" = "عشاء";
+"watch.widget_large_title" = "اوقات · بڑا متن";
+"watch.widget_large_description" = "اگلی نماز، سب سے بڑے متن میں";
+"watch.today" = "آج";

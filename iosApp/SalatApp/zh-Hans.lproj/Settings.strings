@@ -23,3 +23,6 @@
 "settings_day_adjustment" = "日期调整";
 "settings_done" = "完成";
 "settings_minutes_format" = "%d 分钟";
+"settings_data_credit" = "城市数据：GeoNames · CC BY 4.0";
+"settings_appearance_language" = "外观与语言";
+"settings_theme" = "主题";

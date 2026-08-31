@@ -22,4 +22,8 @@
     <string name="settings_method">Kaedah</string>
     <string name="settings_day_adjustment">Pelarasan hari</string>
     <string name="settings_minutes">%1$d min</string>
+    <string name="settings_done">Selesai</string>
+    <string name="settings_data_credit">Data bandar: GeoNames · CC BY 4.0</string>
+    <string name="settings_appearance_language">Penampilan dan bahasa</string>
+    <string name="settings_theme">Tema</string>
 </resources>

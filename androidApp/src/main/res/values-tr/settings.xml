@@ -22,4 +22,8 @@
     <string name="settings_method">Yöntem</string>
     <string name="settings_day_adjustment">Gün düzeltmesi</string>
     <string name="settings_minutes">%1$d dk</string>
+    <string name="settings_done">Bitti</string>
+    <string name="settings_data_credit">Şehir verisi: GeoNames · CC BY 4.0</string>
+    <string name="settings_appearance_language">Görünüm ve dil</string>
+    <string name="settings_theme">Tema</string>
 </resources>

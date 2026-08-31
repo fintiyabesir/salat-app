@@ -1,6 +1,21 @@
 <resources>
-    <string name="qibla_compass_unavailable">指南針感測器無法使用</string>
-    <string name="qibla_calibrating">正在校準指南針…</string>
-    <string name="qibla_aligned">已對準朝向</string>
-    <string name="qibla_accuracy_hint">以「8」字形移動手機以提高指南針精準度。</string>
+    <string name="qibla_cardinal_north">北</string>
+    <string name="qibla_cardinal_east">東</string>
+    <string name="qibla_cardinal_south">南</string>
+    <string name="qibla_cardinal_west">西</string>
+    <string name="qibla_mecca">麥加</string>
+    <string name="qibla_label_direction">方向</string>
+    <string name="qibla_label_distance">距離</string>
+    <string name="qibla_label_deviation">偏差</string>
+    <string name="qibla_turn_right">向右轉</string>
+    <string name="qibla_turn_left">向左轉</string>
+    <string name="qibla_aligned">已對準</string>
+    <string name="qibla_distance_km">%1$s 公里</string>
+    <string name="qibla_low_accuracy_title">羅盤精度偏低</string>
+    <string name="qibla_low_accuracy_body">目前方向不可靠，因此不予顯示。請將手機做八字形移動。</string>
+    <string name="qibla_calibrating">正在校準…</string>
+    <string name="settings_qibla_threshold">朝向精度閾值</string>
+    <string name="settings_qibla_threshold_auto">自動</string>
+    <string name="settings_qibla_threshold_degrees">±%1$d°</string>
+    <string name="qibla_compass_unavailable">沒有羅盤感測器</string>
 </resources>

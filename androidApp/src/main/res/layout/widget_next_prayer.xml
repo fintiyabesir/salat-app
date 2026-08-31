@@ -1,61 +1,245 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!-- Artboard 3c, 4x2 dense. -->
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/widget_root"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    android:gravity="center_vertical"
-    android:padding="16dp"
+    android:paddingStart="20dp"
+    android:paddingEnd="20dp"
+    android:paddingTop="14dp"
+    android:paddingBottom="12dp"
     android:background="@drawable/widget_background">
-
-    <TextView
-        android:id="@+id/widget_brand"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:textSize="11sp"
-        android:textStyle="bold"
-        android:textColor="@color/widget_brand"
-        android:letterSpacing="@dimen/brand_letter_spacing" />
-
-    <TextView
-        android:id="@+id/widget_location"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="4dp"
-        android:maxLines="1"
-        android:ellipsize="end"
-        android:textSize="12sp"
-        android:textColor="@color/widget_text_secondary" />
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="10dp"
         android:orientation="horizontal"
-        android:gravity="center_vertical">
+        android:baselineAligned="false">
 
         <TextView
-            android:id="@+id/widget_prayer"
+            android:id="@+id/widget_location"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:textSize="18sp"
+            android:maxLines="1"
+            android:ellipsize="end"
+            android:textSize="12sp"
+            android:textColor="@color/widget_text_secondary" />
+
+        <TextView
+            android:id="@+id/widget_hijri"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="8dp"
+            android:maxLines="1"
+            android:textSize="12sp"
+            android:textColor="@color/widget_text_secondary" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:orientation="horizontal"
+        android:gravity="center"
+        android:baselineAligned="false">
+
+        <TextView
+            android:id="@+id/widget_prayer"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:maxLines="1"
+            android:textSize="17sp"
             android:textStyle="bold"
-            android:textColor="@color/widget_text_primary" />
+            android:textColor="@color/widget_brand" />
 
         <TextView
             android:id="@+id/widget_time"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:textSize="24sp"
+            android:layout_marginStart="12dp"
+            android:maxLines="1"
+            android:textSize="40sp"
             android:textColor="@color/widget_text_primary" />
+
+        <Chronometer
+            android:id="@+id/widget_countdown"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="12dp"
+            android:paddingStart="12dp"
+            android:paddingEnd="12dp"
+            android:paddingTop="4dp"
+            android:paddingBottom="4dp"
+            android:background="@drawable/widget_chip_background"
+            android:textSize="13.5sp"
+            android:textStyle="bold"
+            android:textColor="@color/widget_brand" />
     </LinearLayout>
 
-    <Chronometer
-        android:id="@+id/widget_countdown"
-        android:layout_width="wrap_content"
+    <!-- An ImageView, not a View: RemoteViews refuses to inflate android.view.View. -->
+    <ImageView
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:contentDescription="@null"
+        android:background="@color/widget_divider" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="4dp"
-        android:textSize="13sp"
-        android:textColor="@color/widget_brand" />
+        android:layout_marginTop="8dp"
+        android:orientation="horizontal"
+        android:baselineAligned="false">
+
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:orientation="vertical"
+            android:gravity="center_horizontal">
+
+            <TextView
+                android:id="@+id/widget_slot_0_label"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:maxLines="1"
+                android:textSize="10sp"
+                android:textColor="@color/widget_text_secondary" />
+
+            <TextView
+                android:id="@+id/widget_slot_0_time"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="2dp"
+                android:maxLines="1"
+                android:textSize="12.5sp"
+                android:textColor="@color/widget_text_primary" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:orientation="vertical"
+            android:gravity="center_horizontal">
+
+            <TextView
+                android:id="@+id/widget_slot_1_label"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:maxLines="1"
+                android:textSize="10sp"
+                android:textColor="@color/widget_text_secondary" />
+
+            <TextView
+                android:id="@+id/widget_slot_1_time"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="2dp"
+                android:maxLines="1"
+                android:textSize="12.5sp"
+                android:textColor="@color/widget_text_primary" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:orientation="vertical"
+            android:gravity="center_horizontal">
+
+            <TextView
+                android:id="@+id/widget_slot_2_label"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:maxLines="1"
+                android:textSize="10sp"
+                android:textColor="@color/widget_text_secondary" />
+
+            <TextView
+                android:id="@+id/widget_slot_2_time"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="2dp"
+                android:maxLines="1"
+                android:textSize="12.5sp"
+                android:textColor="@color/widget_text_primary" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:orientation="vertical"
+            android:gravity="center_horizontal">
+
+            <TextView
+                android:id="@+id/widget_slot_3_label"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:maxLines="1"
+                android:textSize="10sp"
+                android:textColor="@color/widget_text_secondary" />
+
+            <TextView
+                android:id="@+id/widget_slot_3_time"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="2dp"
+                android:maxLines="1"
+                android:textSize="12.5sp"
+                android:textColor="@color/widget_text_primary" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:orientation="vertical"
+            android:gravity="center_horizontal">
+
+            <TextView
+                android:id="@+id/widget_slot_4_label"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:maxLines="1"
+                android:textSize="10sp"
+                android:textColor="@color/widget_text_secondary" />
+
+            <TextView
+                android:id="@+id/widget_slot_4_time"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="2dp"
+                android:maxLines="1"
+                android:textSize="12.5sp"
+                android:textColor="@color/widget_text_primary" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:orientation="vertical"
+            android:gravity="center_horizontal">
+
+            <TextView
+                android:id="@+id/widget_slot_5_label"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:maxLines="1"
+                android:textSize="10sp"
+                android:textColor="@color/widget_text_secondary" />
+
+            <TextView
+                android:id="@+id/widget_slot_5_time"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="2dp"
+                android:maxLines="1"
+                android:textSize="12.5sp"
+                android:textColor="@color/widget_text_primary" />
+        </LinearLayout>
+    </LinearLayout>
 </LinearLayout>

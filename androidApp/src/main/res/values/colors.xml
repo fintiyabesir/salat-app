@@ -6,5 +6,11 @@
     <color name="widget_brand">#467A69</color>
     <color name="widget_text_primary">#20221F</color>
     <color name="widget_text_secondary">#6D716E</color>
+    <!-- The day strip: spent, current, and the hairline that carries it. -->
+    <color name="widget_divider">#ECE9E0</color>
+    <color name="widget_slot_past">#C0C4BE</color>
+    <color name="widget_slot_current">#B08544</color>
+    <color name="widget_chip">#1F467A69</color>
+    <color name="widget_countdown_large">#467A69</color>
     <color name="window_background">#FAF8F3</color>
 </resources>

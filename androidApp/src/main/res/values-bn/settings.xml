@@ -22,4 +22,8 @@
     <string name="settings_method">পদ্ধতি</string>
     <string name="settings_day_adjustment">দিনের সমন্বয়</string>
     <string name="settings_minutes">%1$d মিনিট</string>
+    <string name="settings_done">সম্পন্ন</string>
+    <string name="settings_data_credit">শহরের তথ্য: GeoNames · CC BY 4.0</string>
+    <string name="settings_appearance_language">চেহারা ও ভাষা</string>
+    <string name="settings_theme">থিম</string>
 </resources>

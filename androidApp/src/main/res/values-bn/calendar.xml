@@ -1,0 +1,10 @@
+<resources>
+    <string name="calendar_today_card">আজ · %1$s</string>
+    <!-- Column headings in the month table; they must fit a sixth of the width. -->
+    <string name="prayer_fajr_short">ফজর</string>
+    <string name="prayer_sunrise_short">সূর্য</string>
+    <string name="prayer_dhuhr_short">যোহর</string>
+    <string name="prayer_asr_short">আসর</string>
+    <string name="prayer_maghrib_short">মাগ.</string>
+    <string name="prayer_isha_short">এশা</string>
+</resources>

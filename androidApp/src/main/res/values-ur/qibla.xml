@@ -1,6 +1,21 @@
 <resources>
-    <string name="qibla_compass_unavailable">کمپاس سینسر دستیاب نہیں ہے</string>
-    <string name="qibla_calibrating">کمپاس کیلیبریٹ ہو رہا ہے…</string>
-    <string name="qibla_aligned">قبلہ کے رخ کے ساتھ سیدھ ہو گئی</string>
-    <string name="qibla_accuracy_hint">کمپاس کی درستگی بہتر کرنے کے لیے فون کو آٹھ کی شکل میں حرکت دیں۔</string>
+    <string name="qibla_cardinal_north">ش</string>
+    <string name="qibla_cardinal_east">م</string>
+    <string name="qibla_cardinal_south">ج</string>
+    <string name="qibla_cardinal_west">مغ</string>
+    <string name="qibla_mecca">مکہ</string>
+    <string name="qibla_label_direction">سمت</string>
+    <string name="qibla_label_distance">فاصلہ</string>
+    <string name="qibla_label_deviation">انحراف</string>
+    <string name="qibla_turn_right">دائیں مڑیں</string>
+    <string name="qibla_turn_left">بائیں مڑیں</string>
+    <string name="qibla_aligned">سیدھ میں ہے</string>
+    <string name="qibla_distance_km">%1$s کلومیٹر</string>
+    <string name="qibla_low_accuracy_title">قطب نما کی درستگی کم ہے</string>
+    <string name="qibla_low_accuracy_body">سمت اس وقت قابل اعتماد نہیں، اس لیے نہیں دکھائی جا رہی۔ فون کو آٹھ کی شکل میں گھمائیں۔</string>
+    <string name="qibla_calibrating">کیلیبریشن جاری…</string>
+    <string name="settings_qibla_threshold">قبلہ درستگی کی حد</string>
+    <string name="settings_qibla_threshold_auto">خودکار</string>
+    <string name="settings_qibla_threshold_degrees">±%1$d°</string>
+    <string name="qibla_compass_unavailable">قطب نما سینسر دستیاب نہیں</string>
 </resources>
