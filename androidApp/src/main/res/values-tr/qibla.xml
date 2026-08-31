@@ -1,6 +1,21 @@
 <resources>
-    <string name="qibla_compass_unavailable">Pusula sensörü kullanılamıyor</string>
-    <string name="qibla_calibrating">Pusula kalibre ediliyor…</string>
-    <string name="qibla_aligned">Kıble yönüyle hizalandı</string>
-    <string name="qibla_accuracy_hint">Pusula doğruluğunu artırmak için telefonu sekiz çizerek hareket ettirin.</string>
+    <string name="qibla_cardinal_north">K</string>
+    <string name="qibla_cardinal_east">D</string>
+    <string name="qibla_cardinal_south">G</string>
+    <string name="qibla_cardinal_west">B</string>
+    <string name="qibla_mecca">Mekke</string>
+    <string name="qibla_label_direction">Yön</string>
+    <string name="qibla_label_distance">Mesafe</string>
+    <string name="qibla_label_deviation">Sapma</string>
+    <string name="qibla_turn_right">sağa dön</string>
+    <string name="qibla_turn_left">sola dön</string>
+    <string name="qibla_aligned">hizalandı</string>
+    <string name="qibla_distance_km">%1$s km</string>
+    <string name="qibla_low_accuracy_title">Pusula doğruluğu düşük</string>
+    <string name="qibla_low_accuracy_body">Yön şu an güvenilir değil, bu yüzden gösterilmiyor. Telefonu 8 çizer gibi hareket ettir.</string>
+    <string name="qibla_calibrating">kalibre ediliyor…</string>
+    <string name="settings_qibla_threshold">Kıble doğruluk eşiği</string>
+    <string name="settings_qibla_threshold_auto">Otomatik</string>
+    <string name="settings_qibla_threshold_degrees">±%1$d°</string>
+    <string name="qibla_compass_unavailable">Pusula sensörü yok</string>
 </resources>

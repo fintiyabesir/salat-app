@@ -162,7 +162,7 @@ fun SalatMainShell(
                 when (section) {
                     MainSection.TODAY -> AdaptiveTodayScreen(location, settings)
                     MainSection.CALENDAR -> SalatCalendarScreen(location, settings.calculation, dark)
-                    MainSection.QIBLA -> SalatQiblaScreen(location)
+                    MainSection.QIBLA -> AndroidQiblaScreen(location, settings)
                 }
             }
         }
@@ -268,111 +268,6 @@ private fun CalendarDayCard(item: CalendarDayUi, dark: Boolean, locale: java.uti
             }
         }
     }
-}
-
-@Composable
-private fun SalatQiblaScreen(location: ResolvedLocation) {
-    val context = LocalContext.current
-    val haptics = LocalHapticFeedback.current
-    val provider = remember { AndroidQiblaHeadingProvider(context) }
-    val qibla = remember(location) {
-        SalatEngine().qiblaBearing(location.point.latitude, location.point.longitude).toFloat()
-    }
-    var heading by remember { mutableStateOf<Float?>(null) }
-    val delta = heading?.let { normalizedDelta(qibla - it) }
-    val aligned = delta?.let { abs(it) <= 3f } == true
-    var wasAligned by remember { mutableStateOf(false) }
-
-    DisposableEffect(provider) {
-        provider.start { heading = it }
-        onDispose { provider.stop() }
-    }
-
-    LaunchedEffect(aligned) {
-        if (aligned && !wasAligned) {
-            haptics.performHapticFeedback(HapticFeedbackType.LongPress)
-        }
-        wasAligned = aligned
-    }
-
-    BoxWithConstraints(Modifier.fillMaxSize()) {
-        if (maxWidth >= 700.dp) {
-            Row(
-                Modifier.fillMaxSize().padding(horizontal = 48.dp, vertical = 38.dp),
-                horizontalArrangement = Arrangement.spacedBy(56.dp),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Column(
-                    Modifier.weight(1f),
-                    horizontalAlignment = Alignment.Start
-                ) {
-                    Text(stringResource(R.string.qibla), fontSize = 34.sp, fontWeight = FontWeight.SemiBold)
-                    Spacer(Modifier.height(8.dp))
-                    Text(location.displayName, color = MaterialTheme.colorScheme.onSurfaceVariant, fontSize = 20.sp)
-                    Spacer(Modifier.height(18.dp))
-                    Text("${qibla.toInt()}°", color = MaterialTheme.colorScheme.primary, fontSize = 54.sp, fontWeight = FontWeight.Light)
-                    Spacer(Modifier.height(24.dp))
-                    QiblaStatus(provider.isAvailable, heading, aligned, delta)
-                }
-
-                Box(
-                    Modifier.weight(1f),
-                    contentAlignment = Alignment.Center
-                ) {
-                    QiblaCompass(aligned = aligned, delta = delta, wide = true)
-                }
-            }
-        } else {
-            Column(
-                Modifier.fillMaxSize().padding(horizontal = 24.dp, vertical = 26.dp),
-                horizontalAlignment = Alignment.CenterHorizontally
-            ) {
-                Text(stringResource(R.string.qibla), fontSize = 28.sp, fontWeight = FontWeight.SemiBold)
-                Spacer(Modifier.height(8.dp))
-                Text("${qibla.toInt()}°", color = MaterialTheme.colorScheme.primary, fontSize = 18.sp)
-                Spacer(Modifier.height(54.dp))
-                QiblaCompass(aligned = aligned, delta = delta, wide = false)
-                Spacer(Modifier.height(34.dp))
-                QiblaStatus(provider.isAvailable, heading, aligned, delta)
-            }
-        }
-    }
-}
-
-@Composable
-private fun QiblaCompass(aligned: Boolean, delta: Float?, wide: Boolean) {
-    Box(
-        Modifier
-            .background(
-                if (aligned) MaterialTheme.colorScheme.secondaryContainer else MaterialTheme.colorScheme.surfaceVariant,
-                RoundedCornerShape(if (wide) 170.dp else 120.dp)
-            )
-            .padding(if (wide) 86.dp else 64.dp),
-        contentAlignment = Alignment.Center
-    ) {
-        Text(
-            "▲",
-            modifier = Modifier.rotate(delta ?: 0f),
-            color = MaterialTheme.colorScheme.primary,
-            fontSize = if (wide) 92.sp else 72.sp
-        )
-    }
-}
-
-@Composable
-private fun QiblaStatus(providerAvailable: Boolean, heading: Float?, aligned: Boolean, delta: Float?) {
-    when {
-        !providerAvailable -> Text(stringResource(R.string.qibla_compass_unavailable), color = MaterialTheme.colorScheme.onSurfaceVariant)
-        heading == null -> Text(stringResource(R.string.qibla_calibrating), color = MaterialTheme.colorScheme.onSurfaceVariant)
-        aligned -> Text(stringResource(R.string.qibla_aligned), color = MaterialTheme.colorScheme.primary, fontWeight = FontWeight.SemiBold)
-        else -> Text("${abs(delta ?: 0f).toInt()}°", color = MaterialTheme.colorScheme.onSurfaceVariant)
-    }
-}
-
-private fun normalizedDelta(value: Float): Float {
-    var result = (value + 180f) % 360f
-    if (result < 0) result += 360f
-    return result - 180f
 }
 
 @Composable

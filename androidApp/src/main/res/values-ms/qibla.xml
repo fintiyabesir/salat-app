@@ -1,6 +1,21 @@
 <resources>
-    <string name="qibla_compass_unavailable">Sensor kompas tidak tersedia</string>
-    <string name="qibla_calibrating">Menentukur kompas…</string>
-    <string name="qibla_aligned">Sejajar dengan Kiblat</string>
-    <string name="qibla_accuracy_hint">Gerakkan telefon membentuk angka lapan untuk meningkatkan ketepatan kompas.</string>
+    <string name="qibla_cardinal_north">U</string>
+    <string name="qibla_cardinal_east">T</string>
+    <string name="qibla_cardinal_south">S</string>
+    <string name="qibla_cardinal_west">B</string>
+    <string name="qibla_mecca">Mekah</string>
+    <string name="qibla_label_direction">Arah</string>
+    <string name="qibla_label_distance">Jarak</string>
+    <string name="qibla_label_deviation">Sisihan</string>
+    <string name="qibla_turn_right">pusing ke kanan</string>
+    <string name="qibla_turn_left">pusing ke kiri</string>
+    <string name="qibla_aligned">sejajar</string>
+    <string name="qibla_distance_km">%1$s km</string>
+    <string name="qibla_low_accuracy_title">Ketepatan kompas rendah</string>
+    <string name="qibla_low_accuracy_body">Arah tidak boleh dipercayai sekarang, jadi ia disembunyikan. Gerakkan telefon dalam bentuk angka lapan.</string>
+    <string name="qibla_calibrating">menentukur…</string>
+    <string name="settings_qibla_threshold">Ambang ketepatan kiblat</string>
+    <string name="settings_qibla_threshold_auto">Automatik</string>
+    <string name="settings_qibla_threshold_degrees">±%1$d°</string>
+    <string name="qibla_compass_unavailable">Penderia kompas tiada</string>
 </resources>

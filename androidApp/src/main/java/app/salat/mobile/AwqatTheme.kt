@@ -10,6 +10,12 @@ import androidx.compose.ui.graphics.Color
 import app.salat.model.AppearanceMode
 
 internal val ShellSage = Color(0xFF467A69)
+
+/** Design tokens that sit outside the Material scheme because their meaning is
+ *  fixed rather than role-based: gold marks only the Kaaba, the needle, the active
+ *  prayer and Friday; the hero surface is the deep field the icon is built on. */
+internal val AwqatGold = Color(0xFFC29653)
+internal val AwqatHeroSurface = Color(0xFF1E3A32)
 internal val ShellCanvas = Color(0xFFFAF8F3)
 internal val ShellCanvasDark = Color(0xFF171916)
 internal val ShellCardDark = Color(0xFF22251F)

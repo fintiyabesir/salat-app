@@ -1,6 +1,21 @@
 <resources>
+    <string name="qibla_cardinal_north">N</string>
+    <string name="qibla_cardinal_east">E</string>
+    <string name="qibla_cardinal_south">S</string>
+    <string name="qibla_cardinal_west">W</string>
+    <string name="qibla_mecca">Mecca</string>
+    <string name="qibla_label_direction">Direction</string>
+    <string name="qibla_label_distance">Distance</string>
+    <string name="qibla_label_deviation">Deviation</string>
+    <string name="qibla_turn_right">turn right</string>
+    <string name="qibla_turn_left">turn left</string>
+    <string name="qibla_aligned">aligned</string>
+    <string name="qibla_distance_km">%1$s km</string>
+    <string name="qibla_low_accuracy_title">Compass accuracy is low</string>
+    <string name="qibla_low_accuracy_body">The direction is not reliable right now, so it is hidden. Move the phone in a figure eight.</string>
+    <string name="qibla_calibrating">calibrating…</string>
+    <string name="settings_qibla_threshold">Qibla accuracy threshold</string>
+    <string name="settings_qibla_threshold_auto">Automatic</string>
+    <string name="settings_qibla_threshold_degrees">±%1$d°</string>
     <string name="qibla_compass_unavailable">Compass sensor unavailable</string>
-    <string name="qibla_calibrating">Calibrating compass…</string>
-    <string name="qibla_aligned">Aligned with Qibla</string>
-    <string name="qibla_accuracy_hint">Move the phone in a figure-eight to improve compass accuracy.</string>
 </resources>

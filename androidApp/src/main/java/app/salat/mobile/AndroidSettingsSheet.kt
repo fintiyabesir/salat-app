@@ -136,6 +136,19 @@ fun AndroidSettingsSheet(
                 onValue = { onChange(value.copy(hijriDayAdjustment = it.coerceIn(-2, 2))) }
             )
 
+            SettingsHeading(stringResource(R.string.settings_qibla_threshold))
+            ChipFlow(
+                choices = listOf<String?>(null) + QIBLA_THRESHOLD_CHOICES.map { it.toString() },
+                selected = value.qiblaAccuracyThresholdDegrees?.toString(),
+                label = { raw ->
+                    raw?.let { stringResource(R.string.settings_qibla_threshold_degrees, it.toInt()) }
+                        ?: stringResource(R.string.settings_qibla_threshold_auto)
+                },
+                onSelected = { raw ->
+                    onChange(value.copy(qiblaAccuracyThresholdDegrees = raw?.toInt()))
+                }
+            )
+
             SettingsHeading(stringResource(R.string.settings_language))
             ChipFlow(
                 choices = listOf<String?>(null, "en", "tr", "ar", "fa", "ur", "bn", "ms", "zh-Hans", "zh-Hant"),
@@ -296,3 +309,6 @@ private fun String?.languageLabel(): String = when (this) {
     "zh-Hant" -> "繁體中文"
     else -> this
 }
+
+/** Offered thresholds, inside AppPreferences.QIBLA_THRESHOLD_RANGE. */
+private val QIBLA_THRESHOLD_CHOICES = listOf(5, 10, 15, 20, 30, 45)

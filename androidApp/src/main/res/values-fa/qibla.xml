@@ -1,6 +1,21 @@
 <resources>
+    <string name="qibla_cardinal_north">ش</string>
+    <string name="qibla_cardinal_east">خ</string>
+    <string name="qibla_cardinal_south">ج</string>
+    <string name="qibla_cardinal_west">غ</string>
+    <string name="qibla_mecca">مکه</string>
+    <string name="qibla_label_direction">جهت</string>
+    <string name="qibla_label_distance">فاصله</string>
+    <string name="qibla_label_deviation">انحراف</string>
+    <string name="qibla_turn_right">به راست بچرخید</string>
+    <string name="qibla_turn_left">به چپ بچرخید</string>
+    <string name="qibla_aligned">هم‌راستا شد</string>
+    <string name="qibla_distance_km">%1$s کیلومتر</string>
+    <string name="qibla_low_accuracy_title">دقت قطب‌نما پایین است</string>
+    <string name="qibla_low_accuracy_body">جهت در حال حاضر قابل اعتماد نیست، بنابراین نمایش داده نمی‌شود. گوشی را به شکل عدد هشت حرکت دهید.</string>
+    <string name="qibla_calibrating">در حال کالیبراسیون…</string>
+    <string name="settings_qibla_threshold">آستانه دقت قبله</string>
+    <string name="settings_qibla_threshold_auto">خودکار</string>
+    <string name="settings_qibla_threshold_degrees">±%1$d°</string>
     <string name="qibla_compass_unavailable">حسگر قطب‌نما در دسترس نیست</string>
-    <string name="qibla_calibrating">در حال کالیبره‌کردن قطب‌نما…</string>
-    <string name="qibla_aligned">با جهت قبله هم‌راستا شد</string>
-    <string name="qibla_accuracy_hint">برای بهبود دقت قطب‌نما، گوشی را به شکل عدد هشت حرکت دهید.</string>
 </resources>

@@ -1,6 +1,21 @@
 <resources>
-    <string name="qibla_compass_unavailable">مستشعر البوصلة غير متاح</string>
-    <string name="qibla_calibrating">جارٍ معايرة البوصلة…</string>
-    <string name="qibla_aligned">تمت المحاذاة مع القبلة</string>
-    <string name="qibla_accuracy_hint">حرّك الهاتف على شكل رقم ثمانية لتحسين دقة البوصلة.</string>
+    <string name="qibla_cardinal_north">ش</string>
+    <string name="qibla_cardinal_east">ق</string>
+    <string name="qibla_cardinal_south">ج</string>
+    <string name="qibla_cardinal_west">غ</string>
+    <string name="qibla_mecca">مكة</string>
+    <string name="qibla_label_direction">الاتجاه</string>
+    <string name="qibla_label_distance">المسافة</string>
+    <string name="qibla_label_deviation">الانحراف</string>
+    <string name="qibla_turn_right">استدر يمينًا</string>
+    <string name="qibla_turn_left">استدر يسارًا</string>
+    <string name="qibla_aligned">تمت المحاذاة</string>
+    <string name="qibla_distance_km">%1$s كم</string>
+    <string name="qibla_low_accuracy_title">دقة البوصلة منخفضة</string>
+    <string name="qibla_low_accuracy_body">الاتجاه غير موثوق الآن، لذلك لا يُعرض. حرّك الهاتف على شكل الرقم ثمانية.</string>
+    <string name="qibla_calibrating">جارٍ المعايرة…</string>
+    <string name="settings_qibla_threshold">عتبة دقة القبلة</string>
+    <string name="settings_qibla_threshold_auto">تلقائي</string>
+    <string name="settings_qibla_threshold_degrees">±%1$d°</string>
+    <string name="qibla_compass_unavailable">مستشعر البوصلة غير متوفر</string>
 </resources>
