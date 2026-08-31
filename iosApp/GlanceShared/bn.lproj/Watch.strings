@@ -10,3 +10,14 @@
 "watch.open_app" = "অ্যাপটি খুলুন";
 "watch.update_prayer_times" = "নামাজের সময় হালনাগাদ করুন";
 "watch.widget_description" = "পরবর্তী নামাজ ও বাকি সময়";
+"countdown_hours_minutes" = "%d ঘ %d মি";
+"countdown_minutes" = "%d মি";
+"prayer.fajr.short" = "ফজর";
+"prayer.sunrise.short" = "সূর্য";
+"prayer.dhuhr.short" = "যোহর";
+"prayer.asr.short" = "আসর";
+"prayer.maghrib.short" = "মাগ.";
+"prayer.isha.short" = "এশা";
+"watch.widget_large_title" = "আওকাত · বড় লেখা";
+"watch.widget_large_description" = "পরবর্তী নামাজ সবচেয়ে বড় লেখায়";
+"watch.today" = "আজ";

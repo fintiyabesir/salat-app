@@ -22,3 +22,13 @@
 "notification_sound_system" = "Bunyi sistem";
 "notification_sound_silent" = "Senyap";
 "notification_sound_short_adhan" = "Azan pendek";
+"today_change_city" = "Tukar bandar";
+"countdown_hours_minutes" = "%d j %d min";
+"countdown_minutes_seconds" = "%d min %d s";
+"calendar_today_card" = "Hari ini · %@";
+"prayer.fajr.short" = "Sub";
+"prayer.sunrise.short" = "Syu";
+"prayer.dhuhr.short" = "Zoh";
+"prayer.asr.short" = "Asr";
+"prayer.maghrib.short" = "Mag";
+"prayer.isha.short" = "Isy";

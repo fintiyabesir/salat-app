@@ -1,32 +1,19 @@
 import SwiftUI
 import WidgetKit
 
-/// The widget used a hardcoded cream background while SwiftUI kept resolving
-/// .primary/.secondary against the system appearance, so in dark mode the text came
-/// out near-white on cream and was unreadable. Both canvas and accent adapt now.
-private let widgetCanvas = Color(uiColor: UIColor { traits in
-    traits.userInterfaceStyle == .dark
-        ? UIColor(red: 0.10, green: 0.11, blue: 0.10, alpha: 1)
-        : UIColor(red: 0.98, green: 0.97, blue: 0.94, alpha: 1)
-})
-
-private let widgetAccent = Color(uiColor: UIColor { traits in
-    traits.userInterfaceStyle == .dark
-        ? UIColor(red: 0.47, green: 0.78, blue: 0.65, alpha: 1)
-        : UIColor(red: 0.27, green: 0.48, blue: 0.41, alpha: 1)
-})
-
 private struct SalatWidgetEntry: TimelineEntry {
     let date: Date
-    let locationName: String?
+    let payload: GlanceTimelinePayload?
     let nextPrayer: GlancePrayerEvent?
+
+    var locationName: String? { payload?.locationName }
 }
 
 private struct SalatWidgetProvider: TimelineProvider {
     func placeholder(in context: Context) -> SalatWidgetEntry {
         SalatWidgetEntry(
             date: Date(),
-            locationName: "Istanbul",
+            payload: nil,
             nextPrayer: GlancePrayerEvent(
                 prayerId: "maghrib",
                 prayerName: "Maghrib",
@@ -58,38 +45,221 @@ private struct SalatWidgetProvider: TimelineProvider {
         let payload = GlanceTimelinePersistence.load()
         return SalatWidgetEntry(
             date: date,
-            locationName: payload?.locationName,
+            payload: payload,
             nextPrayer: payload?.next(after: date)
         )
     }
 }
 
-private struct SalatWidgetView: View {
+// MARK: - Shared pieces
+
+/// Artboard 3a. The medium widget inverts in dark mode the way the hero card on
+/// the phone does, so the two surfaces read as the same object.
+private struct WidgetPalette {
+    let surface: Color
+    let content: Color
+    let name: Color
+    let chipFill: Color
+    let chipText: Color
+    let divider: Color
+    let label: Color
+    let spent: Color
+    let current: Color
+
+    static func dense(_ scheme: ColorScheme) -> WidgetPalette {
+        scheme == .dark
+            ? WidgetPalette(
+                surface: Awqat.heroSurface,
+                content: Awqat.canvasLight,
+                name: Color(red: 0.663, green: 0.769, blue: 0.722),
+                chipFill: Awqat.gold.opacity(0.20),
+                chipText: Awqat.goldSoft,
+                divider: Color(red: 0.173, green: 0.290, blue: 0.247),
+                label: Color(red: 0.663, green: 0.769, blue: 0.722),
+                spent: Color(red: 0.494, green: 0.592, blue: 0.549),
+                current: Awqat.goldSoft
+            )
+            : WidgetPalette(
+                surface: Awqat.canvasLight,
+                content: Awqat.inkLight,
+                name: Awqat.heroSurface,
+                chipFill: Awqat.sage.opacity(0.12),
+                chipText: Awqat.sage,
+                divider: Color(red: 0.925, green: 0.914, blue: 0.878),
+                label: Awqat.mutedLight,
+                spent: Color(red: 0.753, green: 0.769, blue: 0.745),
+                current: Awqat.goldDeep
+            )
+    }
+}
+
+private func timeText(_ date: Date, _ payload: GlanceTimelinePayload?) -> String {
+    let formatter = DateFormatter()
+    formatter.locale = .current
+    formatter.timeZone = payload.flatMap { TimeZone(identifier: $0.timeZoneId) } ?? .current
+    formatter.dateFormat = "HH:mm"
+    return formatter.string(from: date)
+}
+
+/// The units the design writes, kept live by the widget's own timeline entries.
+private func countdownText(to date: Date, from now: Date) -> String {
+    let remaining = max(0, Int(date.timeIntervalSince(now)))
+    let hours = remaining / 3600
+    let minutes = (remaining % 3600) / 60
+    return hours > 0
+        ? GlanceL10n.format("countdown_hours_minutes", fallback: "%dh %dm", hours, minutes)
+        : GlanceL10n.format("countdown_minutes", fallback: "%d min", minutes)
+}
+
+private struct DayStripRow: View {
+    let entry: SalatWidgetEntry
+    let palette: WidgetPalette
+
+    var body: some View {
+        let events = entry.payload?.events(on: entry.date) ?? []
+        HStack(spacing: 0) {
+            ForEach(events, id: \.epochMillis) { event in
+                let isNext = event.epochMillis == entry.nextPrayer?.epochMillis
+                let passed = !isNext && event.date <= entry.date
+                VStack(spacing: 2) {
+                    Text(GlanceL10n.prayerShort(event.prayerId, fallback: event.localizedPrayerName))
+                        .font(.system(size: 10, weight: isNext ? .semibold : .regular))
+                        .foregroundStyle(isNext ? palette.current : (passed ? palette.spent : palette.label))
+                    Text(timeText(event.date, entry.payload))
+                        .font(.system(size: 13, weight: isNext ? .semibold : .regular).monospacedDigit())
+                        .foregroundStyle(isNext ? palette.current : (passed ? palette.spent : palette.content))
+                }
+                .lineLimit(1)
+                .minimumScaleFactor(0.7)
+                .frame(maxWidth: .infinity)
+            }
+        }
+    }
+}
+
+// MARK: - Dense family
+
+private struct DenseWidgetView: View {
     @Environment(\.widgetFamily) private var family
+    @Environment(\.colorScheme) private var colorScheme
     let entry: SalatWidgetEntry
 
     var body: some View {
+        let palette = WidgetPalette.dense(colorScheme)
         Group {
             switch family {
-            case .accessoryInline:
-                inlineView
-            case .accessoryCircular:
-                circularView
-            case .accessoryRectangular:
-                rectangularView
-            default:
-                homeView
+            case .accessoryInline: inlineView
+            case .accessoryCircular: circularView
+            case .accessoryRectangular: rectangularView
+            case .systemSmall: smallDense(palette)
+            default: mediumDense(palette)
             }
         }
         .containerBackground(for: .widget) {
-            widgetCanvas
+            family == .accessoryInline || family == .accessoryCircular || family == .accessoryRectangular
+                ? AnyView(Color.clear)
+                : AnyView(palette.surface)
         }
+    }
+
+    @ViewBuilder
+    private func mediumDense(_ palette: WidgetPalette) -> some View {
+        VStack(spacing: 0) {
+            HStack {
+                Text(entry.locationName ?? "").lineLimit(1)
+                Spacer(minLength: 8)
+                Text(entry.payload?.hijriDateText(for: entry.date) ?? "").lineLimit(1)
+            }
+            .font(.system(size: 12))
+            .foregroundStyle(palette.label)
+
+            Spacer(minLength: 4)
+            if let prayer = entry.nextPrayer {
+                HStack(spacing: 12) {
+                    Text(prayer.localizedPrayerName)
+                        .font(.system(size: 18, weight: .semibold))
+                        .foregroundStyle(palette.name)
+                    Text(timeText(prayer.date, entry.payload))
+                        .font(.system(size: 42, weight: .thin).monospacedDigit())
+                        .foregroundStyle(palette.content)
+                    Text(countdownText(to: prayer.date, from: entry.date))
+                        .font(.system(size: 14, weight: .semibold).monospacedDigit())
+                        .foregroundStyle(palette.chipText)
+                        .padding(.horizontal, 12)
+                        .padding(.vertical, 4)
+                        .background(palette.chipFill, in: Capsule())
+                }
+                .lineLimit(1)
+                .minimumScaleFactor(0.7)
+            } else {
+                openAppNotice(palette)
+            }
+            Spacer(minLength: 4)
+
+            Rectangle().fill(palette.divider).frame(height: 1)
+            DayStripRow(entry: entry, palette: palette).padding(.top, 9)
+        }
+    }
+
+    @ViewBuilder
+    private func smallDense(_ palette: WidgetPalette) -> some View {
+        VStack(spacing: 0) {
+            if let prayer = entry.nextPrayer {
+                HStack(alignment: .firstTextBaseline) {
+                    Text(prayer.localizedPrayerName)
+                        .font(.system(size: 15, weight: .bold))
+                        .foregroundStyle(palette.name)
+                    Spacer(minLength: 4)
+                    Text(countdownText(to: prayer.date, from: entry.date))
+                        .font(.system(size: 13, weight: .semibold).monospacedDigit())
+                        .foregroundStyle(palette.chipText)
+                }
+                .lineLimit(1)
+                .minimumScaleFactor(0.7)
+            } else {
+                openAppNotice(palette)
+            }
+
+            Rectangle().fill(palette.divider).frame(height: 1).padding(.top, 8)
+
+            let events = entry.payload?.events(on: entry.date) ?? []
+            VStack(spacing: 0) {
+                ForEach(events, id: \.epochMillis) { event in
+                    let isNext = event.epochMillis == entry.nextPrayer?.epochMillis
+                    let passed = !isNext && event.date <= entry.date
+                    HStack {
+                        Text(event.localizedPrayerName)
+                        Spacer(minLength: 4)
+                        Text(timeText(event.date, entry.payload)).monospacedDigit()
+                    }
+                    .font(.system(size: 12.5, weight: isNext ? .bold : .regular))
+                    .foregroundStyle(isNext ? palette.current : (passed ? palette.spent : palette.content))
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.7)
+                    .frame(maxHeight: .infinity)
+                }
+            }
+            .padding(.top, 7)
+        }
+    }
+
+    @ViewBuilder
+    private func openAppNotice(_ palette: WidgetPalette) -> some View {
+        VStack(alignment: .leading, spacing: 2) {
+            Text(GlanceL10n.text("watch.open_app", fallback: "Open the app"))
+                .font(.system(size: 15, weight: .semibold))
+                .foregroundStyle(palette.name)
+            Text(GlanceL10n.text("watch.update_prayer_times", fallback: "Update prayer times"))
+                .font(.system(size: 12))
+                .foregroundStyle(palette.label)
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
     }
 
     private var inlineView: some View {
         Group {
             if let prayer = entry.nextPrayer {
-                Text("\(prayer.prayerName) · \(time(prayer.date))")
+                Text("\(prayer.localizedPrayerName) · \(timeText(prayer.date, entry.payload))")
             } else {
                 Text(GlanceL10n.text("watch.brand_name", fallback: "Awqat"))
             }
@@ -99,7 +269,7 @@ private struct SalatWidgetView: View {
     private var circularView: some View {
         VStack(spacing: 1) {
             if let prayer = entry.nextPrayer {
-                Text(shortName(prayer.prayerName))
+                Text(GlanceL10n.prayerShort(prayer.prayerId, fallback: prayer.localizedPrayerName))
                     .font(.caption2.weight(.semibold))
                     .minimumScaleFactor(0.6)
                 Text(prayer.date, style: .timer)
@@ -114,9 +284,9 @@ private struct SalatWidgetView: View {
     private var rectangularView: some View {
         VStack(alignment: .leading, spacing: 2) {
             if let prayer = entry.nextPrayer {
-                Text(prayer.prayerName).font(.headline)
+                Text(prayer.localizedPrayerName).font(.headline)
                 HStack {
-                    Text(time(prayer.date)).fontWeight(.semibold)
+                    Text(timeText(prayer.date, entry.payload)).fontWeight(.semibold)
                     Text(prayer.date, style: .timer).foregroundStyle(.secondary)
                 }
             } else {
@@ -124,61 +294,89 @@ private struct SalatWidgetView: View {
             }
         }
     }
+}
 
-    private var homeView: some View {
-        VStack(alignment: .leading, spacing: 6) {
-            Text(GlanceL10n.text("watch.brand_name", fallback: "Awqat"))
-                .font(.caption2.weight(.semibold))
-                .tracking(2)
-                .foregroundStyle(widgetAccent)
-            if let locationName = entry.locationName {
-                Text(locationName)
-                    .font(.caption)
-                    .foregroundStyle(.secondary)
-                    .lineLimit(1)
-            }
-            Spacer(minLength: 2)
-            if let prayer = entry.nextPrayer {
-                Text(prayer.prayerName)
-                    .font(.headline)
-                HStack(alignment: .firstTextBaseline) {
-                    Text(time(prayer.date))
-                        .font(.title2.weight(.medium))
-                    Spacer(minLength: 4)
-                    Text(prayer.date, style: .timer)
-                        .font(.caption)
-                        .foregroundStyle(widgetAccent)
-                }
+// MARK: - Large text family
+
+/// Artboard 3b: the whole card surface works for the digits, for anyone reading at
+/// arm's length.
+private struct LargeTextWidgetView: View {
+    @Environment(\.widgetFamily) private var family
+    @Environment(\.colorScheme) private var colorScheme
+    let entry: SalatWidgetEntry
+
+    var body: some View {
+        let palette = WidgetPalette.dense(colorScheme)
+        Group {
+            if family == .systemMedium {
+                mediumLarge(palette)
             } else {
-                Text(GlanceL10n.text("watch.open_app", fallback: "Open the app"))
-                    .font(.headline)
-                Text(GlanceL10n.text("watch.update_prayer_times", fallback: "Update prayer times"))
-                    .font(.caption)
-                    .foregroundStyle(.secondary)
+                smallLarge(palette)
             }
         }
+        .containerBackground(for: .widget) { palette.surface }
     }
 
-    private func time(_ date: Date) -> String {
-        let formatter = DateFormatter()
-        formatter.locale = .current
-        formatter.timeZone = GlanceTimelinePersistence.load()
-            .flatMap { TimeZone(identifier: $0.timeZoneId) } ?? .current
-        formatter.dateFormat = "HH:mm"
-        return formatter.string(from: date)
+    @ViewBuilder
+    private func smallLarge(_ palette: WidgetPalette) -> some View {
+        VStack(alignment: .leading, spacing: 0) {
+            if let prayer = entry.nextPrayer {
+                Text(prayer.localizedPrayerName)
+                    .font(.system(size: 26, weight: .bold))
+                    .foregroundStyle(palette.name)
+                Text(timeText(prayer.date, entry.payload))
+                    .font(.system(size: 60, weight: .medium).monospacedDigit())
+                    .foregroundStyle(palette.content)
+                Text(countdownText(to: prayer.date, from: entry.date))
+                    .font(.system(size: 24, weight: .bold).monospacedDigit())
+                    .foregroundStyle(palette.chipText)
+            } else {
+                Text(GlanceL10n.text("watch.open_app", fallback: "Open the app"))
+                    .font(.system(size: 22, weight: .bold))
+                    .foregroundStyle(palette.name)
+            }
+        }
+        .lineLimit(1)
+        .minimumScaleFactor(0.5)
+        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .leading)
     }
 
-    private func shortName(_ value: String) -> String {
-        value.count <= 5 ? value : String(value.prefix(5))
+    @ViewBuilder
+    private func mediumLarge(_ palette: WidgetPalette) -> some View {
+        HStack {
+            if let prayer = entry.nextPrayer {
+                VStack(alignment: .leading, spacing: 6) {
+                    Text(prayer.localizedPrayerName)
+                        .font(.system(size: 30, weight: .bold))
+                        .foregroundStyle(palette.name)
+                    Text(countdownText(to: prayer.date, from: entry.date))
+                        .font(.system(size: 25, weight: .bold).monospacedDigit())
+                        .foregroundStyle(palette.chipText)
+                }
+                Spacer(minLength: 8)
+                Text(timeText(prayer.date, entry.payload))
+                    .font(.system(size: 88, weight: .medium).monospacedDigit())
+                    .foregroundStyle(palette.content)
+            } else {
+                Text(GlanceL10n.text("watch.open_app", fallback: "Open the app"))
+                    .font(.system(size: 30, weight: .bold))
+                    .foregroundStyle(palette.name)
+            }
+        }
+        .lineLimit(1)
+        .minimumScaleFactor(0.5)
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
     }
 }
+
+// MARK: - Widgets
 
 struct SalatNextPrayerWidget: Widget {
     let kind = "SalatNextPrayerWidget"
 
     var body: some WidgetConfiguration {
         StaticConfiguration(kind: kind, provider: SalatWidgetProvider()) { entry in
-            SalatWidgetView(entry: entry)
+            DenseWidgetView(entry: entry)
         }
         .configurationDisplayName(GlanceL10n.text("watch.brand_name", fallback: "Awqat"))
         .description(GlanceL10n.text(
@@ -187,6 +385,7 @@ struct SalatNextPrayerWidget: Widget {
         ))
         .supportedFamilies([
             .systemSmall,
+            .systemMedium,
             .accessoryInline,
             .accessoryCircular,
             .accessoryRectangular
@@ -194,9 +393,26 @@ struct SalatNextPrayerWidget: Widget {
     }
 }
 
+struct SalatLargeTextWidget: Widget {
+    let kind = "SalatLargeTextWidget"
+
+    var body: some WidgetConfiguration {
+        StaticConfiguration(kind: kind, provider: SalatWidgetProvider()) { entry in
+            LargeTextWidgetView(entry: entry)
+        }
+        .configurationDisplayName(GlanceL10n.text("watch.widget_large_title", fallback: "Awqat · Large text"))
+        .description(GlanceL10n.text(
+            "watch.widget_large_description",
+            fallback: "Next prayer in the largest type that fits"
+        ))
+        .supportedFamilies([.systemSmall, .systemMedium])
+    }
+}
+
 @main
 struct SalatWidgetBundle: WidgetBundle {
     var body: some Widget {
         SalatNextPrayerWidget()
+        SalatLargeTextWidget()
     }
 }

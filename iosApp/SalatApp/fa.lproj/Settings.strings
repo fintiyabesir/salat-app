@@ -23,3 +23,6 @@
 "settings_day_adjustment" = "تنظیم روز";
 "settings_done" = "تمام";
 "settings_minutes_format" = "%d دقیقه";
+"settings_data_credit" = "داده‌های شهرها: GeoNames · CC BY 4.0";
+"settings_appearance_language" = "ظاهر و زبان";
+"settings_theme" = "پوسته";

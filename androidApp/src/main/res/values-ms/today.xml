@@ -1,0 +1,6 @@
+<resources>
+    <string name="today_change_city">Tukar bandar</string>
+    <!-- The hero countdown; units rather than a bare clock, as in the design. -->
+    <string name="countdown_hours_minutes">%1$d j %2$d min</string>
+    <string name="countdown_minutes_seconds">%1$d min %2$d s</string>
+</resources>

@@ -22,3 +22,13 @@
 "notification_sound_system" = "صوت النظام";
 "notification_sound_silent" = "صامت";
 "notification_sound_short_adhan" = "أذان قصير";
+"today_change_city" = "تغيير المدينة";
+"countdown_hours_minutes" = "%d س %d د";
+"countdown_minutes_seconds" = "%d د %d ث";
+"calendar_today_card" = "اليوم · %@";
+"prayer.fajr.short" = "فجر";
+"prayer.sunrise.short" = "شروق";
+"prayer.dhuhr.short" = "ظهر";
+"prayer.asr.short" = "عصر";
+"prayer.maghrib.short" = "مغرب";
+"prayer.isha.short" = "عشاء";

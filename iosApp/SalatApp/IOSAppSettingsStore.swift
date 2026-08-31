@@ -31,13 +31,17 @@ struct IOSAppSettings: Equatable {
     var hijriDayAdjustment: Int
     var languageTag: String?
     var appearance: String
+    /// Zero means "let the platform decide"; the Qibla screen falls back to the
+    /// shared default rather than hiding every reading.
+    var qiblaThresholdDegrees: Int
 
     static let defaults = IOSAppSettings(
         calculation: .defaults,
         hijriMethod: "AUTOMATIC",
         hijriDayAdjustment: 0,
         languageTag: nil,
-        appearance: "SYSTEM"
+        appearance: "SYSTEM",
+        qiblaThresholdDegrees: 0
     )
 }
 
@@ -73,6 +77,7 @@ final class IOSAppSettingsStore: ObservableObject {
         defaults.set(value.hijriDayAdjustment, forKey: Key.hijriOffset)
         defaults.set(value.languageTag, forKey: Key.language)
         defaults.set(value.appearance, forKey: Key.appearance)
+        defaults.set(value.qiblaThresholdDegrees, forKey: Key.qiblaThreshold)
     }
 
     private static func load(from defaults: UserDefaults) -> IOSAppSettings {
@@ -91,7 +96,8 @@ final class IOSAppSettingsStore: ObservableObject {
             hijriMethod: defaults.string(forKey: Key.hijriMethod) ?? "AUTOMATIC",
             hijriDayAdjustment: min(2, max(-2, defaults.integer(forKey: Key.hijriOffset))),
             languageTag: defaults.string(forKey: Key.language),
-            appearance: defaults.string(forKey: Key.appearance) ?? "SYSTEM"
+            appearance: defaults.string(forKey: Key.appearance) ?? "SYSTEM",
+            qiblaThresholdDegrees: defaults.integer(forKey: Key.qiblaThreshold)
         )
     }
 
@@ -109,5 +115,6 @@ final class IOSAppSettingsStore: ObservableObject {
         static let hijriOffset = "app.hijri.offset"
         static let language = "app.language"
         static let appearance = "app.appearance"
+        static let qiblaThreshold = "qibla.threshold"
     }
 }

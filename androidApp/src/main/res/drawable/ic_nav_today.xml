@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Bottom navigation icon set from artboard 3e, replacing the ● ▦ ⌁ glyphs. -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="24dp" android:height="24dp"
+    android:viewportWidth="24" android:viewportHeight="24">
+    <path android:strokeColor="#FF000000" android:strokeWidth="2" android:fillColor="@android:color/transparent"
+        android:pathData="M12,3.4a8.6,8.6 0 1,0 0.01,0z" />
+    <path android:strokeColor="#FF000000" android:strokeWidth="2" android:strokeLineCap="round"
+        android:strokeLineJoin="round" android:fillColor="@android:color/transparent"
+        android:pathData="M12,7.4 V12 L15.2,14" />
+</vector>

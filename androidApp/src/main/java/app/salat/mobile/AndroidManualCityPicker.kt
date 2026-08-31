@@ -8,9 +8,11 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
@@ -26,6 +28,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import app.salat.model.ResolvedLocation
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -53,14 +56,18 @@ fun AndroidManualCityPicker(
         Column(Modifier.fillMaxWidth().padding(horizontal = 20.dp, vertical = 8.dp)) {
             Text(
                 stringResource(R.string.location_choose_city),
-                fontWeight = FontWeight.SemiBold
+                fontSize = 22.sp,
+                fontWeight = FontWeight.Bold
             )
+            // A floating label rides up onto the field's top border, where it
+            // collided with the title above it; a placeholder stays inside.
             OutlinedTextField(
                 value = query,
                 onValueChange = { query = it },
-                modifier = Modifier.fillMaxWidth().padding(vertical = 12.dp),
+                modifier = Modifier.fillMaxWidth().padding(top = 14.dp, bottom = 12.dp),
                 singleLine = true,
-                label = { Text(stringResource(R.string.location_search_city)) }
+                shape = RoundedCornerShape(18.dp),
+                placeholder = { Text(stringResource(R.string.location_search_city)) }
             )
             OutlinedButton(
                 onClick = onUseDeviceLocation,
@@ -88,10 +95,16 @@ fun AndroidManualCityPicker(
                                 Text(
                                     listOfNotNull(city.regionName, city.countryName)
                                         .distinct()
-                                        .joinToString(" · ")
+                                        .joinToString(" · "),
+                                    fontSize = 13.sp,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant
                                 )
                             }
-                            Text(city.countryCode)
+                            Text(
+                                city.countryCode,
+                                fontSize = 13.sp,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
                         }
                         HorizontalDivider()
                     }

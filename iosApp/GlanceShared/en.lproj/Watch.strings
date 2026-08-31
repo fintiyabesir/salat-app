@@ -10,3 +10,14 @@
 "watch.open_app" = "Open the app";
 "watch.update_prayer_times" = "Update prayer times";
 "watch.widget_description" = "Next prayer and remaining time";
+"countdown_hours_minutes" = "%dh %dm";
+"countdown_minutes" = "%d min";
+"prayer.fajr.short" = "Fjr";
+"prayer.sunrise.short" = "Sun";
+"prayer.dhuhr.short" = "Dhr";
+"prayer.asr.short" = "Asr";
+"prayer.maghrib.short" = "Mgb";
+"prayer.isha.short" = "Ish";
+"watch.widget_large_title" = "Awqat · Large text";
+"watch.widget_large_description" = "Next prayer in the largest type that fits";
+"watch.today" = "Today";

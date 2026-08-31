@@ -5,7 +5,9 @@ struct IOSHijriFormatter {
         date: Date,
         timeZone: TimeZone,
         method: String,
-        dayAdjustment: Int
+        dayAdjustment: Int,
+        /// The calendar header wants a month alone, not a full date.
+        template: String = "d MMMM y"
     ) -> String {
         var gregorian = Calendar(identifier: .gregorian)
         gregorian.timeZone = timeZone
@@ -33,7 +35,7 @@ struct IOSHijriFormatter {
         formatter.calendar = hijri
         formatter.timeZone = timeZone
         formatter.locale = L10n.selectedLocale
-        formatter.dateFormat = "d MMMM y"
+        formatter.dateFormat = template
         return formatter.string(from: adjusted)
     }
 }

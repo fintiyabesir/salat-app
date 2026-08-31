@@ -23,3 +23,6 @@
 "settings_day_adjustment" = "Gün düzeltmesi";
 "settings_done" = "Bitti";
 "settings_minutes_format" = "%d dk";
+"settings_data_credit" = "Şehir verisi: GeoNames · CC BY 4.0";
+"settings_appearance_language" = "Görünüm ve dil";
+"settings_theme" = "Tema";

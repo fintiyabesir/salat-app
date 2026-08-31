@@ -10,3 +10,14 @@
 "watch.open_app" = "開啟應用程式";
 "watch.update_prayer_times" = "更新禮拜時間";
 "watch.widget_description" = "下一次禮拜與剩餘時間";
+"countdown_hours_minutes" = "%d 小時 %d 分";
+"countdown_minutes" = "%d 分";
+"prayer.fajr.short" = "晨";
+"prayer.sunrise.short" = "日出";
+"prayer.dhuhr.short" = "晌";
+"prayer.asr.short" = "晡";
+"prayer.maghrib.short" = "昏";
+"prayer.isha.short" = "宵";
+"watch.widget_large_title" = "Awqat · 大字";
+"watch.widget_large_description" = "以最大字級顯示下一次禮拜";
+"watch.today" = "今天";

@@ -1,0 +1,6 @@
+<resources>
+    <string name="today_change_city">Change city</string>
+    <!-- The hero countdown; units rather than a bare clock, as in the design. -->
+    <string name="countdown_hours_minutes">%1$dh %2$dm</string>
+    <string name="countdown_minutes_seconds">%1$dm %2$ds</string>
+</resources>

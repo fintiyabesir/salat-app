@@ -16,7 +16,9 @@ object AndroidHijriFormatter {
         zoneId: ZoneId,
         locale: Locale,
         method: HijriCalendarMethodId,
-        dayAdjustment: Int
+        dayAdjustment: Int,
+        /** ICU pattern; the calendar header wants a month alone, not a full date. */
+        pattern: String = "d MMMM y"
     ): String {
         val adjustedDate = date.plusDays(dayAdjustment.coerceIn(-2, 2).toLong())
         val instant = adjustedDate.atTime(12, 0).atZone(zoneId).toInstant()
@@ -41,7 +43,7 @@ object AndroidHijriFormatter {
                 else -> "islamic-umalqura"
             }
         )
-        return SimpleDateFormat("d MMMM y", icuLocale).apply {
+        return SimpleDateFormat(pattern, icuLocale).apply {
             this.calendar = calendar
             timeZone = icuZone
         }.format(Date.from(instant))

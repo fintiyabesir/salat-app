@@ -1,6 +1,6 @@
 <resources>
     <string name="verification_official_source">سرکاری حوالہ</string>
     <string name="verification_adapter_ready">سرکاری ماخذ اڈاپٹر دستیاب ہے۔ آج کے اوقات ابھی اس ڈیوائس پر موازنہ نہیں کیے گئے۔</string>
-    <string name="verification_reference_only">سرکاری حوالہ ترتیب دیا گیا ہے۔ براہِ راست موازنہ ابھی فعال نہیں۔</string>
+    <string name="verification_reference_only">اوقات اسی آلے پر شمار کیے جاتے ہیں۔ سرکاری ذریعہ صرف معلومات کے لیے دکھایا جاتا ہے، اس سے کوئی ڈیٹا نہیں لیا جاتا۔</string>
     <string name="verification_local_only">ابھی کوئی سرکاری حوالہ ترتیب نہیں دیا گیا۔ مقامی حساب استعمال ہو رہا ہے۔</string>
 </resources>

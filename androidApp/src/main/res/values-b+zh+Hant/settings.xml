@@ -22,4 +22,8 @@
     <string name="settings_method">方法</string>
     <string name="settings_day_adjustment">日期調整</string>
     <string name="settings_minutes">%1$d 分鐘</string>
+    <string name="settings_done">完成</string>
+    <string name="settings_data_credit">城市資料：GeoNames · CC BY 4.0</string>
+    <string name="settings_appearance_language">外觀與語言</string>
+    <string name="settings_theme">主題</string>
 </resources>

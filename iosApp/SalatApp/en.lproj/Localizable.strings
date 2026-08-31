@@ -22,3 +22,13 @@
 "notification_sound_system" = "System sound";
 "notification_sound_silent" = "Silent";
 "notification_sound_short_adhan" = "Short adhan";
+"today_change_city" = "Change city";
+"countdown_hours_minutes" = "%dh %dm";
+"countdown_minutes_seconds" = "%dm %ds";
+"calendar_today_card" = "Today · %@";
+"prayer.fajr.short" = "Fjr";
+"prayer.sunrise.short" = "Sun";
+"prayer.dhuhr.short" = "Dhr";
+"prayer.asr.short" = "Asr";
+"prayer.maghrib.short" = "Mgb";
+"prayer.isha.short" = "Ish";

@@ -10,3 +10,14 @@
 "watch.open_app" = "Buka aplikasi";
 "watch.update_prayer_times" = "Kemas kini waktu solat";
 "watch.widget_description" = "Waktu solat seterusnya dan baki masa";
+"countdown_hours_minutes" = "%d j %d min";
+"countdown_minutes" = "%d min";
+"prayer.fajr.short" = "Sub";
+"prayer.sunrise.short" = "Syu";
+"prayer.dhuhr.short" = "Zoh";
+"prayer.asr.short" = "Asr";
+"prayer.maghrib.short" = "Mag";
+"prayer.isha.short" = "Isy";
+"watch.widget_large_title" = "Awqat · Teks besar";
+"watch.widget_large_description" = "Solat seterusnya dalam teks terbesar";
+"watch.today" = "Hari ini";

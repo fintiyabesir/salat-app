@@ -1,6 +1,6 @@
 <resources>
     <string name="verification_official_source">Official reference</string>
     <string name="verification_adapter_ready">Official-source adapter is available. Today’s values have not been checked on this device yet.</string>
-    <string name="verification_reference_only">Official reference is configured. Live comparison is not active yet.</string>
+    <string name="verification_reference_only">Times are calculated on this device. The official source is shown for reference only; nothing is fetched from it.</string>
     <string name="verification_local_only">No official reference is configured yet. Local calculation is being used.</string>
 </resources>

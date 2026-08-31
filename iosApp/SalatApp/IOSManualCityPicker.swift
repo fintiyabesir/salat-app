@@ -51,7 +51,11 @@ struct IOSManualCityPicker: View {
                                         .font(.caption.weight(.semibold))
                                         .foregroundStyle(.secondary)
                                 }
+                                .contentShape(Rectangle())
                             }
+                            // Without this a Button inside a List tints its whole
+                            // label, so every city read as a blue hyperlink.
+                            .buttonStyle(.plain)
                         }
 
                         if results.isEmpty {

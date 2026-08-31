@@ -16,6 +16,16 @@ struct TodayPrayerDisplay {
     let prayers: [PrayerDisplay]
     let nextPrayer: PrayerDisplay
     let nextPrayerIsToday: Bool
+
+    /// Where today has got to. Everything after this is still ahead; once the day is
+    /// spent the whole strip reads as behind us.
+    var reachedIndex: Int {
+        guard nextPrayerIsToday,
+              let index = prayers.firstIndex(where: { $0.id == nextPrayer.id }) else {
+            return prayers.count
+        }
+        return index
+    }
 }
 
 /// Formats KMP prayer snapshots for SwiftUI. Prayer calculation remains entirely
@@ -67,7 +77,7 @@ struct SharedPrayerProvider {
         let dateFormatter = DateFormatter()
         dateFormatter.timeZone = timeZone
         dateFormatter.locale = L10n.selectedLocale
-        dateFormatter.setLocalizedDateFormatFromTemplate("d MMM yyyy")
+        dateFormatter.setLocalizedDateFormatFromTemplate("d MMMM yyyy")
         let hijriDate = IOSHijriFormatter.format(
             date: now,
             timeZone: timeZone,

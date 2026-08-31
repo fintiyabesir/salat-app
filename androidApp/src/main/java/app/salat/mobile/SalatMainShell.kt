@@ -1,6 +1,7 @@
 package app.salat.mobile
 
 import android.app.Activity
+import androidx.annotation.DrawableRes
 import androidx.compose.foundation.background
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
@@ -12,23 +13,20 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items as gridItems
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.IconButton
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.NavigationBar
-import androidx.compose.material3.NavigationBarItem
-import androidx.compose.material3.NavigationBarItemDefaults
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.darkColorScheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
@@ -40,16 +38,18 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.draw.rotate
+import androidx.compose.foundation.clickable
+import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalHapticFeedback
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import app.salat.domain.SalatEngine
@@ -67,12 +67,11 @@ import kotlin.math.abs
 private enum class MainSection { TODAY, CALENDAR, QIBLA }
 
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SalatMainShell(
     location: ResolvedLocation,
     onChooseCity: () -> Unit,
-    onUseDeviceLocation: () -> Unit
+    onAppearanceChanged: (AppearanceMode) -> Unit
 ) {
     val context = LocalContext.current
     val settingsStore = remember(context) { AndroidAppSettingsStore(context) }
@@ -91,6 +90,7 @@ fun SalatMainShell(
 
     fun persist(next: AppPreferences) {
         val languageChanged = next.languageTag != settings.languageTag
+        if (next.appearance != settings.appearance) onAppearanceChanged(next.appearance)
         settings = next
         settingsStore.save(next)
         notificationCoordinator.rebuild(location)
@@ -103,65 +103,18 @@ fun SalatMainShell(
     MaterialTheme(colorScheme = colorScheme) {
         Scaffold(
             containerColor = canvas,
-            topBar = {
-                TopAppBar(
-                    title = {
-                        Text(
-                            stringResource(R.string.brand_name),
-                            color = MaterialTheme.colorScheme.primary,
-                            // Arabic-script locales join their letters; spacing them breaks the word.
-                            letterSpacing = if (LocalLayoutDirection.current == LayoutDirection.Rtl) 0.sp else 2.sp
-                        )
-                    },
-                    actions = {
-                        IconButton(onClick = onChooseCity) {
-                            Text("⌖", fontSize = 22.sp)
-                        }
-                        IconButton(onClick = { showSettings = true }) {
-                            Text("⚙", fontSize = 22.sp)
-                        }
-                    }
-                )
-            },
-            bottomBar = {
-                // Material3's item defaults pull roles this app does not define, which
-                // put a lavender label on the selected tab. Set them explicitly.
-                val navColors = NavigationBarItemDefaults.colors(
-                    selectedIconColor = MaterialTheme.colorScheme.primary,
-                    selectedTextColor = MaterialTheme.colorScheme.primary,
-                    indicatorColor = MaterialTheme.colorScheme.secondaryContainer,
-                    unselectedIconColor = MaterialTheme.colorScheme.onSurfaceVariant,
-                    unselectedTextColor = MaterialTheme.colorScheme.onSurfaceVariant
-                )
-                NavigationBar(containerColor = canvas) {
-                    NavigationBarItem(
-                        selected = section == MainSection.TODAY,
-                        onClick = { section = MainSection.TODAY },
-                        icon = { Text("●") },
-                        label = { Text(stringResource(R.string.today)) },
-                        colors = navColors
-                    )
-                    NavigationBarItem(
-                        selected = section == MainSection.CALENDAR,
-                        onClick = { section = MainSection.CALENDAR },
-                        icon = { Text("▦") },
-                        label = { Text(stringResource(R.string.calendar)) },
-                        colors = navColors
-                    )
-                    NavigationBarItem(
-                        selected = section == MainSection.QIBLA,
-                        onClick = { section = MainSection.QIBLA },
-                        icon = { Text("⌁") },
-                        label = { Text(stringResource(R.string.qibla)) },
-                        colors = navColors
-                    )
-                }
-            }
+            bottomBar = { AwqatBottomNav(section, dark) { section = it } }
         ) { padding ->
             Box(Modifier.fillMaxSize().padding(padding).background(canvas)) {
                 when (section) {
-                    MainSection.TODAY -> AdaptiveTodayScreen(location, settings)
-                    MainSection.CALENDAR -> SalatCalendarScreen(location, settings.calculation, dark)
+                    MainSection.TODAY -> AdaptiveTodayScreen(
+                        location = location,
+                        settings = settings,
+                        dark = dark,
+                        onChooseCity = onChooseCity,
+                        onOpenSettings = { showSettings = true }
+                    )
+                    MainSection.CALENDAR -> AndroidCalendarScreen(location, settings, dark)
                     MainSection.QIBLA -> AndroidQiblaScreen(location, settings)
                 }
             }
@@ -178,104 +131,94 @@ fun SalatMainShell(
     }
 }
 
-private data class CalendarDayUi(
-    val date: LocalDate,
-    val rows: List<Pair<PrayerName, String>>
-)
-
+/**
+ * Artboard 3e: a floating pill rather than a full-width bar, so the canvas runs
+ * behind it and the tab set reads as one object. Material3's NavigationBar cannot
+ * be reshaped this far, and its item defaults kept pulling in roles this app does
+ * not define.
+ */
 @Composable
-private fun SalatCalendarScreen(
-    location: ResolvedLocation,
-    preferences: CalculationPreferences,
-    dark: Boolean
-) {
-    val locale = LocalConfiguration.current.locales[0]
-    val zone = remember(location.timeZoneId) { ZoneId.of(location.timeZoneId) }
-    val engine = remember { SalatEngine() }
-    val start = remember(location, zone) { LocalDate.now(zone) }
-    val days = remember(location, start, preferences, locale) {
-        (0L until 30L).map { offset ->
-            val date = start.plusDays(offset)
-            val day = engine.calculateDay(
-                year = date.year,
-                month = date.monthValue,
-                day = date.dayOfMonth,
-                latitude = location.point.latitude,
-                longitude = location.point.longitude,
-                timeZoneId = location.timeZoneId,
-                countryCode = location.countryCode ?: "ZZ",
-                preferences = preferences
-            )
-            CalendarDayUi(
-                date = date,
-                rows = PrayerName.entries.map { prayer ->
-                    prayer to DateTimeFormatter.ofPattern("HH:mm", locale)
-                        .withZone(zone)
-                        .format(Instant.ofEpochMilli(day.time(prayer).toEpochMilliseconds()))
-                }
-            )
-        }
-    }
-
-    BoxWithConstraints(Modifier.fillMaxSize()) {
-        if (maxWidth >= 700.dp) {
-            LazyVerticalGrid(
-                columns = GridCells.Fixed(2),
-                modifier = Modifier.fillMaxSize(),
-                contentPadding = PaddingValues(horizontal = 28.dp, vertical = 14.dp),
-                horizontalArrangement = Arrangement.spacedBy(16.dp),
-                verticalArrangement = Arrangement.spacedBy(16.dp)
-            ) {
-                gridItems(days, key = { it.date }) { item ->
-                    CalendarDayCard(item, dark, locale)
-                }
-            }
-        } else {
-            LazyColumn(
-                modifier = Modifier.fillMaxSize().padding(horizontal = 18.dp),
-                verticalArrangement = Arrangement.spacedBy(10.dp)
-            ) {
-                item { Spacer(Modifier.height(6.dp)) }
-                items(days, key = { it.date }) { item ->
-                    CalendarDayCard(item, dark, locale)
-                }
-                item { Spacer(Modifier.height(12.dp)) }
-            }
-        }
-    }
-}
-
-@Composable
-private fun CalendarDayCard(item: CalendarDayUi, dark: Boolean, locale: java.util.Locale) {
-    Column(
-        Modifier.fillMaxWidth()
-            .background(if (dark) ShellCardDark else Color.White.copy(alpha = 0.72f), RoundedCornerShape(22.dp))
-            .padding(18.dp)
+private fun AwqatBottomNav(section: MainSection, dark: Boolean, onSelect: (MainSection) -> Unit) {
+    val shape = RoundedCornerShape(34.dp)
+    Box(
+        // A floating bar has to keep clear of the gesture handle itself; the Material
+        // bar this replaces consumed that inset on its own.
+        Modifier.fillMaxWidth().navigationBarsPadding()
+            .padding(horizontal = 20.dp, vertical = 12.dp),
+        contentAlignment = Alignment.Center
     ) {
-        Text(
-            item.date.format(DateTimeFormatter.ofPattern("EEEE, d MMMM", locale)),
-            fontSize = 18.sp,
-            fontWeight = FontWeight.SemiBold
-        )
-        Spacer(Modifier.height(10.dp))
-        item.rows.forEach { (prayer, time) ->
-            Row(
-                Modifier.fillMaxWidth().padding(vertical = 4.dp),
-                horizontalArrangement = Arrangement.SpaceBetween
-            ) {
-                Text(prayer.localizedLabel())
-                Text(time, color = MaterialTheme.colorScheme.primary, fontWeight = FontWeight.Medium)
-            }
+        Row(
+            Modifier.fillMaxWidth()
+                .then(if (dark) Modifier else Modifier.shadow(8.dp, shape))
+                .background(if (dark) Color(0xFF1F221E) else ShellCanvas, shape)
+                .padding(horizontal = 12.dp, vertical = 8.dp),
+            horizontalArrangement = Arrangement.spacedBy(8.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            NavPill(
+                Modifier.weight(1f),
+                icon = R.drawable.ic_nav_today,
+                label = stringResource(R.string.today),
+                selected = section == MainSection.TODAY,
+                dark = dark
+            ) { onSelect(MainSection.TODAY) }
+            NavPill(
+                Modifier.weight(1f),
+                icon = R.drawable.ic_nav_calendar,
+                label = stringResource(R.string.calendar),
+                selected = section == MainSection.CALENDAR,
+                dark = dark
+            ) { onSelect(MainSection.CALENDAR) }
+            NavPill(
+                Modifier.weight(1f),
+                // Only the Qibla glyph has a distinct filled twin: it is the brand mark,
+                // and an outline Kaaba at 23dp loses its band.
+                icon = if (section == MainSection.QIBLA) R.drawable.ic_nav_qibla_filled
+                else R.drawable.ic_nav_qibla,
+                label = stringResource(R.string.qibla),
+                selected = section == MainSection.QIBLA,
+                dark = dark
+            ) { onSelect(MainSection.QIBLA) }
         }
     }
 }
 
 @Composable
-private fun PrayerName.localizedLabel(): String = when (this) {
-    PrayerName.FAJR -> stringResource(R.string.prayer_fajr)
-    PrayerName.SUNRISE -> stringResource(R.string.prayer_sunrise)
-    PrayerName.DHUHR -> stringResource(R.string.prayer_dhuhr)
-    PrayerName.ASR -> stringResource(R.string.prayer_asr)
-    PrayerName.MAGHRIB -> stringResource(R.string.prayer_maghrib)
-    PrayerName.ISHA -> stringResource(R.string.prayer_isha)
+private fun NavPill(
+    modifier: Modifier,
+    @DrawableRes icon: Int,
+    label: String,
+    selected: Boolean,
+    dark: Boolean,
+    onClick: () -> Unit
+) {
+    val shape = RoundedCornerShape(26.dp)
+    val content = when {
+        selected && dark -> Color(0xFF91C9B5)
+        selected -> AwqatHeroSurface
+        dark -> Color(0xFFAAB0A8)
+        else -> Color(0xFF6D716E)
+    }
+    Column(
+        modifier
+            .clip(shape)
+            .background(
+                if (!selected) Color.Transparent
+                else if (dark) Color(0xFF2C3A33) else Color(0xFFE4EEE9)
+            )
+            .clickable(onClick = onClick)
+            .padding(vertical = 9.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.spacedBy(4.dp)
+    ) {
+        Icon(painterResource(icon), contentDescription = null, tint = content, modifier = Modifier.size(23.dp))
+        Text(
+            label,
+            fontSize = 12.sp,
+            color = content,
+            maxLines = 1,
+            fontWeight = if (selected) FontWeight.SemiBold else FontWeight.Normal
+        )
+    }
 }
+
