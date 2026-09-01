@@ -203,7 +203,7 @@ private fun LocationHeader(
 }
 
 @Composable
-private fun HeaderAction(@DrawableRes id: Int, label: String, dark: Boolean, onClick: () -> Unit) {
+internal fun HeaderAction(@DrawableRes id: Int, label: String, dark: Boolean, onClick: () -> Unit) {
     Surface(
         onClick = onClick,
         shape = CircleShape,

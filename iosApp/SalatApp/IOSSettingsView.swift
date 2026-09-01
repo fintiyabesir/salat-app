@@ -167,14 +167,21 @@ struct IOSSettingsView: View {
 
     @ViewBuilder
     private var qiblaCard: some View {
+        let threshold = store.value.qiblaThresholdDegrees > 0
+            ? store.value.qiblaThresholdDegrees
+            : IOSCompassDefaults.seedThresholdDegrees
         card(L10n.text("settings_qibla_threshold")) {
             chips(
-                options: [(nil, L10n.text("settings_qibla_threshold_auto"))]
-                    + thresholds.map { (Optional(String($0)), L10n.format("settings_qibla_threshold_degrees", $0)) },
-                selected: store.value.qiblaThresholdDegrees > 0 ? String(store.value.qiblaThresholdDegrees) : nil
+                options: thresholds.map { (Optional(String($0)), L10n.format("settings_qibla_threshold_degrees", $0)) },
+                selected: String(threshold)
             ) { value in
-                store.update { $0.qiblaThresholdDegrees = value.flatMap(Int.init) ?? 0 }
+                guard let degrees = value.flatMap(Int.init) else { return }
+                store.update { $0.qiblaThresholdDegrees = degrees }
             }
+            // Without the live reading the picker is guesswork: the whole point of
+            // the threshold is how it compares with what the compass is actually
+            // managing right now.
+            CompassAccuracyNotice(thresholdDegrees: threshold)
         }
     }
 
@@ -451,5 +458,34 @@ private struct FlowLayout: Layout {
         }
         if !row.indices.isEmpty { rows.append(row) }
         return rows
+    }
+}
+
+/// The compass reading as it stands, next to the number that gates it.
+private struct CompassAccuracyNotice: View {
+    let thresholdDegrees: Int
+
+    @StateObject private var headingModel = IOSQiblaHeadingModel()
+    @Environment(\.colorScheme) private var colorScheme
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 4) {
+            Text(
+                headingModel.accuracy.map { L10n.format("settings_qibla_accuracy_now", Int($0.rounded(.up))) }
+                    ?? L10n.text("settings_qibla_accuracy_measuring")
+            )
+            .font(.system(size: 13))
+            .foregroundStyle(Awqat.muted(colorScheme))
+
+            if let accuracy = headingModel.accuracy, Int(accuracy.rounded(.up)) > thresholdDegrees {
+                Text(L10n.text("settings_qibla_accuracy_hidden"))
+                    .font(.system(size: 13))
+                    .foregroundStyle(Awqat.gold)
+            }
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .padding(.top, 12)
+        .onAppear { headingModel.start() }
+        .onDisappear { headingModel.stop() }
     }
 }

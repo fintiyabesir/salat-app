@@ -77,9 +77,17 @@ struct SalatRootView: View {
                 onOpenSettings: { showSettings = true }
             )
         case .calendar:
-            CalendarView(location: location, settings: settingsStore.value)
+            CalendarView(
+                location: location,
+                settings: settingsStore.value,
+                onOpenSettings: { showSettings = true }
+            )
         case .qibla:
-            QiblaView(location: location, settings: settingsStore.value)
+            QiblaView(
+                location: location,
+                settings: settingsStore.value,
+                onOpenSettings: { showSettings = true }
+            )
         }
     }
 

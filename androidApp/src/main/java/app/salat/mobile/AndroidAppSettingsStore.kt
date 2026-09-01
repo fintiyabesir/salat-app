@@ -14,7 +14,22 @@ class AndroidAppSettingsStore(context: Context) {
     private val appContext = context.applicationContext
     private val prefs = appContext.getSharedPreferences(FILE_NAME, Context.MODE_PRIVATE)
 
+    /**
+     * The Qibla threshold is seeded from the device the first time it is read, so
+     * from then on it is a plain stored number. There is no "automatic" mode to
+     * resolve at use time: when the Qibla will not appear, the user has to be able
+     * to see the number that is hiding it.
+     */
     fun load(): AppPreferences {
+        if (prefs.getInt(KEY_QIBLA_THRESHOLD, 0) <= 0) {
+            prefs.edit()
+                .putInt(KEY_QIBLA_THRESHOLD, AndroidQiblaHeadingProvider(appContext).seedAccuracyThresholdDegrees)
+                .apply()
+        }
+        return loadStored()
+    }
+
+    private fun loadStored(): AppPreferences {
         val calculation = CalculationPreferences(
             methodOverride = enumOrNull<CalculationMethodId>(prefs.getString(KEY_METHOD, null)),
             madhabOverride = enumOrNull<MadhabId>(prefs.getString(KEY_MADHAB, null)),

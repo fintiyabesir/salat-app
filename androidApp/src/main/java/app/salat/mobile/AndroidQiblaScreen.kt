@@ -63,7 +63,12 @@ import kotlin.math.sin
  * rather than softened — the design is explicit that a wrong Qibla is never shown.
  */
 @Composable
-internal fun AndroidQiblaScreen(location: ResolvedLocation, settings: AppPreferences) {
+internal fun AndroidQiblaScreen(
+    location: ResolvedLocation,
+    settings: AppPreferences,
+    dark: Boolean,
+    onOpenSettings: () -> Unit
+) {
     val context = LocalContext.current
     val haptics = LocalHapticFeedback.current
     val provider = remember { AndroidQiblaHeadingProvider(context) }
@@ -78,7 +83,9 @@ internal fun AndroidQiblaScreen(location: ResolvedLocation, settings: AppPrefere
         onDispose { provider.stop() }
     }
 
-    val threshold = settings.qiblaAccuracyThresholdDegrees ?: provider.defaultAccuracyThresholdDegrees
+    // Seeded on first launch by the settings store, so this fallback should never
+    // be reached; it keeps the screen working if preferences are ever cleared.
+    val threshold = settings.qiblaAccuracyThresholdDegrees ?: provider.seedAccuracyThresholdDegrees
     // The "never show a wrong Qibla" rule lives in the shared module, where it is
     // pinned by tests rather than by this screen.
     val display = QiblaDirectionPolicy.evaluate(
@@ -102,13 +109,25 @@ internal fun AndroidQiblaScreen(location: ResolvedLocation, settings: AppPrefere
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Spacer(Modifier.height(26.dp))
-        Column(Modifier.fillMaxWidth()) {
-            Text(stringResource(R.string.qibla), fontSize = 28.sp, fontWeight = FontWeight.SemiBold)
-            Text(
-                "${location.displayName} → ${stringResource(R.string.qibla_mecca)}",
-                fontSize = 15.sp,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                modifier = Modifier.padding(top = 4.dp)
+        Row(
+            Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.Top
+        ) {
+            Column(Modifier.weight(1f)) {
+                Text(stringResource(R.string.qibla), fontSize = 28.sp, fontWeight = FontWeight.SemiBold)
+                Text(
+                    "${location.displayName} → ${stringResource(R.string.qibla_mecca)}",
+                    fontSize = 15.sp,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    modifier = Modifier.padding(top = 4.dp)
+                )
+            }
+            HeaderAction(
+                R.drawable.ic_action_settings,
+                stringResource(R.string.settings),
+                dark,
+                onOpenSettings
             )
         }
 

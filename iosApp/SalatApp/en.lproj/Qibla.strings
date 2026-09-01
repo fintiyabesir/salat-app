@@ -18,3 +18,6 @@
 "settings_qibla_threshold" = "Qibla accuracy threshold";
 "settings_qibla_threshold_auto" = "Automatic";
 "settings_qibla_threshold_degrees" = "±%d°";
+"settings_qibla_accuracy_now" = "Current compass accuracy: ±%d°";
+"settings_qibla_accuracy_measuring" = "Measuring compass accuracy…";
+"settings_qibla_accuracy_hidden" = "At the selected threshold the direction stays hidden.";

@@ -65,7 +65,8 @@ private data class CalendarRow(
 internal fun AndroidCalendarScreen(
     location: ResolvedLocation,
     settings: AppPreferences,
-    dark: Boolean
+    dark: Boolean,
+    onOpenSettings: () -> Unit
 ) {
     val locale = LocalConfiguration.current.locales[0]
     val zone = remember(location.timeZoneId) { ZoneId.of(location.timeZoneId) }
@@ -117,13 +118,25 @@ internal fun AndroidCalendarScreen(
     }
 
     Column(Modifier.fillMaxSize()) {
-        Column(Modifier.padding(start = 24.dp, end = 24.dp, top = 20.dp)) {
-            Text(stringResource(R.string.calendar), fontSize = 26.sp, fontWeight = FontWeight.Bold)
-            Text(
-                "$gregorianRange · $hijriMonth",
-                fontSize = 15.sp,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                modifier = Modifier.padding(top = 4.dp)
+        Row(
+            Modifier.fillMaxWidth().padding(start = 24.dp, end = 24.dp, top = 20.dp),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.Top
+        ) {
+            Column(Modifier.weight(1f)) {
+                Text(stringResource(R.string.calendar), fontSize = 26.sp, fontWeight = FontWeight.Bold)
+                Text(
+                    "$gregorianRange · $hijriMonth",
+                    fontSize = 15.sp,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    modifier = Modifier.padding(top = 4.dp)
+                )
+            }
+            HeaderAction(
+                R.drawable.ic_action_settings,
+                stringResource(R.string.settings),
+                dark,
+                onOpenSettings
             )
         }
         TodayCard(today, hijriToday, todayTimes, dark, locale)

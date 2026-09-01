@@ -18,4 +18,7 @@
     <string name="settings_qibla_threshold_auto">自動</string>
     <string name="settings_qibla_threshold_degrees">±%1$d°</string>
     <string name="qibla_compass_unavailable">沒有羅盤感測器</string>
+    <string name="settings_qibla_accuracy_now">目前羅盤精度：±%1$d°</string>
+    <string name="settings_qibla_accuracy_measuring">正在測量羅盤精度…</string>
+    <string name="settings_qibla_accuracy_hidden">在所選閾值下，方向將保持隱藏。</string>
 </resources>

@@ -18,4 +18,7 @@
     <string name="settings_qibla_threshold_auto">خودکار</string>
     <string name="settings_qibla_threshold_degrees">±%1$d°</string>
     <string name="qibla_compass_unavailable">قطب نما سینسر دستیاب نہیں</string>
+    <string name="settings_qibla_accuracy_now">موجودہ قطب نما درستگی: ±%1$d°</string>
+    <string name="settings_qibla_accuracy_measuring">قطب نما کی درستگی ناپی جا رہی ہے…</string>
+    <string name="settings_qibla_accuracy_hidden">منتخب حد پر سمت پوشیدہ رہتی ہے۔</string>
 </resources>

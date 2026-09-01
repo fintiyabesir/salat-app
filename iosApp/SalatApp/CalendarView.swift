@@ -15,6 +15,7 @@ private struct CalendarDayDisplay: Identifiable {
 struct CalendarView: View {
     let location: PrayerLocation
     let settings: IOSAppSettings
+    let onOpenSettings: () -> Void
     @Environment(\.horizontalSizeClass) private var horizontalSizeClass
     @Environment(\.colorScheme) private var colorScheme
 
@@ -23,11 +24,19 @@ struct CalendarView: View {
     var body: some View {
         let model = build()
         VStack(alignment: .leading, spacing: 0) {
-            VStack(alignment: .leading, spacing: 4) {
-                Text(L10n.text("calendar")).font(.system(size: 26, weight: .bold))
-                Text(model.subtitle)
-                    .font(.system(size: 15))
-                    .foregroundStyle(Awqat.muted(colorScheme))
+            HStack(alignment: .top) {
+                VStack(alignment: .leading, spacing: 4) {
+                    Text(L10n.text("calendar")).font(.system(size: 26, weight: .bold))
+                    Text(model.subtitle)
+                        .font(.system(size: 15))
+                        .foregroundStyle(Awqat.muted(colorScheme))
+                }
+                Spacer(minLength: 12)
+                HeaderActionButton(
+                    symbol: "gearshape",
+                    label: L10n.text("settings"),
+                    action: onOpenSettings
+                )
             }
             .padding(.horizontal, 24)
             .padding(.top, 8)

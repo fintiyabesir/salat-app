@@ -18,4 +18,7 @@
     <string name="settings_qibla_threshold_auto">স্বয়ংক্রিয়</string>
     <string name="settings_qibla_threshold_degrees">±%1$d°</string>
     <string name="qibla_compass_unavailable">কম্পাস সেন্সর নেই</string>
+    <string name="settings_qibla_accuracy_now">বর্তমান কম্পাস নির্ভুলতা: ±%1$d°</string>
+    <string name="settings_qibla_accuracy_measuring">কম্পাসের নির্ভুলতা মাপা হচ্ছে…</string>
+    <string name="settings_qibla_accuracy_hidden">নির্বাচিত সীমায় দিকটি লুকানো থাকে।</string>
 </resources>

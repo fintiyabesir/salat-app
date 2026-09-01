@@ -18,4 +18,7 @@
     <string name="settings_qibla_threshold_auto">خودکار</string>
     <string name="settings_qibla_threshold_degrees">±%1$d°</string>
     <string name="qibla_compass_unavailable">حسگر قطب‌نما در دسترس نیست</string>
+    <string name="settings_qibla_accuracy_now">دقت کنونی قطب‌نما: ±%1$d°</string>
+    <string name="settings_qibla_accuracy_measuring">در حال سنجش دقت قطب‌نما…</string>
+    <string name="settings_qibla_accuracy_hidden">با آستانه انتخابی، جهت پنهان می‌ماند.</string>
 </resources>

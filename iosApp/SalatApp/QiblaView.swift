@@ -12,6 +12,7 @@ import UIKit
 struct QiblaView: View {
     let location: PrayerLocation
     let settings: IOSAppSettings
+    let onOpenSettings: () -> Void
 
     @Environment(\.horizontalSizeClass) private var horizontalSizeClass
     @Environment(\.colorScheme) private var colorScheme
@@ -26,10 +27,12 @@ struct QiblaView: View {
         SalatApi.shared.qiblaDistanceKilometres(latitude: location.latitude, longitude: location.longitude)
     }
 
+    /// Seeded on first launch by the settings store, so the fallback should never
+    /// be reached; it keeps the screen working if preferences are ever cleared.
     private var threshold: Int {
         settings.qiblaThresholdDegrees > 0
             ? settings.qiblaThresholdDegrees
-            : Int(SalatApi.shared.qiblaDefaultThresholdDegrees)
+            : IOSCompassDefaults.seedThresholdDegrees
     }
 
     /// The "never show a wrong Qibla" rule lives in the shared module, where it is
@@ -50,11 +53,19 @@ struct QiblaView: View {
 
     var body: some View {
         VStack(spacing: 0) {
-            VStack(alignment: .leading, spacing: 4) {
-                Text(L10n.text("qibla")).font(.system(size: 28, weight: .semibold))
-                Text("\(location.displayName) → \(L10n.text("qibla_mecca"))")
-                    .font(.system(size: 15))
-                    .foregroundStyle(Awqat.muted(colorScheme))
+            HStack(alignment: .top) {
+                VStack(alignment: .leading, spacing: 4) {
+                    Text(L10n.text("qibla")).font(.system(size: 28, weight: .semibold))
+                    Text("\(location.displayName) → \(L10n.text("qibla_mecca"))")
+                        .font(.system(size: 15))
+                        .foregroundStyle(Awqat.muted(colorScheme))
+                }
+                Spacer(minLength: 12)
+                HeaderActionButton(
+                    symbol: "gearshape",
+                    label: L10n.text("settings"),
+                    action: onOpenSettings
+                )
             }
             .frame(maxWidth: .infinity, alignment: .leading)
             .padding(.top, 12)

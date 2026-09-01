@@ -5,7 +5,7 @@ import android.hardware.Sensor
 import android.hardware.SensorEvent
 import android.hardware.SensorEventListener
 import android.hardware.SensorManager
-import app.salat.model.AppPreferences
+import app.salat.domain.SalatApi
 
 /** What the compass is currently worth, in the terms the Qibla screen reasons about. */
 data class QiblaHeading(
@@ -28,16 +28,19 @@ class AndroidQiblaHeadingProvider(context: Context) : SensorEventListener {
     val isAvailable: Boolean get() = rotationSensor != null
 
     /**
-     * A gyroscope means TYPE_ROTATION_VECTOR is sensor-fused rather than derived
-     * from the magnetometer alone, which is what actually decides how tight a
-     * threshold the compass can hold. Device age is a poor proxy for this — an old
-     * handset can run a current Android release.
+     * The seed written on first run, after which the threshold is a plain stored
+     * number the user can change.
+     *
+     * Android's device spread is too wide for a model-year rule, so this asks the
+     * question that actually decides compass quality: a gyroscope means
+     * TYPE_ROTATION_VECTOR is sensor-fused rather than derived from the
+     * magnetometer alone. It is the analogue of "iPhone 12 or newer".
      */
-    val defaultAccuracyThresholdDegrees: Int
+    val seedAccuracyThresholdDegrees: Int
         get() = if (sensorManager.getDefaultSensor(Sensor.TYPE_GYROSCOPE) != null) {
-            AppPreferences.QIBLA_THRESHOLD_FUSED
+            SalatApi.qiblaThresholdModernDevice
         } else {
-            AppPreferences.QIBLA_THRESHOLD_MAGNETOMETER_ONLY
+            SalatApi.qiblaThresholdOlderDevice
         }
 
     fun start(onHeading: (QiblaHeading) -> Unit) {
@@ -55,6 +58,11 @@ class AndroidQiblaHeadingProvider(context: Context) : SensorEventListener {
 
     override fun onSensorChanged(event: SensorEvent) {
         if (event.sensor.type != Sensor.TYPE_ROTATION_VECTOR) return
+        // Every event carries the current accuracy. Relying on onAccuracyChanged
+        // alone left this null forever on devices that never fire it for the
+        // rotation vector, and a null accuracy hides the direction unconditionally —
+        // so on those handsets the Qibla never appeared at any threshold.
+        accuracyDegrees = event.accuracy.toApproximateDegrees()
         val rotation = FloatArray(9)
         val orientation = FloatArray(3)
         SensorManager.getRotationMatrixFromVector(rotation, event.values)
