@@ -1,6 +1,14 @@
 package app.salat.mobile
 
 import androidx.compose.foundation.Canvas
+import android.view.Surface
+import androidx.compose.ui.unit.min
+import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.platform.LocalView
+import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.foundation.layout.BoxWithConstraints
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.background
 import androidx.compose.ui.draw.clip
 import androidx.compose.foundation.clickable
@@ -80,6 +88,13 @@ internal fun AndroidQiblaScreen(
     val distanceKm = remember(point) { QiblaCalculator.distanceKilometres(point) }
 
     var heading by remember { mutableStateOf<QiblaHeading?>(null) }
+    // The rotation sensor reports against the device's natural orientation, so the
+    // provider needs to know how the screen is turned relative to it.
+    val view = LocalView.current
+    val configuration = LocalConfiguration.current
+    LaunchedEffect(provider, configuration) {
+        provider.displayRotation = view.display?.rotation ?: Surface.ROTATION_0
+    }
     DisposableEffect(provider) {
         provider.start { heading = it }
         onDispose { provider.stop() }
@@ -106,34 +121,17 @@ internal fun AndroidQiblaScreen(
         wasAligned = aligned
     }
 
-    Column(
-        Modifier.fillMaxSize().padding(horizontal = 26.dp),
-        horizontalAlignment = Alignment.CenterHorizontally
-    ) {
-        Spacer(Modifier.height(26.dp))
-        Row(
-            Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.Top
-        ) {
-            Column(Modifier.weight(1f)) {
-                Text(stringResource(R.string.qibla), fontSize = 28.sp, fontWeight = FontWeight.SemiBold)
-                Text(
-                    "${location.displayName} → ${stringResource(R.string.qibla_mecca)}",
-                    fontSize = 15.sp,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    modifier = Modifier.padding(top = 4.dp)
-                )
-            }
-            HeaderAction(
-                R.drawable.ic_action_settings,
-                stringResource(R.string.settings),
-                dark,
-                onOpenSettings
-            )
-        }
+    BoxWithConstraints(Modifier.fillMaxSize().padding(horizontal = 26.dp)) {
+        // The design draws one portrait screen. Landscape has no artboard, so the
+        // dial keeps its proportions and the readings move alongside it rather than
+        // below, which is the only way both survive a short viewport.
+        // Captured here: the nested Row and Column scopes shadow this one.
+        val availableWidth = maxWidth
+        val availableHeight = maxHeight
+        val sideBySide = availableWidth > availableHeight
 
-        Box(Modifier.weight(1f), contentAlignment = Alignment.Center) {
+        @Composable
+        fun dial(size: Dp) {
             if (!provider.isAvailable) {
                 Text(
                     stringResource(R.string.qibla_compass_unavailable),
@@ -141,36 +139,80 @@ internal fun AndroidQiblaScreen(
                     textAlign = TextAlign.Center
                 )
             } else {
-                Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                    QiblaRose(
-                        headingDegrees = heading?.degrees,
-                        deviationDegrees = deviation
-                    )
-                    // A placeholder "—°" says nothing the notice below does not say
-                    // better, and it crowded the notice off the screen.
-                    if (deviation != null) {
-                        Spacer(Modifier.height(10.dp))
-                        QiblaReading(deviation, aligned)
-                    }
-                }
+                QiblaRose(
+                    headingDegrees = heading?.degrees,
+                    deviationDegrees = deviation,
+                    diameter = size
+                )
             }
         }
 
-        if (provider.isAvailable && !trusted) {
-            LowAccuracyNotice(
-                accuracyDegrees = heading?.accuracyDegrees,
-                thresholdDegrees = threshold,
-                onOpenSettings = onOpenSettings
-            )
-            Spacer(Modifier.height(16.dp))
+        @Composable
+        fun readings() {
+            if (provider.isAvailable && deviation != null) {
+                QiblaReading(deviation, aligned)
+                Spacer(Modifier.height(14.dp))
+            }
+            if (provider.isAvailable && !trusted) {
+                LowAccuracyNotice(
+                    accuracyDegrees = heading?.accuracyDegrees,
+                    thresholdDegrees = threshold,
+                    onOpenSettings = onOpenSettings
+                )
+                Spacer(Modifier.height(16.dp))
+            }
+            QiblaReadout(bearing = bearing, distanceKm = distanceKm, deviation = deviation)
         }
 
-        QiblaReadout(
-            bearing = bearing,
-            distanceKm = distanceKm,
-            deviation = deviation
-        )
-        Spacer(Modifier.height(20.dp))
+        Column(Modifier.fillMaxSize(), horizontalAlignment = Alignment.CenterHorizontally) {
+            Spacer(Modifier.height(if (sideBySide) 14.dp else 26.dp))
+            Row(
+                Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.Top
+            ) {
+                Column(Modifier.weight(1f)) {
+                    Text(stringResource(R.string.qibla), fontSize = 28.sp, fontWeight = FontWeight.SemiBold)
+                    Text(
+                        "${location.displayName} → ${stringResource(R.string.qibla_mecca)}",
+                        fontSize = 15.sp,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        modifier = Modifier.padding(top = 4.dp)
+                    )
+                }
+                HeaderAction(
+                    R.drawable.ic_action_settings,
+                    stringResource(R.string.settings),
+                    dark,
+                    onOpenSettings
+                )
+            }
+
+            if (sideBySide) {
+                Row(
+                    Modifier.fillMaxWidth().weight(1f),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(24.dp)
+                ) {
+                    Box(Modifier.weight(1f), contentAlignment = Alignment.Center) {
+                        dial(min(availableHeight - 90.dp, availableWidth / 2.4f).coerceAtLeast(140.dp))
+                    }
+                    Column(
+                        Modifier.weight(1f).verticalScroll(rememberScrollState()),
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+                        readings()
+                    }
+                }
+                Spacer(Modifier.height(12.dp))
+            } else {
+                Box(Modifier.weight(1f), contentAlignment = Alignment.Center) {
+                    dial(min(availableWidth, availableHeight * 0.45f).coerceIn(180.dp, 320.dp))
+                }
+                readings()
+                Spacer(Modifier.height(20.dp))
+            }
+        }
     }
 }
 
@@ -198,7 +240,7 @@ private fun QiblaReading(deviationDegrees: Float, aligned: Boolean) {
 }
 
 @Composable
-private fun QiblaRose(headingDegrees: Float?, deviationDegrees: Float?) {
+private fun QiblaRose(headingDegrees: Float?, deviationDegrees: Float?, diameter: Dp) {
     val scheme = MaterialTheme.colorScheme
     val tick = scheme.onSurfaceVariant.copy(alpha = 0.35f)
     val face = scheme.surface
@@ -207,7 +249,7 @@ private fun QiblaRose(headingDegrees: Float?, deviationDegrees: Float?) {
     val hub = AwqatHeroSurface
 
     Box(contentAlignment = Alignment.Center) {
-        Canvas(Modifier.size(320.dp)) {
+        Canvas(Modifier.size(diameter)) {
             val radius = size.minDimension / 2f
             val centre = Offset(radius, radius)
             drawCircle(face, radius = radius * 0.90f, center = centre)
@@ -231,22 +273,23 @@ private fun QiblaRose(headingDegrees: Float?, deviationDegrees: Float?) {
         }
 
         // Cardinal letters ride the same rotation as the ticks but stay upright.
-        CardinalLetters(headingDegrees ?: 0f)
+        CardinalLetters(headingDegrees ?: 0f, diameter)
     }
 }
 
 @Composable
-private fun CardinalLetters(headingDegrees: Float) {
+private fun CardinalLetters(headingDegrees: Float, diameter: Dp) {
     val letters = listOf(
         stringResource(R.string.qibla_cardinal_north) to 0f,
         stringResource(R.string.qibla_cardinal_east) to 90f,
         stringResource(R.string.qibla_cardinal_south) to 180f,
         stringResource(R.string.qibla_cardinal_west) to 270f
     )
-    Box(Modifier.size(320.dp), contentAlignment = Alignment.Center) {
+    Box(Modifier.size(diameter), contentAlignment = Alignment.Center) {
         letters.forEach { (label, angle) ->
             val radians = Math.toRadians(((angle - headingDegrees) - 90f).toDouble())
-            val distance = 132.dp
+            // A fixed offset left the letters stranded when the dial was squeezed.
+            val distance = diameter * 0.4125f
             Text(
                 label,
                 fontSize = if (angle == 0f) 16.sp else 15.sp,

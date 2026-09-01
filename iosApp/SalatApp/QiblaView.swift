@@ -52,46 +52,58 @@ struct QiblaView: View {
     }
 
     var body: some View {
-        VStack(spacing: 0) {
-            HStack(alignment: .top) {
-                VStack(alignment: .leading, spacing: 4) {
-                    Text(L10n.text("qibla")).font(.system(size: 28, weight: .semibold))
-                    Text("\(location.displayName) → \(L10n.text("qibla_mecca"))")
-                        .font(.system(size: 15))
-                        .foregroundStyle(Awqat.muted(colorScheme))
-                }
-                Spacer(minLength: 12)
-                HeaderActionButton(
-                    symbol: "gearshape",
-                    label: L10n.text("settings"),
-                    action: onOpenSettings
-                )
-            }
-            .frame(maxWidth: .infinity, alignment: .leading)
-            .padding(.top, 12)
+        GeometryReader { proxy in
+            // The design draws one portrait screen. Landscape has no artboard, so the
+            // dial keeps its proportions and the readings move alongside it rather
+            // than below, which is the only way both survive a short viewport.
+            let sideBySide = proxy.size.width > proxy.size.height
+            let dialSize = sideBySide
+                ? max(140, min(proxy.size.height - 80, proxy.size.width / 2.4))
+                : min(max(180, min(proxy.size.width - 52, proxy.size.height * 0.45)), 320)
 
-            Spacer(minLength: 0)
-            if headingModel.isAvailable {
-                VStack(spacing: 10) {
-                    rose
-                    reading
+            VStack(spacing: 0) {
+                HStack(alignment: .top) {
+                    VStack(alignment: .leading, spacing: 4) {
+                        Text(L10n.text("qibla")).font(.system(size: 28, weight: .semibold))
+                        Text("\(location.displayName) → \(L10n.text("qibla_mecca"))")
+                            .font(.system(size: 15))
+                            .foregroundStyle(Awqat.muted(colorScheme))
+                    }
+                    Spacer(minLength: 12)
+                    HeaderActionButton(
+                        symbol: "gearshape",
+                        label: L10n.text("settings"),
+                        action: onOpenSettings
+                    )
                 }
-            } else {
-                Text(L10n.text("qibla_compass_unavailable"))
-                    .foregroundStyle(Awqat.muted(colorScheme))
-                    .multilineTextAlignment(.center)
-            }
-            Spacer(minLength: 0)
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .padding(.top, sideBySide ? 6 : 12)
 
-            if headingModel.isAvailable && deviation == nil {
-                lowAccuracyNotice
-                    .padding(.bottom, 16)
+                if sideBySide {
+                    HStack(spacing: 24) {
+                        dial(diameter: dialSize).frame(maxWidth: .infinity)
+                        ScrollView {
+                            VStack(spacing: 0) { readings }
+                                .frame(
+                                    maxWidth: .infinity,
+                                    minHeight: max(0, proxy.size.height - 80),
+                                    alignment: .center
+                                )
+                        }
+                        .frame(maxWidth: .infinity)
+                    }
+                    .frame(maxHeight: .infinity)
+                    .padding(.bottom, 8)
+                } else {
+                    Spacer(minLength: 0)
+                    dial(diameter: dialSize)
+                    Spacer(minLength: 0)
+                    readings.padding(.bottom, 12)
+                }
             }
-            readout
-                .padding(.bottom, 12)
+            .padding(.horizontal, 26)
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
         }
-        .padding(.horizontal, 26)
-        .frame(maxWidth: .infinity, maxHeight: .infinity)
         .background(Awqat.canvas(colorScheme))
         .onAppear { headingModel.start() }
         .onDisappear { headingModel.stop() }
@@ -103,10 +115,30 @@ struct QiblaView: View {
         }
     }
 
-    private var diameter: CGFloat { horizontalSizeClass == .regular ? 340 : 300 }
+    @ViewBuilder
+    private func dial(diameter: CGFloat) -> some View {
+        if headingModel.isAvailable {
+            VStack(spacing: 10) {
+                rose(diameter: diameter)
+                if deviation != nil { reading }
+            }
+        } else {
+            Text(L10n.text("qibla_compass_unavailable"))
+                .foregroundStyle(Awqat.muted(colorScheme))
+                .multilineTextAlignment(.center)
+        }
+    }
 
     @ViewBuilder
-    private var rose: some View {
+    private var readings: some View {
+        if headingModel.isAvailable && deviation == nil {
+            lowAccuracyNotice.padding(.bottom, 16)
+        }
+        readout
+    }
+
+    @ViewBuilder
+    private func rose(diameter: CGFloat) -> some View {
         ZStack {
             QiblaRose(
                 heading: headingModel.heading ?? 0,

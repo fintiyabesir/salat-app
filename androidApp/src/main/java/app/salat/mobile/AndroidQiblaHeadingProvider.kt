@@ -5,6 +5,7 @@ import android.hardware.Sensor
 import android.hardware.SensorEvent
 import android.hardware.SensorEventListener
 import android.hardware.SensorManager
+import android.view.Surface
 import app.salat.domain.SalatApi
 
 /** What the compass is currently worth, in the terms the Qibla screen reasons about. */
@@ -24,6 +25,14 @@ class AndroidQiblaHeadingProvider(context: Context) : SensorEventListener {
     private val rotationSensor = sensorManager.getDefaultSensor(Sensor.TYPE_ROTATION_VECTOR)
     private var callback: ((QiblaHeading) -> Unit)? = null
     private var accuracyDegrees: Int? = null
+
+    /**
+     * The rotation sensor reports against the device's natural orientation, so in
+     * landscape the heading is a quarter turn out unless the axes are remapped.
+     * The screen keeps this in step with the display.
+     */
+    @Volatile
+    var displayRotation: Int = Surface.ROTATION_0
 
     val isAvailable: Boolean get() = rotationSensor != null
 
@@ -64,9 +73,12 @@ class AndroidQiblaHeadingProvider(context: Context) : SensorEventListener {
         // so on those handsets the Qibla never appeared at any threshold.
         accuracyDegrees = event.accuracy.toApproximateDegrees()
         val rotation = FloatArray(9)
+        val remapped = FloatArray(9)
         val orientation = FloatArray(3)
         SensorManager.getRotationMatrixFromVector(rotation, event.values)
-        SensorManager.getOrientation(rotation, orientation)
+        val (axisX, axisY) = axesFor(displayRotation)
+        SensorManager.remapCoordinateSystem(rotation, axisX, axisY, remapped)
+        SensorManager.getOrientation(remapped, orientation)
         val degrees = Math.toDegrees(orientation[0].toDouble()).toFloat()
         callback?.invoke(QiblaHeading((degrees + 360f) % 360f, accuracyDegrees))
     }
@@ -77,6 +89,14 @@ class AndroidQiblaHeadingProvider(context: Context) : SensorEventListener {
     }
 
     private companion object {
+        /** Which device axes point along the screen's x and y at each rotation. */
+        fun axesFor(displayRotation: Int): Pair<Int, Int> = when (displayRotation) {
+            Surface.ROTATION_90 -> SensorManager.AXIS_Y to SensorManager.AXIS_MINUS_X
+            Surface.ROTATION_180 -> SensorManager.AXIS_MINUS_X to SensorManager.AXIS_MINUS_Y
+            Surface.ROTATION_270 -> SensorManager.AXIS_MINUS_Y to SensorManager.AXIS_X
+            else -> SensorManager.AXIS_X to SensorManager.AXIS_Y
+        }
+
         /**
          * Android reports compass accuracy as a coarse level, not an angle, while the
          * design and the user-facing setting are both in degrees. These are the

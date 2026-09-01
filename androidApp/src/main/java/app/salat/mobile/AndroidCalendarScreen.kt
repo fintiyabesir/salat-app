@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -117,19 +118,25 @@ internal fun AndroidCalendarScreen(
         else "${today.format(month)}–${last.format(monthYear)}"
     }
 
+    BoxWithConstraints(Modifier.fillMaxSize()) {
+    val short = maxHeight < 520.dp
     Column(Modifier.fillMaxSize()) {
         Row(
-            Modifier.fillMaxWidth().padding(start = 24.dp, end = 24.dp, top = 20.dp),
+            Modifier.fillMaxWidth().padding(start = 24.dp, end = 24.dp, top = if (short) 12.dp else 20.dp),
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.Top
         ) {
             Column(Modifier.weight(1f)) {
-                Text(stringResource(R.string.calendar), fontSize = 26.sp, fontWeight = FontWeight.Bold)
+                Text(
+                    stringResource(R.string.calendar),
+                    fontSize = if (short) 22.sp else 26.sp,
+                    fontWeight = FontWeight.Bold
+                )
                 Text(
                     "$gregorianRange · $hijriMonth",
-                    fontSize = 15.sp,
+                    fontSize = if (short) 13.sp else 15.sp,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    modifier = Modifier.padding(top = 4.dp)
+                    modifier = Modifier.padding(top = if (short) 2.dp else 4.dp)
                 )
             }
             HeaderAction(
@@ -139,24 +146,51 @@ internal fun AndroidCalendarScreen(
                 onOpenSettings
             )
         }
-        TodayCard(today, hijriToday, todayTimes, dark, locale)
         BoxWithConstraints(Modifier.weight(1f)) {
             val wide = maxWidth >= 700.dp
-            Column(
-                Modifier.fillMaxSize()
-                    .padding(horizontal = if (wide) 30.dp else 22.dp)
-                    .padding(top = 14.dp, bottom = 8.dp)
-                    .background(MaterialTheme.colorScheme.surface, RoundedCornerShape(24.dp))
-                    .padding(horizontal = 16.dp)
-            ) {
-                // Kept outside the list rather than as a sticky item: it is the table's
-                // legend, and it must never scroll away from the column it names.
-                MonthTableHeader(dark)
-                LazyColumn(contentPadding = PaddingValues(bottom = 14.dp)) {
-                    items(rows, key = { it.date }) { row -> MonthTableRow(row, dark) }
+            // Stacked, the table is left a sliver on a landscape phone. Side by side
+            // it keeps full height and still has more width than portrait gives it.
+            val sideBySide = maxWidth > maxHeight
+
+            @Composable
+            fun table(modifier: Modifier) {
+                Column(
+                    modifier
+                        .background(MaterialTheme.colorScheme.surface, RoundedCornerShape(24.dp))
+                        .padding(horizontal = 16.dp)
+                ) {
+                    // Kept outside the list rather than as a sticky item: it is the
+                    // table's legend, and it must never scroll away from the column
+                    // it names.
+                    MonthTableHeader(dark)
+                    LazyColumn(contentPadding = PaddingValues(bottom = 14.dp)) {
+                        items(rows, key = { it.date }) { row -> MonthTableRow(row, dark) }
+                    }
+                }
+            }
+
+            if (sideBySide) {
+                Row(
+                    Modifier.fillMaxSize().padding(horizontal = 22.dp).padding(top = 12.dp, bottom = 8.dp),
+                    horizontalArrangement = Arrangement.spacedBy(16.dp)
+                ) {
+                    Box(Modifier.weight(1f)) {
+                        TodayCard(today, hijriToday, todayTimes, dark, locale, inset = false)
+                    }
+                    table(Modifier.weight(1.2f).fillMaxHeight())
+                }
+            } else {
+                Column(Modifier.fillMaxSize()) {
+                    TodayCard(today, hijriToday, todayTimes, dark, locale, inset = true)
+                    table(
+                        Modifier.fillMaxSize()
+                            .padding(horizontal = if (wide) 30.dp else 22.dp)
+                            .padding(top = 14.dp, bottom = 8.dp)
+                    )
                 }
             }
         }
+    }
     }
 }
 
@@ -166,15 +200,15 @@ private fun TodayCard(
     hijri: String,
     times: List<String>,
     dark: Boolean,
-    locale: Locale
+    locale: Locale,
+    inset: Boolean
 ) {
     val palette = heroPalette(dark)
     val shape = RoundedCornerShape(24.dp)
     CompositionLocalProvider(LocalContentColor provides palette.content) {
         Column(
             Modifier.fillMaxWidth()
-                .padding(horizontal = 22.dp)
-                .padding(top = 16.dp)
+                .then(if (inset) Modifier.padding(horizontal = 22.dp).padding(top = 16.dp) else Modifier)
                 .background(palette.surface, shape)
                 .then(palette.border?.let { Modifier.border(1.dp, it, shape) } ?: Modifier)
                 .padding(horizontal = 20.dp, vertical = 18.dp)

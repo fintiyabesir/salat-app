@@ -20,21 +20,28 @@ struct TodayView: View {
 
     @ViewBuilder
     private func prayerContent(_ model: TodayPrayerDisplay) -> some View {
+        GeometryReader { proxy in
+            content(model, short: proxy.size.height < 520)
+        }
+    }
+
+    @ViewBuilder
+    private func content(_ model: TodayPrayerDisplay, short: Bool) -> some View {
         ScrollView {
             if horizontalSizeClass == .regular {
-                VStack(alignment: .leading, spacing: 20) {
-                    locationHeader(model)
+                VStack(alignment: .leading, spacing: short ? 12 : 20) {
+                    locationHeader(model, short: short)
                     HStack(alignment: .top, spacing: 30) {
-                        nextPrayerHero(model).frame(maxWidth: .infinity, alignment: .topLeading)
+                        nextPrayerHero(model, short: short).frame(maxWidth: .infinity, alignment: .topLeading)
                         prayerList(model).frame(maxWidth: .infinity, alignment: .top)
                     }
                 }
                 .padding(.horizontal, 30)
                 .padding(.bottom, 24)
             } else {
-                VStack(alignment: .leading, spacing: 20) {
-                    locationHeader(model)
-                    nextPrayerHero(model).padding(.horizontal, 22)
+                VStack(alignment: .leading, spacing: short ? 12 : 20) {
+                    locationHeader(model, short: short)
+                    nextPrayerHero(model, short: short).padding(.horizontal, 22)
                     prayerList(model).padding(.horizontal, 22)
                 }
                 .padding(.bottom, 16)
@@ -43,12 +50,12 @@ struct TodayView: View {
     }
 
     @ViewBuilder
-    private func locationHeader(_ model: TodayPrayerDisplay) -> some View {
+    private func locationHeader(_ model: TodayPrayerDisplay, short: Bool) -> some View {
         HStack(alignment: .top) {
             VStack(alignment: .leading, spacing: 5) {
-                Text(model.locationName).font(.system(size: 26, weight: .bold))
+                Text(model.locationName).font(.system(size: short ? 22 : 26, weight: .bold))
                 Text("\(model.dateText) · \(model.hijriDateText)")
-                    .font(.system(size: 15))
+                    .font(.system(size: short ? 13 : 15))
                     .foregroundStyle(Awqat.muted(colorScheme))
             }
             Spacer(minLength: 12)
@@ -58,7 +65,7 @@ struct TodayView: View {
             }
         }
         .padding(.horizontal, horizontalSizeClass == .regular ? 0 : 24)
-        .padding(.top, 8)
+        .padding(.top, short ? 4 : 8)
     }
 
     @ViewBuilder
@@ -67,7 +74,7 @@ struct TodayView: View {
     }
 
     @ViewBuilder
-    private func nextPrayerHero(_ model: TodayPrayerDisplay) -> some View {
+    private func nextPrayerHero(_ model: TodayPrayerDisplay, short: Bool) -> some View {
         let palette = HeroPalette.of(colorScheme)
         VStack(alignment: .leading, spacing: 0) {
             HStack {
@@ -88,16 +95,16 @@ struct TodayView: View {
                 }
             }
             Text(model.nextPrayer.name)
-                .font(.system(size: 26, weight: .medium))
-                .padding(.top, 14)
+                .font(.system(size: short ? 18 : 26, weight: .medium))
+                .padding(.top, short ? 6 : 14)
             Text(model.nextPrayer.time)
-                .font(.system(size: 72, weight: .ultraLight).monospacedDigit())
-            dayStrip(model, palette: palette)
+                .font(.system(size: short ? 40 : 72, weight: .ultraLight).monospacedDigit())
+            dayStrip(model, palette: palette, short: short)
         }
         .foregroundStyle(palette.content)
         .padding(.horizontal, 26)
-        .padding(.top, 26)
-        .padding(.bottom, 22)
+        .padding(.top, short ? 14 : 26)
+        .padding(.bottom, short ? 12 : 22)
         .frame(maxWidth: .infinity, alignment: .leading)
         .background(palette.surface, in: RoundedRectangle(cornerRadius: 30))
         .overlay(
@@ -108,7 +115,7 @@ struct TodayView: View {
 
     /// The six prayers as one line of the day, so "where am I in today" is a glance.
     @ViewBuilder
-    private func dayStrip(_ model: TodayPrayerDisplay, palette: HeroPalette) -> some View {
+    private func dayStrip(_ model: TodayPrayerDisplay, palette: HeroPalette, short: Bool) -> some View {
         let reached = model.reachedIndex
         VStack(alignment: .leading, spacing: 8) {
             HStack(spacing: 0) {
@@ -143,7 +150,7 @@ struct TodayView: View {
                 }
             }
         }
-        .padding(.top, 18)
+        .padding(.top, short ? 10 : 18)
     }
 
     @ViewBuilder
