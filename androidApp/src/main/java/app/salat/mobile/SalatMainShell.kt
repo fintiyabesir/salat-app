@@ -114,8 +114,8 @@ fun SalatMainShell(
                         onChooseCity = onChooseCity,
                         onOpenSettings = { showSettings = true }
                     )
-                    MainSection.CALENDAR -> AndroidCalendarScreen(location, settings, dark)
-                    MainSection.QIBLA -> AndroidQiblaScreen(location, settings)
+                    MainSection.CALENDAR -> AndroidCalendarScreen(location, settings, dark) { showSettings = true }
+                    MainSection.QIBLA -> AndroidQiblaScreen(location, settings, dark) { showSettings = true }
                 }
             }
         }

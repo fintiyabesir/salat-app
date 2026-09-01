@@ -115,11 +115,42 @@ object SalatApi {
     }
 
     /**
-     * Platforms that report compass accuracy as an angle rather than a coarse level
-     * can hold the tight threshold; Android picks its own from the sensor set.
+     * Seed values each platform picks between when a device is first set up. There
+     * is deliberately no "automatic" mode: the threshold is always a concrete number
+     * the user can see and override, because a hidden rule is impossible to reason
+     * about when the Qibla will not appear.
      */
-    val qiblaDefaultThresholdDegrees: Int
+    val qiblaThresholdModernDevice: Int
         get() = AppPreferences.QIBLA_THRESHOLD_FUSED
+
+    val qiblaThresholdOlderDevice: Int
+        get() = AppPreferences.QIBLA_THRESHOLD_MAGNETOMETER_ONLY
+
+    /**
+     * The seed for an Apple device, from its hardware identifier.
+     *
+     * iPhone 12 is `iPhone13,x` — Apple's internal numbering runs a year ahead of
+     * the marketing name, so "iPhone 12 or newer" means a major of 13 or above.
+     * Anything unrecognised (an iPad, a future naming scheme) is treated as older,
+     * which errs towards showing a reading rather than hiding one.
+     *
+     * The rule lives here rather than in Swift so it is pinned by tests.
+     */
+    fun qiblaSeedThresholdForAppleDevice(modelIdentifier: String): Int {
+        val major = modelIdentifier
+            .takeIf { it.startsWith(APPLE_PHONE_PREFIX) }
+            ?.removePrefix(APPLE_PHONE_PREFIX)
+            ?.takeWhile { it.isDigit() }
+            ?.toIntOrNull()
+        return if (major != null && major >= FIRST_MODERN_IPHONE_MAJOR) {
+            qiblaThresholdModernDevice
+        } else {
+            qiblaThresholdOlderDevice
+        }
+    }
+
+    private const val APPLE_PHONE_PREFIX = "iPhone"
+    private const val FIRST_MODERN_IPHONE_MAJOR = 13
 
     private inline fun <reified T : Enum<T>> enumOrNull(raw: String?): T? =
         raw?.let { runCatching { enumValueOf<T>(it) }.getOrNull() }

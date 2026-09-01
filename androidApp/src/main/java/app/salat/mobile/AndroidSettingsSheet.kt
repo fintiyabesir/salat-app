@@ -27,6 +27,13 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import app.salat.domain.SalatApi
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.runtime.setValue
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -210,15 +217,18 @@ fun AndroidSettingsSheet(
                     }
 
                     SettingsCard(stringResource(R.string.settings_qibla_threshold).tracked()) {
+                        val threshold = value.qiblaAccuracyThresholdDegrees
+                            ?: SalatApi.qiblaThresholdOlderDevice
                         ChipFlow(
-                            choices = listOf<String?>(null) + QIBLA_THRESHOLD_CHOICES.map { it.toString() },
-                            selected = value.qiblaAccuracyThresholdDegrees?.toString(),
-                            label = { raw ->
-                                raw?.let { stringResource(R.string.settings_qibla_threshold_degrees, it.toInt()) }
-                                    ?: stringResource(R.string.settings_qibla_threshold_auto)
-                            },
-                            onSelected = { raw -> onChange(value.copy(qiblaAccuracyThresholdDegrees = raw?.toInt())) }
+                            choices = QIBLA_THRESHOLD_CHOICES,
+                            selected = threshold,
+                            label = { stringResource(R.string.settings_qibla_threshold_degrees, it) },
+                            onSelected = { onChange(value.copy(qiblaAccuracyThresholdDegrees = it)) }
                         )
+                        // Without the live reading the picker is guesswork: the whole
+                        // point of the threshold is how it compares with what the
+                        // compass is actually managing right now.
+                        CompassAccuracyNotice(threshold)
                     }
 
                     SettingsCard(stringResource(R.string.settings_appearance_language).tracked()) {
@@ -255,6 +265,36 @@ fun AndroidSettingsSheet(
 /** Section labels are set in caps by the design; Kotlin's invariant uppercase
  *  would turn Turkish "Hicri" into "HICRI" rather than "HİCRİ". */
 private fun String.tracked(): String = uppercase(Locale.getDefault())
+
+/** The compass reading as it stands, next to the number that gates it. */
+@Composable
+private fun CompassAccuracyNotice(thresholdDegrees: Int) {
+    val context = LocalContext.current
+    val provider = remember(context) { AndroidQiblaHeadingProvider(context) }
+    var accuracy by remember { mutableStateOf<Int?>(null) }
+    DisposableEffect(provider) {
+        if (provider.isAvailable) provider.start { accuracy = it.accuracyDegrees }
+        onDispose { provider.stop() }
+    }
+
+    Column(Modifier.padding(top = 12.dp)) {
+        Text(
+            accuracy?.let { stringResource(R.string.settings_qibla_accuracy_now, it) }
+                ?: stringResource(R.string.settings_qibla_accuracy_measuring),
+            fontSize = 13.sp,
+            color = MaterialTheme.colorScheme.onSurfaceVariant
+        )
+        val reading = accuracy
+        if (reading != null && reading > thresholdDegrees) {
+            Text(
+                stringResource(R.string.settings_qibla_accuracy_hidden),
+                fontSize = 13.sp,
+                color = AwqatGold,
+                modifier = Modifier.padding(top = 4.dp)
+            )
+        }
+    }
+}
 
 @Composable
 private fun SettingsCard(title: String, content: @Composable ColumnScope.() -> Unit) {

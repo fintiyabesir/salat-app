@@ -18,4 +18,9 @@
     <string name="settings_qibla_threshold_auto">تلقائي</string>
     <string name="settings_qibla_threshold_degrees">±%1$d°</string>
     <string name="qibla_compass_unavailable">مستشعر البوصلة غير متوفر</string>
+    <string name="settings_qibla_accuracy_now">دقة البوصلة الحالية: ±%1$d°</string>
+    <string name="settings_qibla_accuracy_measuring">جارٍ قياس دقة البوصلة…</string>
+    <string name="settings_qibla_accuracy_hidden">عند العتبة المختارة يبقى الاتجاه مخفيًا.</string>
+    <string name="qibla_accuracy_vs_threshold">الدقة ±%1$d° · العتبة ±%2$d°</string>
+    <string name="qibla_threshold_hint">غيّر العتبة من الإعدادات</string>
 </resources>

@@ -18,3 +18,8 @@
 "settings_qibla_threshold" = "Ambang ketepatan kiblat";
 "settings_qibla_threshold_auto" = "Automatik";
 "settings_qibla_threshold_degrees" = "±%d°";
+"settings_qibla_accuracy_now" = "Ketepatan kompas semasa: ±%d°";
+"settings_qibla_accuracy_measuring" = "Mengukur ketepatan kompas…";
+"settings_qibla_accuracy_hidden" = "Pada ambang yang dipilih, arah kekal tersembunyi.";
+"qibla_accuracy_vs_threshold" = "Ketepatan ±%d° · ambang ±%d°";
+"qibla_threshold_hint" = "Tukar ambang dalam Tetapan";

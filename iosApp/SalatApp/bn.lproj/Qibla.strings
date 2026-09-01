@@ -18,3 +18,8 @@
 "settings_qibla_threshold" = "কিবলা নির্ভুলতার সীমা";
 "settings_qibla_threshold_auto" = "স্বয়ংক্রিয়";
 "settings_qibla_threshold_degrees" = "±%d°";
+"settings_qibla_accuracy_now" = "বর্তমান কম্পাস নির্ভুলতা: ±%d°";
+"settings_qibla_accuracy_measuring" = "কম্পাসের নির্ভুলতা মাপা হচ্ছে…";
+"settings_qibla_accuracy_hidden" = "নির্বাচিত সীমায় দিকটি লুকানো থাকে।";
+"qibla_accuracy_vs_threshold" = "নির্ভুলতা ±%d° · সীমা ±%d°";
+"qibla_threshold_hint" = "সেটিংস থেকে সীমা বদলান";

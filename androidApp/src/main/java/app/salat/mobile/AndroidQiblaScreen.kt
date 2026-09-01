@@ -2,6 +2,8 @@ package app.salat.mobile
 
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
+import androidx.compose.ui.draw.clip
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -63,7 +65,12 @@ import kotlin.math.sin
  * rather than softened — the design is explicit that a wrong Qibla is never shown.
  */
 @Composable
-internal fun AndroidQiblaScreen(location: ResolvedLocation, settings: AppPreferences) {
+internal fun AndroidQiblaScreen(
+    location: ResolvedLocation,
+    settings: AppPreferences,
+    dark: Boolean,
+    onOpenSettings: () -> Unit
+) {
     val context = LocalContext.current
     val haptics = LocalHapticFeedback.current
     val provider = remember { AndroidQiblaHeadingProvider(context) }
@@ -78,7 +85,9 @@ internal fun AndroidQiblaScreen(location: ResolvedLocation, settings: AppPrefere
         onDispose { provider.stop() }
     }
 
-    val threshold = settings.qiblaAccuracyThresholdDegrees ?: provider.defaultAccuracyThresholdDegrees
+    // Seeded on first launch by the settings store, so this fallback should never
+    // be reached; it keeps the screen working if preferences are ever cleared.
+    val threshold = settings.qiblaAccuracyThresholdDegrees ?: provider.seedAccuracyThresholdDegrees
     // The "never show a wrong Qibla" rule lives in the shared module, where it is
     // pinned by tests rather than by this screen.
     val display = QiblaDirectionPolicy.evaluate(
@@ -102,13 +111,25 @@ internal fun AndroidQiblaScreen(location: ResolvedLocation, settings: AppPrefere
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Spacer(Modifier.height(26.dp))
-        Column(Modifier.fillMaxWidth()) {
-            Text(stringResource(R.string.qibla), fontSize = 28.sp, fontWeight = FontWeight.SemiBold)
-            Text(
-                "${location.displayName} → ${stringResource(R.string.qibla_mecca)}",
-                fontSize = 15.sp,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                modifier = Modifier.padding(top = 4.dp)
+        Row(
+            Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.Top
+        ) {
+            Column(Modifier.weight(1f)) {
+                Text(stringResource(R.string.qibla), fontSize = 28.sp, fontWeight = FontWeight.SemiBold)
+                Text(
+                    "${location.displayName} → ${stringResource(R.string.qibla_mecca)}",
+                    fontSize = 15.sp,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    modifier = Modifier.padding(top = 4.dp)
+                )
+            }
+            HeaderAction(
+                R.drawable.ic_action_settings,
+                stringResource(R.string.settings),
+                dark,
+                onOpenSettings
             )
         }
 
@@ -125,14 +146,22 @@ internal fun AndroidQiblaScreen(location: ResolvedLocation, settings: AppPrefere
                         headingDegrees = heading?.degrees,
                         deviationDegrees = deviation
                     )
-                    Spacer(Modifier.height(10.dp))
-                    QiblaReading(deviation, aligned)
+                    // A placeholder "—°" says nothing the notice below does not say
+                    // better, and it crowded the notice off the screen.
+                    if (deviation != null) {
+                        Spacer(Modifier.height(10.dp))
+                        QiblaReading(deviation, aligned)
+                    }
                 }
             }
         }
 
         if (provider.isAvailable && !trusted) {
-            LowAccuracyNotice(calibrating = heading != null)
+            LowAccuracyNotice(
+                accuracyDegrees = heading?.accuracyDegrees,
+                thresholdDegrees = threshold,
+                onOpenSettings = onOpenSettings
+            )
             Spacer(Modifier.height(16.dp))
         }
 
@@ -151,24 +180,20 @@ internal fun AndroidQiblaScreen(location: ResolvedLocation, settings: AppPrefere
  * southerly — hiding the one thing the screen exists to show.
  */
 @Composable
-private fun QiblaReading(deviationDegrees: Float?, aligned: Boolean) {
+private fun QiblaReading(deviationDegrees: Float, aligned: Boolean) {
     val scheme = MaterialTheme.colorScheme
     Column(horizontalAlignment = Alignment.CenterHorizontally) {
-        if (deviationDegrees == null) {
-            Text("—°", fontSize = 40.sp, fontWeight = FontWeight.Light, color = scheme.onSurfaceVariant)
-        } else {
-            Text("${abs(deviationDegrees).roundToInt()}°", fontSize = 40.sp, fontWeight = FontWeight.Light)
-            Text(
-                when {
-                    aligned -> stringResource(R.string.qibla_aligned)
-                    deviationDegrees > 0 -> stringResource(R.string.qibla_turn_right)
-                    else -> stringResource(R.string.qibla_turn_left)
-                },
-                fontSize = 14.sp,
-                color = if (aligned) scheme.primary else scheme.onSurfaceVariant,
-                modifier = Modifier.padding(top = 2.dp)
-            )
-        }
+        Text("${abs(deviationDegrees).roundToInt()}°", fontSize = 40.sp, fontWeight = FontWeight.Light)
+        Text(
+            when {
+                aligned -> stringResource(R.string.qibla_aligned)
+                deviationDegrees > 0 -> stringResource(R.string.qibla_turn_right)
+                else -> stringResource(R.string.qibla_turn_left)
+            },
+            fontSize = 14.sp,
+            color = if (aligned) scheme.primary else scheme.onSurfaceVariant,
+            modifier = Modifier.padding(top = 2.dp)
+        )
     }
 }
 
@@ -236,8 +261,17 @@ private fun CardinalLetters(headingDegrees: Float) {
     }
 }
 
+/**
+ * What is being withheld and why, in numbers. Naming the reading beside the
+ * threshold turns "it does not work" into a decision the user can act on, and the
+ * last line is the way to act on it.
+ */
 @Composable
-private fun LowAccuracyNotice(calibrating: Boolean) {
+private fun LowAccuracyNotice(
+    accuracyDegrees: Int?,
+    thresholdDegrees: Int,
+    onOpenSettings: () -> Unit
+) {
     Column(
         Modifier
             .fillMaxWidth()
@@ -255,14 +289,26 @@ private fun LowAccuracyNotice(calibrating: Boolean) {
             color = MaterialTheme.colorScheme.onSurfaceVariant,
             modifier = Modifier.padding(top = 6.dp)
         )
-        if (calibrating) {
-            Text(
-                stringResource(R.string.qibla_calibrating),
-                fontSize = 13.sp,
-                color = MaterialTheme.colorScheme.primary,
-                modifier = Modifier.padding(top = 8.dp)
-            )
-        }
+        Text(
+            accuracyDegrees
+                ?.let { stringResource(R.string.qibla_accuracy_vs_threshold, it, thresholdDegrees) }
+                ?: stringResource(R.string.qibla_calibrating),
+            fontSize = 13.sp,
+            fontWeight = FontWeight.Medium,
+            color = AwqatGold,
+            modifier = Modifier.padding(top = 10.dp)
+        )
+        Text(
+            stringResource(R.string.qibla_threshold_hint),
+            fontSize = 13.sp,
+            fontWeight = FontWeight.SemiBold,
+            color = MaterialTheme.colorScheme.primary,
+            modifier = Modifier
+                .padding(top = 8.dp)
+                .clip(RoundedCornerShape(8.dp))
+                .clickable(onClick = onOpenSettings)
+                .padding(vertical = 2.dp)
+        )
     }
 }
 

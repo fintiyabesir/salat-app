@@ -52,6 +52,9 @@ final class IOSAppSettingsStore: ObservableObject {
 
     init(defaults: UserDefaults = .standard) {
         self.defaults = defaults
+        if defaults.integer(forKey: Key.qiblaThreshold) <= 0 {
+            defaults.set(IOSCompassDefaults.seedThresholdDegrees, forKey: Key.qiblaThreshold)
+        }
         self.value = Self.load(from: defaults)
     }
 

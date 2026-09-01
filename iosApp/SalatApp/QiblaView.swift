@@ -12,6 +12,7 @@ import UIKit
 struct QiblaView: View {
     let location: PrayerLocation
     let settings: IOSAppSettings
+    let onOpenSettings: () -> Void
 
     @Environment(\.horizontalSizeClass) private var horizontalSizeClass
     @Environment(\.colorScheme) private var colorScheme
@@ -26,10 +27,12 @@ struct QiblaView: View {
         SalatApi.shared.qiblaDistanceKilometres(latitude: location.latitude, longitude: location.longitude)
     }
 
+    /// Seeded on first launch by the settings store, so the fallback should never
+    /// be reached; it keeps the screen working if preferences are ever cleared.
     private var threshold: Int {
         settings.qiblaThresholdDegrees > 0
             ? settings.qiblaThresholdDegrees
-            : Int(SalatApi.shared.qiblaDefaultThresholdDegrees)
+            : IOSCompassDefaults.seedThresholdDegrees
     }
 
     /// The "never show a wrong Qibla" rule lives in the shared module, where it is
@@ -50,11 +53,19 @@ struct QiblaView: View {
 
     var body: some View {
         VStack(spacing: 0) {
-            VStack(alignment: .leading, spacing: 4) {
-                Text(L10n.text("qibla")).font(.system(size: 28, weight: .semibold))
-                Text("\(location.displayName) → \(L10n.text("qibla_mecca"))")
-                    .font(.system(size: 15))
-                    .foregroundStyle(Awqat.muted(colorScheme))
+            HStack(alignment: .top) {
+                VStack(alignment: .leading, spacing: 4) {
+                    Text(L10n.text("qibla")).font(.system(size: 28, weight: .semibold))
+                    Text("\(location.displayName) → \(L10n.text("qibla_mecca"))")
+                        .font(.system(size: 15))
+                        .foregroundStyle(Awqat.muted(colorScheme))
+                }
+                Spacer(minLength: 12)
+                HeaderActionButton(
+                    symbol: "gearshape",
+                    label: L10n.text("settings"),
+                    action: onOpenSettings
+                )
             }
             .frame(maxWidth: .infinity, alignment: .leading)
             .padding(.top, 12)
@@ -134,8 +145,10 @@ struct QiblaView: View {
     /// Kaaba medallion exactly when the bearing is southerly.
     @ViewBuilder
     private var reading: some View {
-        VStack(spacing: 2) {
-            if let deviation {
+        // A placeholder "—°" says nothing the notice below does not say better, and
+        // it crowded the notice off the screen.
+        if let deviation {
+            VStack(spacing: 2) {
                 Text("\(Int(abs(deviation).rounded()))°")
                     .font(.system(size: 40, weight: .light))
                     .foregroundStyle(Awqat.ink(colorScheme))
@@ -146,14 +159,13 @@ struct QiblaView: View {
                 )
                 .font(.system(size: 14))
                 .foregroundStyle(aligned ? Awqat.accent(colorScheme) : Awqat.muted(colorScheme))
-            } else {
-                Text("—°")
-                    .font(.system(size: 40, weight: .light))
-                    .foregroundStyle(Awqat.muted(colorScheme))
             }
         }
     }
 
+    /// What is being withheld and why, in numbers. Naming the reading beside the
+    /// threshold turns "it does not work" into a decision the user can act on, and
+    /// the last line is the way to act on it.
     @ViewBuilder
     private var lowAccuracyNotice: some View {
         VStack(alignment: .leading, spacing: 6) {
@@ -162,12 +174,22 @@ struct QiblaView: View {
             Text(L10n.text("qibla_low_accuracy_body"))
                 .font(.system(size: 13))
                 .foregroundStyle(Awqat.muted(colorScheme))
-            if headingModel.heading != nil {
-                Text(L10n.text("qibla_calibrating"))
-                    .font(.system(size: 13))
+            Text(
+                headingModel.accuracy
+                    .map { L10n.format("qibla_accuracy_vs_threshold", Int($0.rounded(.up)), threshold) }
+                    ?? L10n.text("qibla_calibrating")
+            )
+            .font(.system(size: 13, weight: .medium))
+            .foregroundStyle(Awqat.gold)
+            .padding(.top, 4)
+
+            Button(action: onOpenSettings) {
+                Text(L10n.text("qibla_threshold_hint"))
+                    .font(.system(size: 13, weight: .semibold))
                     .foregroundStyle(Awqat.accent(colorScheme))
-                    .padding(.top, 2)
             }
+            .buttonStyle(.plain)
+            .padding(.top, 2)
         }
         .frame(maxWidth: .infinity, alignment: .leading)
         .padding(.horizontal, 20)

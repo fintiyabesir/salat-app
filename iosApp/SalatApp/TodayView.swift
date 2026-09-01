@@ -63,15 +63,7 @@ struct TodayView: View {
 
     @ViewBuilder
     private func headerAction(_ symbol: String, _ label: String, _ action: @escaping () -> Void) -> some View {
-        Button(action: action) {
-            Image(systemName: symbol)
-                .font(.system(size: 17, weight: .medium))
-                .foregroundStyle(Awqat.ink(colorScheme))
-                .frame(width: 40, height: 40)
-                .background(Awqat.card(colorScheme), in: Circle())
-                .shadow(color: .black.opacity(colorScheme == .dark ? 0 : 0.10), radius: 5, y: 2)
-        }
-        .accessibilityLabel(label)
+        HeaderActionButton(symbol: symbol, label: label, action: action)
     }
 
     @ViewBuilder
@@ -201,5 +193,26 @@ struct TodayView: View {
         if active { return colorScheme == .dark ? Awqat.mint : Awqat.heroSurface }
         if passed { return Awqat.spent(colorScheme) }
         return Awqat.ink(colorScheme)
+    }
+}
+
+/// The round header button from the design, shared by Today, Calendar and Qibla.
+struct HeaderActionButton: View {
+    let symbol: String
+    let label: String
+    let action: () -> Void
+
+    @Environment(\.colorScheme) private var colorScheme
+
+    var body: some View {
+        Button(action: action) {
+            Image(systemName: symbol)
+                .font(.system(size: 17, weight: .medium))
+                .foregroundStyle(Awqat.ink(colorScheme))
+                .frame(width: 40, height: 40)
+                .background(Awqat.card(colorScheme), in: Circle())
+                .shadow(color: .black.opacity(colorScheme == .dark ? 0 : 0.10), radius: 5, y: 2)
+        }
+        .accessibilityLabel(label)
     }
 }

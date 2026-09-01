@@ -18,4 +18,9 @@
     <string name="settings_qibla_threshold_auto">Otomatik</string>
     <string name="settings_qibla_threshold_degrees">±%1$d°</string>
     <string name="qibla_compass_unavailable">Pusula sensörü yok</string>
+    <string name="settings_qibla_accuracy_now">Şu anki pusula hassasiyeti: ±%1$d°</string>
+    <string name="settings_qibla_accuracy_measuring">Pusula hassasiyeti ölçülüyor…</string>
+    <string name="settings_qibla_accuracy_hidden">Seçili eşikte yön gizli kalır.</string>
+    <string name="qibla_accuracy_vs_threshold">Hassasiyet ±%1$d° · eşik ±%2$d°</string>
+    <string name="qibla_threshold_hint">Eşiği Ayarlar’dan değiştir</string>
 </resources>

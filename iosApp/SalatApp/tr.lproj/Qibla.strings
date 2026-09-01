@@ -18,3 +18,8 @@
 "settings_qibla_threshold" = "Kıble doğruluk eşiği";
 "settings_qibla_threshold_auto" = "Otomatik";
 "settings_qibla_threshold_degrees" = "±%d°";
+"settings_qibla_accuracy_now" = "Şu anki pusula hassasiyeti: ±%d°";
+"settings_qibla_accuracy_measuring" = "Pusula hassasiyeti ölçülüyor…";
+"settings_qibla_accuracy_hidden" = "Seçili eşikte yön gizli kalır.";
+"qibla_accuracy_vs_threshold" = "Hassasiyet ±%d° · eşik ±%d°";
+"qibla_threshold_hint" = "Eşiği Ayarlar’dan değiştir";

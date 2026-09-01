@@ -18,4 +18,9 @@
     <string name="settings_qibla_threshold_auto">Automatic</string>
     <string name="settings_qibla_threshold_degrees">±%1$d°</string>
     <string name="qibla_compass_unavailable">Compass sensor unavailable</string>
+    <string name="settings_qibla_accuracy_now">Current compass accuracy: ±%1$d°</string>
+    <string name="settings_qibla_accuracy_measuring">Measuring compass accuracy…</string>
+    <string name="settings_qibla_accuracy_hidden">At the selected threshold the direction stays hidden.</string>
+    <string name="qibla_accuracy_vs_threshold">Accuracy ±%1$d° · threshold ±%2$d°</string>
+    <string name="qibla_threshold_hint">Change the threshold in Settings</string>
 </resources>

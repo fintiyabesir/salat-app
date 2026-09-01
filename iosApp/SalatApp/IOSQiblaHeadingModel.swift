@@ -27,10 +27,12 @@ final class IOSQiblaHeadingModel: NSObject, ObservableObject, @preconcurrency CL
     }
 
     func locationManager(_ manager: CLLocationManager, didUpdateHeading newHeading: CLHeading) {
-        guard newHeading.headingAccuracy >= 0 else { return }
         let preferred = newHeading.trueHeading >= 0 ? newHeading.trueHeading : newHeading.magneticHeading
         heading = preferred
-        accuracy = newHeading.headingAccuracy
+        // A negative headingAccuracy means the reading is unusable, not that the
+        // whole update should be discarded — dropping it left the compass looking
+        // dead instead of merely uncalibrated.
+        accuracy = newHeading.headingAccuracy >= 0 ? newHeading.headingAccuracy : nil
     }
 
     func locationManagerShouldDisplayHeadingCalibration(_ manager: CLLocationManager) -> Bool {
