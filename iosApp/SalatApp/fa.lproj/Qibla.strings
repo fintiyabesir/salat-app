@@ -21,3 +21,5 @@
 "settings_qibla_accuracy_now" = "دقت کنونی قطب‌نما: ±%d°";
 "settings_qibla_accuracy_measuring" = "در حال سنجش دقت قطب‌نما…";
 "settings_qibla_accuracy_hidden" = "با آستانه انتخابی، جهت پنهان می‌ماند.";
+"qibla_accuracy_vs_threshold" = "دقت ±%d° · آستانه ±%d°";
+"qibla_threshold_hint" = "آستانه را در تنظیمات تغییر دهید";

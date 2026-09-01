@@ -21,4 +21,6 @@
     <string name="settings_qibla_accuracy_now">目前羅盤精度：±%1$d°</string>
     <string name="settings_qibla_accuracy_measuring">正在測量羅盤精度…</string>
     <string name="settings_qibla_accuracy_hidden">在所選閾值下，方向將保持隱藏。</string>
+    <string name="qibla_accuracy_vs_threshold">精度 ±%1$d° · 閾值 ±%2$d°</string>
+    <string name="qibla_threshold_hint">在設定中變更閾值</string>
 </resources>

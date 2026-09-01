@@ -21,4 +21,6 @@
     <string name="settings_qibla_accuracy_now">当前罗盘精度：±%1$d°</string>
     <string name="settings_qibla_accuracy_measuring">正在测量罗盘精度…</string>
     <string name="settings_qibla_accuracy_hidden">在所选阈值下，方向将保持隐藏。</string>
+    <string name="qibla_accuracy_vs_threshold">精度 ±%1$d° · 阈值 ±%2$d°</string>
+    <string name="qibla_threshold_hint">在设置中更改阈值</string>
 </resources>

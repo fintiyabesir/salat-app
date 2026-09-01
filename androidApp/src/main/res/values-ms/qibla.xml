@@ -21,4 +21,6 @@
     <string name="settings_qibla_accuracy_now">Ketepatan kompas semasa: ±%1$d°</string>
     <string name="settings_qibla_accuracy_measuring">Mengukur ketepatan kompas…</string>
     <string name="settings_qibla_accuracy_hidden">Pada ambang yang dipilih, arah kekal tersembunyi.</string>
+    <string name="qibla_accuracy_vs_threshold">Ketepatan ±%1$d° · ambang ±%2$d°</string>
+    <string name="qibla_threshold_hint">Tukar ambang dalam Tetapan</string>
 </resources>

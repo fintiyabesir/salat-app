@@ -21,3 +21,5 @@
 "settings_qibla_accuracy_now" = "当前罗盘精度：±%d°";
 "settings_qibla_accuracy_measuring" = "正在测量罗盘精度…";
 "settings_qibla_accuracy_hidden" = "在所选阈值下，方向将保持隐藏。";
+"qibla_accuracy_vs_threshold" = "精度 ±%d° · 阈值 ±%d°";
+"qibla_threshold_hint" = "在设置中更改阈值";
