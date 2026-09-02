@@ -38,6 +38,9 @@ struct IOSSettingsView: View {
     /// Offered thresholds, inside the shared QIBLA_THRESHOLD_RANGE.
     private let thresholds = [5, 10, 15, 20, 30, 45]
 
+    /// Offered kerahat durations, inside the shared KERAHAT_MINUTES_RANGE.
+    private let kerahatChoices = [20, 30, 40, 45, 60]
+
     var body: some View {
         VStack(spacing: 0) {
             HStack {
@@ -59,6 +62,7 @@ struct IOSSettingsView: View {
                     calculationCard
                     adjustmentsCard
                     hijriCard
+                    kerahatCard
                     qiblaCard
                     appearanceCard
                     Text(L10n.text("settings_data_credit"))
@@ -162,6 +166,24 @@ struct IOSSettingsView: View {
                 range: -2...2,
                 top: 12
             ) { next in store.update { $0.hijriDayAdjustment = next } }
+        }
+    }
+
+    @ViewBuilder
+    private var kerahatCard: some View {
+        card(L10n.text("settings_kerahat")) {
+            chips(
+                options: [(nil, L10n.text("settings_kerahat_off"))]
+                    + kerahatChoices.map { (Optional(String($0)), L10n.format("settings_kerahat_minutes", $0)) },
+                selected: store.value.kerahatMinutes > 0 ? String(store.value.kerahatMinutes) : nil
+            ) { value in
+                store.update { $0.kerahatMinutes = value.flatMap(Int.init) ?? 0 }
+            }
+            Text(L10n.text("settings_kerahat_note"))
+                .font(.system(size: 13))
+                .foregroundStyle(Awqat.muted(colorScheme))
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .padding(.top, 12)
         }
     }
 

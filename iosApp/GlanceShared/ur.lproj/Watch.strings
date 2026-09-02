@@ -21,3 +21,12 @@
 "watch.widget_large_title" = "اوقات · بڑا متن";
 "watch.widget_large_description" = "اگلی نماز، سب سے بڑے متن میں";
 "watch.today" = "آج";
+"period.fajr" = "فجر کا وقت";
+"period.duha" = "چاشت";
+"period.dhuhr" = "ظہر کا وقت";
+"period.asr" = "عصر کا وقت";
+"period.maghrib" = "مغرب کا وقت";
+"period.isha" = "عشاء کا وقت";
+"kerahat.sunrise" = "طلوع کی کراہت";
+"kerahat.zenith" = "استوا کی کراہت";
+"kerahat.sunset" = "غروب کی کراہت";

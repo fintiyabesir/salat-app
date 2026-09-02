@@ -54,18 +54,19 @@ private struct WatchPrayerView: View {
                     accent: accent
                 )
                 VStack(spacing: 0) {
-                    Text(next.localizedPrayerName)
-                        .font(.system(size: 22, weight: .semibold))
-                        .foregroundStyle(accent)
+                    let status = payload.status(at: now)
+                    Text(status?.headline ?? next.localizedPrayerName)
+                        .font(.system(size: 20, weight: .semibold))
+                        .foregroundStyle(status?.isKerahat == true ? gold : accent)
                         .lineLimit(1)
                         .minimumScaleFactor(0.6)
                     Text(time(next.date, payload))
                         .font(.system(size: 46, weight: .light).monospacedDigit())
                         .lineLimit(1)
                         .minimumScaleFactor(0.6)
-                    Text(remaining(to: next.date, from: now))
+                    Text(remaining(to: status?.endsAt ?? next.date, from: now))
                         .font(.system(size: 17, weight: .semibold).monospacedDigit())
-                        .foregroundStyle(gold)
+                        .foregroundStyle(status?.isKerahat == true ? gold : muted)
                         .lineLimit(1)
                         .minimumScaleFactor(0.6)
                 }
@@ -78,7 +79,9 @@ private struct WatchPrayerView: View {
     private func listPage(payload: GlanceTimelinePayload, next: GlancePrayerEvent, now: Date) -> some View {
         VStack(spacing: 0) {
             HStack {
-                Text(GlanceL10n.text("watch.today", fallback: "Today")).foregroundStyle(muted)
+                Text(payload.status(at: now)?.headline ?? GlanceL10n.text("watch.today", fallback: "Today"))
+                    .foregroundStyle(muted)
+                    .lineLimit(1)
                 Spacer(minLength: 6)
                 Text(now, style: .time).fontWeight(.semibold)
             }

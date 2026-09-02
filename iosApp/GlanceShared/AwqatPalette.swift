@@ -43,6 +43,35 @@ struct HeroPalette {
     let track: Color
     let trackLabel: Color
 
+    /// Kerahat: a deep clay at the same value as the pine. Loud enough that it
+    /// cannot be missed, quiet enough that three times a day it still reads as a
+    /// state of the day rather than an alarm.
+    static func kerahat(_ scheme: ColorScheme) -> HeroPalette {
+        scheme == .dark
+            ? HeroPalette(
+                surface: Color(red: 0.165, green: 0.129, blue: 0.118),
+                border: Color(red: 0.290, green: 0.196, blue: 0.169),
+                content: Awqat.inkDark,
+                accent: Awqat.goldSoft,
+                chip: Awqat.goldSoft.opacity(0.16),
+                track: Color(red: 0.227, green: 0.188, blue: 0.173),
+                trackLabel: Color(red: 0.541, green: 0.478, blue: 0.447)
+            )
+            : HeroPalette(
+                surface: Color(red: 0.227, green: 0.141, blue: 0.125),
+                border: nil,
+                content: Awqat.canvasLight,
+                accent: Color(red: 0.851, green: 0.627, blue: 0.400),
+                chip: Color(red: 0.851, green: 0.627, blue: 0.400).opacity(0.20),
+                track: Color(red: 0.353, green: 0.243, blue: 0.212),
+                trackLabel: Color(red: 0.659, green: 0.529, blue: 0.471)
+            )
+    }
+
+    static func of(_ scheme: ColorScheme, kerahat: Bool) -> HeroPalette {
+        kerahat ? Self.kerahat(scheme) : of(scheme)
+    }
+
     static func of(_ scheme: ColorScheme) -> HeroPalette {
         scheme == .dark
             ? HeroPalette(

@@ -12,6 +12,11 @@ import android.os.SystemClock
 import android.view.View
 import android.widget.RemoteViews
 import app.salat.model.PrayerName
+import app.salat.domain.KerahatId
+import app.salat.domain.DayTimes
+import app.salat.domain.DayStatusCalculator
+import app.salat.domain.DayStatus
+import app.salat.domain.DayPeriodId
 import java.time.Instant
 import java.time.LocalDate
 import java.time.ZoneId
@@ -81,6 +86,7 @@ class SalatAppWidgetProvider : AppWidgetProvider() {
                             views.setTextViewText(timeId, "")
                         }
                     }
+                    views.setTextViewText(R.id.widget_period, "")
                     views.setTextViewText(R.id.widget_prayer, context.getString(R.string.next_prayer))
                     views.setTextViewText(R.id.widget_time, "—")
                     views.setViewVisibility(R.id.widget_countdown, View.GONE)
@@ -92,6 +98,16 @@ class SalatAppWidgetProvider : AppWidgetProvider() {
                     val base = SystemClock.elapsedRealtime() + max(0L, next.atMillis - now)
                     views.setChronometer(R.id.widget_countdown, base, null, true)
                     views.setChronometerCountDown(R.id.widget_countdown, true)
+                    // The same "where am I / what is next" the phone shows, so the
+                    // widget is not telling a different story from the app behind it.
+                    val status = dayStatus(context, timeline, zone, now)
+                    views.setTextViewText(R.id.widget_period, periodText(context, status))
+                    views.setTextColor(
+                        R.id.widget_period,
+                        context.getColor(
+                            if (status?.kerahat != null) R.color.widget_kerahat else R.color.widget_brand
+                        )
+                    )
                     if (dense) {
                         views.setTextViewText(R.id.widget_location, timeline.locationName)
                         views.setTextViewText(R.id.widget_hijri, hijriToday(context, zone, locale))
@@ -141,6 +157,65 @@ class SalatAppWidgetProvider : AppWidgetProvider() {
                 views.setTextColor(labelId, labelColor)
                 views.setTextColor(timeId, valueColor)
             }
+        }
+
+        /**
+         * Built from the stored projection rather than recalculated: the timeline
+         * already holds every instant these windows hang off.
+         */
+        private fun dayStatus(
+            context: Context,
+            timeline: AndroidGlanceTimeline,
+            zone: ZoneId,
+            nowMillis: Long
+        ): DayStatus? {
+            val today = LocalDate.now(zone)
+            fun times(date: LocalDate): DayTimes? {
+                val ofDay = timeline.events
+                    .filter { Instant.ofEpochMilli(it.atMillis).atZone(zone).toLocalDate() == date }
+                    .associateBy { it.prayer }
+                if (ofDay.size < PrayerName.entries.size) return null
+                return DayTimes(
+                    fajr = ofDay.getValue(PrayerName.FAJR).atMillis,
+                    sunrise = ofDay.getValue(PrayerName.SUNRISE).atMillis,
+                    dhuhr = ofDay.getValue(PrayerName.DHUHR).atMillis,
+                    asr = ofDay.getValue(PrayerName.ASR).atMillis,
+                    maghrib = ofDay.getValue(PrayerName.MAGHRIB).atMillis,
+                    isha = ofDay.getValue(PrayerName.ISHA).atMillis
+                )
+            }
+            // The projection starts today, so yesterday is absent; Isha's own start is
+            // only needed to label the window, never to decide which one we are in.
+            val todayTimes = times(today) ?: return null
+            val tomorrow = times(today.plusDays(1)) ?: todayTimes
+            return DayStatusCalculator.evaluate(
+                nowMillis = nowMillis,
+                today = todayTimes,
+                yesterday = times(today.minusDays(1)) ?: todayTimes,
+                tomorrow = tomorrow,
+                kerahatMinutes = AndroidAppSettingsStore(context).load().kerahatMinutes
+            )
+        }
+
+        private fun periodText(context: Context, status: DayStatus?): String = when {
+            status == null -> ""
+            status.kerahat != null -> context.getString(
+                when (status.kerahat!!.id) {
+                    KerahatId.SUNRISE -> R.string.kerahat_sunrise
+                    KerahatId.ZENITH -> R.string.kerahat_zenith
+                    KerahatId.SUNSET -> R.string.kerahat_sunset
+                }
+            )
+            else -> context.getString(
+                when (status.period.id) {
+                    DayPeriodId.FAJR -> R.string.period_fajr
+                    DayPeriodId.DUHA -> R.string.period_duha
+                    DayPeriodId.DHUHR -> R.string.period_dhuhr
+                    DayPeriodId.ASR -> R.string.period_asr
+                    DayPeriodId.MAGHRIB -> R.string.period_maghrib
+                    DayPeriodId.ISHA -> R.string.period_isha
+                }
+            )
         }
 
         private fun hijriToday(context: Context, zone: ZoneId, locale: Locale): String {

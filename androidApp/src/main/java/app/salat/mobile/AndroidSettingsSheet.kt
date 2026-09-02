@@ -216,6 +216,24 @@ fun AndroidSettingsSheet(
                         ) { onChange(value.copy(hijriDayAdjustment = it)) }
                     }
 
+                    SettingsCard(stringResource(R.string.settings_kerahat).tracked()) {
+                        ChipFlow(
+                            choices = listOf<String?>(null) + KERAHAT_CHOICES.map { it.toString() },
+                            selected = value.kerahatMinutes?.toString(),
+                            label = { raw ->
+                                raw?.let { stringResource(R.string.settings_kerahat_minutes, it.toInt()) }
+                                    ?: stringResource(R.string.settings_kerahat_off)
+                            },
+                            onSelected = { raw -> onChange(value.copy(kerahatMinutes = raw?.toInt())) }
+                        )
+                        Text(
+                            stringResource(R.string.settings_kerahat_note),
+                            fontSize = 13.sp,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            modifier = Modifier.padding(top = 12.dp)
+                        )
+                    }
+
                     SettingsCard(stringResource(R.string.settings_qibla_threshold).tracked()) {
                         val threshold = value.qiblaAccuracyThresholdDegrees
                             ?: SalatApi.qiblaThresholdOlderDevice
@@ -542,3 +560,6 @@ private fun String?.languageLabel(): String = when (this) {
 
 /** Offered thresholds, inside AppPreferences.QIBLA_THRESHOLD_RANGE. */
 private val QIBLA_THRESHOLD_CHOICES = listOf(5, 10, 15, 20, 30, 45)
+
+/** Offered kerahat durations, inside DayStatusCalculator.KERAHAT_MINUTES_RANGE. */
+private val KERAHAT_CHOICES = listOf(20, 30, 40, 45, 60)

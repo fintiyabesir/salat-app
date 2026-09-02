@@ -26,4 +26,8 @@
     <string name="settings_data_credit">城市資料：GeoNames · CC BY 4.0</string>
     <string name="settings_appearance_language">外觀與語言</string>
     <string name="settings_theme">主題</string>
+    <string name="settings_kerahat">嫌惡時</string>
+    <string name="settings_kerahat_off">關閉</string>
+    <string name="settings_kerahat_minutes">%1$d 分</string>
+    <string name="settings_kerahat_note">僅顯示時段及其結束時間。其間可否禮拜因教法學派而異，本應用不作裁斷。</string>
 </resources>

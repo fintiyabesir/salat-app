@@ -152,6 +152,30 @@ object SalatApi {
     private const val APPLE_PHONE_PREFIX = "iPhone"
     private const val FIRST_MODERN_IPHONE_MAJOR = 13
 
+    /**
+     * The three kerahat windows of one day, flattened for Swift: id, start and end
+     * repeated three times. The phone writes these into the glance payload so the
+     * widget and the watch never have to reimplement the rule.
+     */
+    fun kerahatWindowsEncoded(
+        sunriseMillis: Long,
+        dhuhrMillis: Long,
+        maghribMillis: Long,
+        minutes: Int
+    ): List<String> = DayStatusCalculator.windows(
+        DayTimes(
+            fajr = 0L,
+            sunrise = sunriseMillis,
+            dhuhr = dhuhrMillis,
+            asr = 0L,
+            maghrib = maghribMillis,
+            isha = 0L
+        ),
+        minutes
+    ).map { "${it.id.name}\t${it.startMillis}\t${it.endMillis}" }
+
+    val kerahatDefaultMinutes: Int get() = DayStatusCalculator.DEFAULT_KERAHAT_MINUTES
+
     private inline fun <reified T : Enum<T>> enumOrNull(raw: String?): T? =
         raw?.let { runCatching { enumValueOf<T>(it) }.getOrNull() }
 }

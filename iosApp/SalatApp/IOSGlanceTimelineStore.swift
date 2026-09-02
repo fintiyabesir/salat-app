@@ -36,7 +36,8 @@ final class IOSGlanceTimelineStore {
             timeZoneId: location.timeZoneId,
             events: events.sorted(by: { $0.epochMillis < $1.epochMillis }),
             hijriMethod: settings.hijriMethod,
-            hijriDayAdjustment: settings.hijriDayAdjustment
+            hijriDayAdjustment: settings.hijriDayAdjustment,
+            kerahatMinutes: settings.kerahatMinutes
         )
 
         watchBridge.publish(payload)

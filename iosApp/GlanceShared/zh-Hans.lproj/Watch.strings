@@ -21,3 +21,12 @@
 "watch.widget_large_title" = "Awqat · 大字";
 "watch.widget_large_description" = "以最大字号显示下一次礼拜";
 "watch.today" = "今天";
+"period.fajr" = "晨礼时段";
+"period.duha" = "上午";
+"period.dhuhr" = "晌礼时段";
+"period.asr" = "晡礼时段";
+"period.maghrib" = "昏礼时段";
+"period.isha" = "宵礼时段";
+"kerahat.sunrise" = "日出嫌恶时";
+"kerahat.zenith" = "正午嫌恶时";
+"kerahat.sunset" = "日落嫌恶时";

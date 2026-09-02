@@ -42,6 +42,8 @@ struct GlanceTimelinePayload: Codable {
     /// surfaces need them to print the same Hijri date the phone shows.
     var hijriMethod: String?
     var hijriDayAdjustment: Int?
+    /// Null or zero when the user has kerahat turned off.
+    var kerahatMinutes: Int?
 
     func next(after date: Date) -> GlancePrayerEvent? {
         let millis = Int64(date.timeIntervalSince1970 * 1000.0)
@@ -97,5 +99,82 @@ enum GlanceTimelinePersistence {
             return nil
         }
         return try? JSONDecoder().decode(GlanceTimelinePayload.self, from: data)
+    }
+}
+
+/// Which stretch of the day we are standing in. Mirrors DayPeriodId in the shared
+/// Kotlin module, which is where the rule is pinned by tests; the glance targets
+/// cannot link that framework, so the lookup is repeated here and nothing else is.
+enum GlanceDayPeriod: String {
+    case fajr, duha, dhuhr, asr, maghrib, isha
+
+    var localizedName: String {
+        GlanceL10n.text("period.\(rawValue)", fallback: rawValue.capitalized)
+    }
+}
+
+enum GlanceKerahat: String {
+    case sunrise, zenith, sunset
+
+    var localizedName: String {
+        GlanceL10n.text("kerahat.\(rawValue)", fallback: "Kerahat")
+    }
+}
+
+struct GlanceDayStatus {
+    let period: GlanceDayPeriod
+    let periodEnds: Date
+    let kerahat: GlanceKerahat?
+    let kerahatEnds: Date?
+
+    /// What the surface leads with: the window being withheld, or the one we are in.
+    var headline: String { kerahat?.localizedName ?? period.localizedName }
+    var isKerahat: Bool { kerahat != nil }
+    var endsAt: Date { kerahatEnds ?? periodEnds }
+}
+
+extension GlanceTimelinePayload {
+    /// The window containing [date]. Sunrise closes Fajr rather than opening a
+    /// window of its own, which is the only rule here that is not simply "the last
+    /// event before now".
+    func status(at date: Date) -> GlanceDayStatus? {
+        let millis = Int64(date.timeIntervalSince1970 * 1000)
+        guard let opening = events.last(where: { $0.epochMillis <= millis }),
+              let closing = events.first(where: { $0.epochMillis > millis }) else { return nil }
+        let period: GlanceDayPeriod
+        switch opening.prayerId.lowercased() {
+        case "fajr": period = .fajr
+        case "sunrise": period = .duha
+        case "dhuhr": period = .dhuhr
+        case "asr": period = .asr
+        case "maghrib": period = .maghrib
+        default: period = .isha
+        }
+
+        var window: GlanceKerahat?
+        var windowEnds: Date?
+        if let minutes = kerahatMinutes, minutes > 0 {
+            let span = Int64(minutes) * 60_000
+            let today = events(on: date)
+            func instant(_ id: String) -> Int64? {
+                today.first { $0.prayerId.lowercased() == id }?.epochMillis
+            }
+            let candidates: [(GlanceKerahat, Int64, Int64)] = [
+                instant("sunrise").map { (.sunrise, $0, $0 + span) },
+                instant("dhuhr").map { (.zenith, $0 - span, $0) },
+                instant("maghrib").map { (.sunset, $0 - span, $0) }
+            ].compactMap { $0 }
+            if let hit = candidates.first(where: { millis >= $0.1 && millis < $0.2 }) {
+                window = hit.0
+                windowEnds = Date(timeIntervalSince1970: Double(hit.2) / 1000)
+            }
+        }
+
+        return GlanceDayStatus(
+            period: period,
+            periodEnds: closing.date,
+            kerahat: window,
+            kerahatEnds: windowEnds
+        )
     }
 }

@@ -26,4 +26,8 @@
     <string name="settings_data_credit">بيانات المدن: GeoNames · CC BY 4.0</string>
     <string name="settings_appearance_language">المظهر واللغة</string>
     <string name="settings_theme">السمة</string>
+    <string name="settings_kerahat">أوقات الكراهة</string>
+    <string name="settings_kerahat_off">مغلق</string>
+    <string name="settings_kerahat_minutes">%1$d د</string>
+    <string name="settings_kerahat_note">يُعرض الوقت ونهايته فقط. وما يجوز فيه يختلف بين المذاهب، فلا يفتي التطبيق فيه.</string>
 </resources>

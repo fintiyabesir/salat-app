@@ -47,6 +47,12 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import kotlinx.coroutines.delay
 import app.salat.domain.SalatEngine
+import app.salat.domain.dayTimes
+import app.salat.domain.KerahatWindow
+import app.salat.domain.KerahatId
+import app.salat.domain.DayStatusCalculator
+import app.salat.domain.DayStatus
+import app.salat.domain.DayPeriodId
 import app.salat.model.AppPreferences
 import app.salat.model.PrayerDay
 import app.salat.model.PrayerName
@@ -56,6 +62,22 @@ import java.time.LocalDate
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 import java.util.Locale
+
+/** Bridges the screen's java.time date to the shared calculator's plain integers. */
+private fun SalatEngine.dayTimes(
+    location: ResolvedLocation,
+    date: LocalDate,
+    preferences: app.salat.model.CalculationPreferences
+) = dayTimes(
+    year = date.year,
+    month = date.monthValue,
+    day = date.dayOfMonth,
+    latitude = location.point.latitude,
+    longitude = location.point.longitude,
+    timeZoneId = location.timeZoneId,
+    countryCode = location.countryCode ?: "ZZ",
+    preferences = preferences
+)
 
 private data class NextPrayerUi(
     val prayer: PrayerName,
@@ -92,6 +114,17 @@ fun AdaptiveTodayScreen(
         )
     }
     val nowMillis = System.currentTimeMillis()
+    // Isha runs past midnight and the small hours still belong to it, so the
+    // surrounding days are not optional.
+    val status = remember(location, today, settings.calculation, settings.kerahatMinutes, nowMillis / 60_000L) {
+        DayStatusCalculator.evaluate(
+            nowMillis = nowMillis,
+            today = engine.dayTimes(location, today, settings.calculation),
+            yesterday = engine.dayTimes(location, today.minusDays(1L), settings.calculation),
+            tomorrow = engine.dayTimes(location, today.plusDays(1L), settings.calculation),
+            kerahatMinutes = settings.kerahatMinutes
+        )
+    }
     val next = PrayerName.entries.firstOrNull {
         day.time(it).toEpochMilliseconds() > nowMillis
     }?.let { prayer ->
@@ -143,7 +176,7 @@ fun AdaptiveTodayScreen(
                         Modifier.fillMaxWidth().padding(top = if (short) 12.dp else 20.dp, bottom = 16.dp),
                         horizontalArrangement = Arrangement.spacedBy(30.dp)
                     ) {
-                        Box(Modifier.weight(1f)) { HeroCard(next, reached, zone, locale, dark, short) }
+                        Box(Modifier.weight(1f)) { HeroCard(next, status, reached, zone, locale, dark, short) }
                         Column(Modifier.weight(1f)) {
                             PrayerList(day, next.prayer.takeIf { next.isToday }, zone, locale, dark) {
                                 selectedPrayer = it
@@ -155,7 +188,7 @@ fun AdaptiveTodayScreen(
                 Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState())) {
                     LocationHeader(location, gregorianDate, hijriDate, dark, short, onChooseCity, onOpenSettings)
                     Box(Modifier.padding(horizontal = 22.dp, vertical = if (short) 12.dp else 20.dp)) {
-                        HeroCard(next, reached, zone, locale, dark, short)
+                        HeroCard(next, status, reached, zone, locale, dark, short)
                     }
                     Column(Modifier.padding(horizontal = 22.dp).padding(bottom = 16.dp)) {
                         PrayerList(day, next.prayer.takeIf { next.isToday }, zone, locale, dark) {
@@ -229,13 +262,15 @@ internal fun HeaderAction(@DrawableRes id: Int, label: String, dark: Boolean, on
 @Composable
 private fun HeroCard(
     next: NextPrayerUi,
+    status: DayStatus,
     reached: Int,
     zone: ZoneId,
     locale: Locale,
     dark: Boolean,
     short: Boolean
 ) {
-    val palette = heroPalette(dark)
+    val kerahat = status.kerahat
+    val palette = heroPalette(dark, kerahat != null)
     val shape = RoundedCornerShape(30.dp)
     CompositionLocalProvider(LocalContentColor provides palette.content) {
         Column(
@@ -254,8 +289,12 @@ private fun HeroCard(
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
+                // Which window you are standing in, not merely what comes next: the
+                // countdown is the same number either way, but only one of them is
+                // the question people are actually asking.
                 Text(
-                    stringResource(R.string.next_prayer),
+                    if (kerahat != null) stringResource(R.string.kerahat_label)
+                    else stringResource(R.string.period_now),
                     color = palette.accent,
                     fontSize = 12.sp,
                     fontWeight = FontWeight.SemiBold,
@@ -263,7 +302,7 @@ private fun HeroCard(
                     letterSpacing = if (LocalLayoutDirection.current == LayoutDirection.Rtl) 0.sp else 1.8.sp
                 )
                 Text(
-                    countdownText(next.epochMillis, locale),
+                    countdownText(kerahat?.endMillis ?: status.period.endMillis, locale),
                     color = palette.accent,
                     fontSize = 14.sp,
                     style = Tabular,
@@ -273,17 +312,27 @@ private fun HeroCard(
                 )
             }
             Text(
-                next.prayer.adaptiveLabel(),
+                kerahat?.label() ?: status.period.id.label(),
                 fontSize = if (short) 18.sp else 26.sp,
                 fontWeight = FontWeight.Medium,
                 modifier = Modifier.padding(top = if (short) 6.dp else 14.dp)
             )
-            Text(
-                adaptiveFormat(next.epochMillis, zone, locale),
-                fontSize = if (short) 40.sp else 72.sp,
-                fontWeight = FontWeight.ExtraLight,
-                style = Tabular
-            )
+            // The next prayer keeps the design's anchor: a clock time you can read
+            // across a room.
+            Row(verticalAlignment = Alignment.Bottom) {
+                Text(
+                    adaptiveFormat(next.epochMillis, zone, locale),
+                    fontSize = if (short) 40.sp else 72.sp,
+                    fontWeight = FontWeight.ExtraLight,
+                    style = Tabular
+                )
+                Text(
+                    next.prayer.adaptiveLabel(),
+                    fontSize = if (short) 13.sp else 15.sp,
+                    color = palette.accent,
+                    modifier = Modifier.padding(start = 10.dp, bottom = if (short) 8.dp else 14.dp)
+                )
+            }
             DayStrip(reached, palette, short)
         }
     }
@@ -434,6 +483,27 @@ private fun adaptiveFormat(epochMillis: Long, zone: ZoneId, locale: Locale): Str
     DateTimeFormatter.ofPattern("HH:mm", locale)
         .withZone(zone)
         .format(Instant.ofEpochMilli(epochMillis))
+
+@Composable
+private fun DayPeriodId.label(): String = stringResource(
+    when (this) {
+        DayPeriodId.FAJR -> R.string.period_fajr
+        DayPeriodId.DUHA -> R.string.period_duha
+        DayPeriodId.DHUHR -> R.string.period_dhuhr
+        DayPeriodId.ASR -> R.string.period_asr
+        DayPeriodId.MAGHRIB -> R.string.period_maghrib
+        DayPeriodId.ISHA -> R.string.period_isha
+    }
+)
+
+@Composable
+private fun KerahatWindow.label(): String = stringResource(
+    when (id) {
+        KerahatId.SUNRISE -> R.string.kerahat_sunrise
+        KerahatId.ZENITH -> R.string.kerahat_zenith
+        KerahatId.SUNSET -> R.string.kerahat_sunset
+    }
+)
 
 @Composable
 internal fun PrayerName.adaptiveLabel(): String = when (this) {

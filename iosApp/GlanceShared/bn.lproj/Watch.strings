@@ -21,3 +21,12 @@
 "watch.widget_large_title" = "আওকাত · বড় লেখা";
 "watch.widget_large_description" = "পরবর্তী নামাজ সবচেয়ে বড় লেখায়";
 "watch.today" = "আজ";
+"period.fajr" = "ফজরের সময়";
+"period.duha" = "চাশত";
+"period.dhuhr" = "যোহরের সময়";
+"period.asr" = "আসরের সময়";
+"period.maghrib" = "মাগরিবের সময়";
+"period.isha" = "এশার সময়";
+"kerahat.sunrise" = "সূর্যোদয় কারাহাত";
+"kerahat.zenith" = "দ্বিপ্রহর কারাহাত";
+"kerahat.sunset" = "সূর্যাস্ত কারাহাত";

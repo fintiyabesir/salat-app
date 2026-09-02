@@ -4,6 +4,9 @@ import android.content.Context
 import org.json.JSONObject
 import java.time.Instant
 import java.time.ZoneId
+import app.salat.domain.DayStatus
+import app.salat.domain.DayStatusCalculator
+import app.salat.domain.DayTimes
 
 data class WearPrayerEvent(
     val prayerId: String,
@@ -14,8 +17,42 @@ data class WearPrayerTimeline(
     val generatedAtMillis: Long,
     val locationName: String,
     val timeZoneId: String,
-    val events: List<WearPrayerEvent>
+    val events: List<WearPrayerEvent>,
+    /** Null when the phone has kerahat turned off. */
+    val kerahatMinutes: Int? = null
 ) {
+    /**
+     * The same reading the phone shows. Built from the projection rather than
+     * recalculated, so the watch cannot drift from the handset in its pocket.
+     */
+    fun status(nowMillis: Long = System.currentTimeMillis()): DayStatus? {
+        val zone = runCatching { ZoneId.of(timeZoneId) }.getOrDefault(ZoneId.systemDefault())
+        fun times(date: java.time.LocalDate): DayTimes? {
+            val ofDay = events
+                .filter { Instant.ofEpochMilli(it.atMillis).atZone(zone).toLocalDate() == date }
+                .associateBy { it.prayerId.uppercase() }
+            val ids = listOf("FAJR", "SUNRISE", "DHUHR", "ASR", "MAGHRIB", "ISHA")
+            if (!ids.all { ofDay.containsKey(it) }) return null
+            return DayTimes(
+                fajr = ofDay.getValue("FAJR").atMillis,
+                sunrise = ofDay.getValue("SUNRISE").atMillis,
+                dhuhr = ofDay.getValue("DHUHR").atMillis,
+                asr = ofDay.getValue("ASR").atMillis,
+                maghrib = ofDay.getValue("MAGHRIB").atMillis,
+                isha = ofDay.getValue("ISHA").atMillis
+            )
+        }
+        val today = Instant.ofEpochMilli(nowMillis).atZone(zone).toLocalDate()
+        val todayTimes = times(today) ?: return null
+        return DayStatusCalculator.evaluate(
+            nowMillis = nowMillis,
+            today = todayTimes,
+            yesterday = times(today.minusDays(1)) ?: todayTimes,
+            tomorrow = times(today.plusDays(1)) ?: todayTimes,
+            kerahatMinutes = kerahatMinutes
+        )
+    }
+
     fun next(nowMillis: Long = System.currentTimeMillis()): WearPrayerEvent? =
         events.firstOrNull { it.atMillis > nowMillis }
 
@@ -73,7 +110,8 @@ internal fun decodeWearTimeline(raw: String): WearPrayerTimeline? = runCatching 
         generatedAtMillis = root.getLong("generatedAt"),
         locationName = root.getString("locationName"),
         timeZoneId = timeZoneId,
-        events = events
+        events = events,
+        kerahatMinutes = root.optInt("kerahatMinutes", 0).takeIf { it > 0 }
     )
 }.getOrNull()
 

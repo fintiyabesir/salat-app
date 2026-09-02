@@ -1,5 +1,7 @@
 package app.salat.model
 
+import app.salat.domain.DayStatusCalculator
+
 enum class AppearanceMode { SYSTEM, LIGHT, DARK }
 
 enum class HijriCalendarMethodId {
@@ -20,10 +22,21 @@ data class AppPreferences(
      * a sensor-fused heading and can hold the tighter default, one without is
      * magnetometer-only and needs the looser one.
      */
-    val qiblaAccuracyThresholdDegrees: Int? = null
+    val qiblaAccuracyThresholdDegrees: Int? = null,
+    /**
+     * How long each kerahat window runs, or null to leave them out entirely. The
+     * app names the window and when it ends; it does not rule on what may be prayed,
+     * because that varies by school and is not an app's to decide.
+     */
+    val kerahatMinutes: Int? = DayStatusCalculator.DEFAULT_KERAHAT_MINUTES
 ) {
     init {
         require(hijriDayAdjustment in -2..2) { "Hijri day adjustment must be between -2 and +2" }
+        kerahatMinutes?.let {
+            require(it in DayStatusCalculator.KERAHAT_MINUTES_RANGE) {
+                "Kerahat minutes must be within ${DayStatusCalculator.KERAHAT_MINUTES_RANGE}"
+            }
+        }
         qiblaAccuracyThresholdDegrees?.let {
             require(it in QIBLA_THRESHOLD_RANGE) { "Qibla accuracy threshold must be within $QIBLA_THRESHOLD_RANGE" }
         }

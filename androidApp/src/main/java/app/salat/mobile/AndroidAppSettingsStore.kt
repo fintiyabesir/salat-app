@@ -1,6 +1,7 @@
 package app.salat.mobile
 
 import android.content.Context
+import app.salat.domain.DayStatusCalculator
 import app.salat.model.AppPreferences
 import app.salat.model.AppearanceMode
 import app.salat.model.CalculationMethodId
@@ -55,6 +56,10 @@ class AndroidAppSettingsStore(context: Context) {
             hijriDayAdjustment = prefs.getInt(KEY_HIJRI_OFFSET, 0).coerceIn(-2, 2),
             languageTag = prefs.getString(KEY_LANGUAGE, null)?.takeIf { it.isNotBlank() },
             qiblaAccuracyThresholdDegrees = prefs.getInt(KEY_QIBLA_THRESHOLD, 0).takeIf { it > 0 },
+            // 0 means the user turned kerahat off; absent means never chosen.
+            kerahatMinutes = prefs
+                .getInt(KEY_KERAHAT_MINUTES, DayStatusCalculator.DEFAULT_KERAHAT_MINUTES)
+                .takeIf { it > 0 },
             appearance = enumOrDefault(
                 prefs.getString(KEY_APPEARANCE, null),
                 AppearanceMode.SYSTEM
@@ -77,6 +82,7 @@ class AndroidAppSettingsStore(context: Context) {
             .putInt(KEY_HIJRI_OFFSET, value.hijriDayAdjustment)
             // 0 stands for "decide from the hardware"; the range never includes it.
             .putInt(KEY_QIBLA_THRESHOLD, value.qiblaAccuracyThresholdDegrees ?: 0)
+            .putInt(KEY_KERAHAT_MINUTES, value.kerahatMinutes ?: 0)
             .putNullableString(KEY_LANGUAGE, value.languageTag)
             .putString(KEY_APPEARANCE, value.appearance.name)
             .apply()
@@ -106,6 +112,7 @@ class AndroidAppSettingsStore(context: Context) {
         private const val KEY_ADJ_ASR = "adjustment_asr"
         private const val KEY_ADJ_MAGHRIB = "adjustment_maghrib"
         private const val KEY_ADJ_ISHA = "adjustment_isha"
+        private const val KEY_KERAHAT_MINUTES = "kerahat_minutes"
         private const val KEY_HIJRI_METHOD = "hijri_method"
         private const val KEY_HIJRI_OFFSET = "hijri_day_adjustment"
         private const val KEY_LANGUAGE = "language_tag"

@@ -26,4 +26,8 @@
     <string name="settings_data_credit">শহরের তথ্য: GeoNames · CC BY 4.0</string>
     <string name="settings_appearance_language">চেহারা ও ভাষা</string>
     <string name="settings_theme">থিম</string>
+    <string name="settings_kerahat">কারাহাতের সময়</string>
+    <string name="settings_kerahat_off">বন্ধ</string>
+    <string name="settings_kerahat_minutes">%1$d মি</string>
+    <string name="settings_kerahat_note">শুধু সময় ও তার শেষ দেখানো হয়। তখন কী পড়া যাবে তা মাযহাব ভেদে ভিন্ন, অ্যাপ সে বিষয়ে রায় দেয় না।</string>
 </resources>

@@ -32,3 +32,14 @@
 "prayer.asr.short" = "晡";
 "prayer.maghrib.short" = "昏";
 "prayer.isha.short" = "宵";
+"period_now" = "目前";
+"period_fajr" = "晨禮時段";
+"period_duha" = "上午";
+"period_dhuhr" = "晌禮時段";
+"period_asr" = "晡禮時段";
+"period_maghrib" = "昏禮時段";
+"period_isha" = "宵禮時段";
+"kerahat_sunrise" = "日出嫌惡時";
+"kerahat_zenith" = "正午嫌惡時";
+"kerahat_sunset" = "日落嫌惡時";
+"kerahat_label" = "嫌惡時";

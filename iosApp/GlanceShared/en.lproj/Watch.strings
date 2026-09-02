@@ -21,3 +21,12 @@
 "watch.widget_large_title" = "Awqat · Large text";
 "watch.widget_large_description" = "Next prayer in the largest type that fits";
 "watch.today" = "Today";
+"period.fajr" = "Fajr time";
+"period.duha" = "Duha";
+"period.dhuhr" = "Dhuhr time";
+"period.asr" = "Asr time";
+"period.maghrib" = "Maghrib time";
+"period.isha" = "Isha time";
+"kerahat.sunrise" = "Sunrise kerahat";
+"kerahat.zenith" = "Midday kerahat";
+"kerahat.sunset" = "Sunset kerahat";

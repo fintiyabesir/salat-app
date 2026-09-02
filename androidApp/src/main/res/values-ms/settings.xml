@@ -26,4 +26,8 @@
     <string name="settings_data_credit">Data bandar: GeoNames · CC BY 4.0</string>
     <string name="settings_appearance_language">Penampilan dan bahasa</string>
     <string name="settings_theme">Tema</string>
+    <string name="settings_kerahat">Waktu karahah</string>
+    <string name="settings_kerahat_off">Tutup</string>
+    <string name="settings_kerahat_minutes">%1$d min</string>
+    <string name="settings_kerahat_note">Hanya waktu dan tamatnya dipaparkan. Apa yang boleh disolatkan ketika itu berbeza mengikut mazhab, jadi aplikasi tidak memutuskannya.</string>
 </resources>

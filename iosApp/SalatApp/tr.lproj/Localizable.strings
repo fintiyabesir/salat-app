@@ -32,3 +32,14 @@
 "prayer.asr.short" = "İkn";
 "prayer.maghrib.short" = "Akş";
 "prayer.isha.short" = "Yat";
+"period_now" = "ŞU AN";
+"period_fajr" = "İmsak vakti";
+"period_duha" = "Kuşluk";
+"period_dhuhr" = "Öğle vakti";
+"period_asr" = "İkindi vakti";
+"period_maghrib" = "Akşam vakti";
+"period_isha" = "Yatsı vakti";
+"kerahat_sunrise" = "Güneş kerahati";
+"kerahat_zenith" = "İstiva kerahati";
+"kerahat_sunset" = "Gurub kerahati";
+"kerahat_label" = "KERAHAT";

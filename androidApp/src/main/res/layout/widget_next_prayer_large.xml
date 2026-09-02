@@ -13,6 +13,16 @@
     android:background="@drawable/widget_background">
 
     <TextView
+        android:id="@+id/widget_period"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:maxLines="1"
+        android:ellipsize="end"
+        android:textSize="12sp"
+        android:textStyle="bold"
+        android:textColor="@color/widget_brand" />
+
+    <TextView
         android:id="@+id/widget_prayer"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"

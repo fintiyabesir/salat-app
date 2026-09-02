@@ -8,6 +8,13 @@ struct PrayerDisplay: Identifiable {
     let epochMillis: Int64
 }
 
+/// Where the day has got to, resolved by the shared calculator rather than here.
+struct TodayStatus {
+    let headline: String
+    let isKerahat: Bool
+    let endsAtMillis: Int64
+}
+
 struct TodayPrayerDisplay {
     let locationName: String
     let regionText: String
@@ -16,6 +23,7 @@ struct TodayPrayerDisplay {
     let prayers: [PrayerDisplay]
     let nextPrayer: PrayerDisplay
     let nextPrayerIsToday: Bool
+    let status: TodayStatus?
 
     /// Where today has got to. Everything after this is still ahead; once the day is
     /// spent the whole strip reads as behind us.
@@ -100,7 +108,65 @@ struct SharedPrayerProvider {
             hijriDateText: hijriDate,
             prayers: rows,
             nextPrayer: nextPrayer,
-            nextPrayerIsToday: nextPrayerIsToday
+            nextPrayerIsToday: nextPrayerIsToday,
+            status: dayStatus(
+                now: now,
+                calendar: calendar,
+                timeZone: timeZone,
+                location: location,
+                calculation: calculation,
+                kerahatMinutes: settings.kerahatMinutes
+            )
+        )
+    }
+
+    /// Isha runs past midnight and the small hours still belong to it, so the
+    /// surrounding days are not optional.
+    private func dayStatus(
+        now: Date,
+        calendar: Calendar,
+        timeZone: TimeZone,
+        location: PrayerLocation,
+        calculation: IOSCalculationSettings,
+        kerahatMinutes: Int
+    ) -> TodayStatus? {
+        func times(_ offset: Int) -> DayTimes? {
+            guard let date = calendar.date(byAdding: .day, value: offset, to: now) else { return nil }
+            let snapshot = calculateSnapshot(
+                for: date,
+                calendar: calendar,
+                timeZone: timeZone,
+                location: location,
+                calculation: calculation
+            )
+            return DayTimes(
+                fajr: snapshot.fajrEpochMillis,
+                sunrise: snapshot.sunriseEpochMillis,
+                dhuhr: snapshot.dhuhrEpochMillis,
+                asr: snapshot.asrEpochMillis,
+                maghrib: snapshot.maghribEpochMillis,
+                isha: snapshot.ishaEpochMillis
+            )
+        }
+        guard let today = times(0), let yesterday = times(-1), let tomorrow = times(1) else { return nil }
+        let status = DayStatusCalculator.shared.evaluate(
+            nowMillis: Int64(now.timeIntervalSince1970 * 1000),
+            today: today,
+            yesterday: yesterday,
+            tomorrow: tomorrow,
+            kerahatMinutes: kerahatMinutes > 0 ? KotlinInt(value: Int32(kerahatMinutes)) : nil
+        )
+        if let kerahat = status.kerahat {
+            return TodayStatus(
+                headline: L10n.text("kerahat_\(kerahat.id.name.lowercased())"),
+                isKerahat: true,
+                endsAtMillis: kerahat.endMillis
+            )
+        }
+        return TodayStatus(
+            headline: L10n.text("period_\(status.period.id.name.lowercased())"),
+            isKerahat: false,
+            endsAtMillis: status.period.endMillis
         )
     }
 

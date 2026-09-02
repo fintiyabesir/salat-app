@@ -26,3 +26,7 @@
 "settings_data_credit" = "城市数据：GeoNames · CC BY 4.0";
 "settings_appearance_language" = "外观与语言";
 "settings_theme" = "主题";
+"settings_kerahat" = "嫌恶时";
+"settings_kerahat_off" = "关闭";
+"settings_kerahat_note" = "仅显示时段及其结束时间。其间可否礼拜因教法学派而异，本应用不作裁断。";
+"settings_kerahat_minutes" = "%d 分";

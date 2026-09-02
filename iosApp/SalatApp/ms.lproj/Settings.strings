@@ -26,3 +26,7 @@
 "settings_data_credit" = "Data bandar: GeoNames · CC BY 4.0";
 "settings_appearance_language" = "Penampilan dan bahasa";
 "settings_theme" = "Tema";
+"settings_kerahat" = "Waktu karahah";
+"settings_kerahat_off" = "Tutup";
+"settings_kerahat_note" = "Hanya waktu dan tamatnya dipaparkan. Apa yang boleh disolatkan ketika itu berbeza mengikut mazhab, jadi aplikasi tidak memutuskannya.";
+"settings_kerahat_minutes" = "%d min";

@@ -34,6 +34,8 @@ struct IOSAppSettings: Equatable {
     /// Zero means "let the platform decide"; the Qibla screen falls back to the
     /// shared default rather than hiding every reading.
     var qiblaThresholdDegrees: Int
+    /// Zero means the user turned kerahat off.
+    var kerahatMinutes: Int
 
     static let defaults = IOSAppSettings(
         calculation: .defaults,
@@ -41,7 +43,8 @@ struct IOSAppSettings: Equatable {
         hijriDayAdjustment: 0,
         languageTag: nil,
         appearance: "SYSTEM",
-        qiblaThresholdDegrees: 0
+        qiblaThresholdDegrees: 0,
+        kerahatMinutes: 45
     )
 }
 
@@ -81,6 +84,7 @@ final class IOSAppSettingsStore: ObservableObject {
         defaults.set(value.languageTag, forKey: Key.language)
         defaults.set(value.appearance, forKey: Key.appearance)
         defaults.set(value.qiblaThresholdDegrees, forKey: Key.qiblaThreshold)
+        defaults.set(value.kerahatMinutes, forKey: Key.kerahat)
     }
 
     private static func load(from defaults: UserDefaults) -> IOSAppSettings {
@@ -100,7 +104,9 @@ final class IOSAppSettingsStore: ObservableObject {
             hijriDayAdjustment: min(2, max(-2, defaults.integer(forKey: Key.hijriOffset))),
             languageTag: defaults.string(forKey: Key.language),
             appearance: defaults.string(forKey: Key.appearance) ?? "SYSTEM",
-            qiblaThresholdDegrees: defaults.integer(forKey: Key.qiblaThreshold)
+            qiblaThresholdDegrees: defaults.integer(forKey: Key.qiblaThreshold),
+            // Absent means never chosen, which takes the default rather than off.
+            kerahatMinutes: defaults.object(forKey: Key.kerahat) as? Int ?? 45
         )
     }
 
@@ -119,5 +125,6 @@ final class IOSAppSettingsStore: ObservableObject {
         static let language = "app.language"
         static let appearance = "app.appearance"
         static let qiblaThreshold = "qibla.threshold"
+        static let kerahat = "kerahat.minutes"
     }
 }

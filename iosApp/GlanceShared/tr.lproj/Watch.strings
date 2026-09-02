@@ -21,3 +21,12 @@
 "watch.widget_large_title" = "Awqat · Büyük yazı";
 "watch.widget_large_description" = "Sonraki vakit, sığan en büyük yazıyla";
 "watch.today" = "Bugün";
+"period.fajr" = "İmsak vakti";
+"period.duha" = "Kuşluk";
+"period.dhuhr" = "Öğle vakti";
+"period.asr" = "İkindi vakti";
+"period.maghrib" = "Akşam vakti";
+"period.isha" = "Yatsı vakti";
+"kerahat.sunrise" = "Güneş kerahati";
+"kerahat.zenith" = "İstiva kerahati";
+"kerahat.sunset" = "Gurub kerahati";
