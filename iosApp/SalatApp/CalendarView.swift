@@ -22,13 +22,21 @@ struct CalendarView: View {
     private let dateCellWidth: CGFloat = 70
 
     var body: some View {
+        GeometryReader { proxy in
+            body(short: proxy.size.height < 520, sideBySide: proxy.size.width > proxy.size.height)
+        }
+        .background(Awqat.canvas(colorScheme))
+    }
+
+    @ViewBuilder
+    private func body(short: Bool, sideBySide: Bool) -> some View {
         let model = build()
         VStack(alignment: .leading, spacing: 0) {
             HStack(alignment: .top) {
                 VStack(alignment: .leading, spacing: 4) {
-                    Text(L10n.text("calendar")).font(.system(size: 26, weight: .bold))
+                    Text(L10n.text("calendar")).font(.system(size: short ? 22 : 26, weight: .bold))
                     Text(model.subtitle)
-                        .font(.system(size: 15))
+                        .font(.system(size: short ? 13 : 15))
                         .foregroundStyle(Awqat.muted(colorScheme))
                 }
                 Spacer(minLength: 12)
@@ -39,31 +47,47 @@ struct CalendarView: View {
                 )
             }
             .padding(.horizontal, 24)
-            .padding(.top, 8)
+            .padding(.top, short ? 4 : 8)
 
-            todayCard(model)
-                .padding(.horizontal, horizontalSizeClass == .regular ? 30 : 22)
-                .padding(.top, 16)
-
-            VStack(spacing: 0) {
-                header
-                ScrollView {
-                    LazyVStack(spacing: 0) {
-                        ForEach(model.rows) { row in
-                            tableRow(row)
-                        }
-                    }
-                    .padding(.bottom, 14)
+            // Side by side the table keeps full height and still has more width than
+            // portrait gives it; stacked it would be left a sliver.
+            if sideBySide {
+                // The table carries seven columns and gets the larger share.
+                HStack(alignment: .top, spacing: 16) {
+                    todayCard(model).layoutPriority(1)
+                    monthTable(model).layoutPriority(2)
                 }
+                .padding(.horizontal, 22)
+                .padding(.top, 12)
+                .padding(.bottom, 8)
+            } else {
+                todayCard(model)
+                    .padding(.horizontal, horizontalSizeClass == .regular ? 30 : 22)
+                    .padding(.top, 16)
+                monthTable(model)
+                    .padding(.horizontal, horizontalSizeClass == .regular ? 30 : 22)
+                    .padding(.top, 14)
+                    .padding(.bottom, 8)
             }
-            .padding(.horizontal, 16)
-            .background(Awqat.card(colorScheme), in: RoundedRectangle(cornerRadius: 24))
-            .padding(.horizontal, horizontalSizeClass == .regular ? 30 : 22)
-            .padding(.top, 14)
-            .padding(.bottom, 8)
         }
         .frame(maxWidth: .infinity, alignment: .leading)
-        .background(Awqat.canvas(colorScheme))
+    }
+
+    @ViewBuilder
+    private func monthTable(_ model: CalendarModel) -> some View {
+        VStack(spacing: 0) {
+            header
+            ScrollView {
+                LazyVStack(spacing: 0) {
+                    ForEach(model.rows) { row in
+                        tableRow(row)
+                    }
+                }
+                .padding(.bottom, 14)
+            }
+        }
+        .padding(.horizontal, 16)
+        .background(Awqat.card(colorScheme), in: RoundedRectangle(cornerRadius: 24))
     }
 
     @ViewBuilder
@@ -85,11 +109,13 @@ struct CalendarView: View {
                             .font(.system(size: 11))
                             .foregroundStyle(palette.trackLabel)
                             .lineLimit(1)
+                            .minimumScaleFactor(0.7)
                         Text(prayer.time)
                             .font(.system(size: 15, weight: prayer.id == "sunrise" ? .semibold : .regular)
                                 .monospacedDigit())
                             .foregroundStyle(prayer.id == "sunrise" ? Awqat.gold : palette.content)
                             .lineLimit(1)
+                            .minimumScaleFactor(0.7)
                     }
                     .frame(maxWidth: .infinity)
                 }
@@ -137,6 +163,7 @@ struct CalendarView: View {
                         .font(.system(size: 13.5, weight: row.isFriday ? .semibold : .regular))
                         .foregroundStyle(dateColor(row.isFriday))
                         .lineLimit(1)
+                        .minimumScaleFactor(0.75)
                     if row.isFriday {
                         Circle().fill(Awqat.gold).frame(width: 6, height: 6)
                     }
@@ -149,6 +176,7 @@ struct CalendarView: View {
                         .font(.system(size: 13.5).monospacedDigit())
                         .foregroundStyle(Awqat.ink(colorScheme))
                         .lineLimit(1)
+                        .minimumScaleFactor(0.75)
                         .frame(maxWidth: .infinity)
                 }
             }

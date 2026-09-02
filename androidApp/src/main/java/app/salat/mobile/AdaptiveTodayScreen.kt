@@ -132,15 +132,19 @@ fun AdaptiveTodayScreen(
 
     Surface(modifier = Modifier.fillMaxSize(), color = MaterialTheme.colorScheme.background) {
         BoxWithConstraints(Modifier.fillMaxSize()) {
+            // A short viewport — a phone on its side — cannot carry the design's
+            // 72sp clock, so the hero steps down rather than being cut off. The whole
+            // page scrolls either way; nothing is clipped to make room.
+            val short = maxHeight < 520.dp
             if (maxWidth >= 700.dp) {
-                Column(Modifier.fillMaxSize().padding(horizontal = 30.dp)) {
-                    LocationHeader(location, gregorianDate, hijriDate, dark, onChooseCity, onOpenSettings)
+                Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(horizontal = 30.dp)) {
+                    LocationHeader(location, gregorianDate, hijriDate, dark, short, onChooseCity, onOpenSettings)
                     Row(
-                        Modifier.fillMaxWidth().padding(top = 20.dp),
+                        Modifier.fillMaxWidth().padding(top = if (short) 12.dp else 20.dp, bottom = 16.dp),
                         horizontalArrangement = Arrangement.spacedBy(30.dp)
                     ) {
-                        Box(Modifier.weight(1f)) { HeroCard(next, reached, zone, locale, dark) }
-                        Column(Modifier.weight(1f).verticalScroll(rememberScrollState())) {
+                        Box(Modifier.weight(1f)) { HeroCard(next, reached, zone, locale, dark, short) }
+                        Column(Modifier.weight(1f)) {
                             PrayerList(day, next.prayer.takeIf { next.isToday }, zone, locale, dark) {
                                 selectedPrayer = it
                             }
@@ -149,9 +153,9 @@ fun AdaptiveTodayScreen(
                 }
             } else {
                 Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState())) {
-                    LocationHeader(location, gregorianDate, hijriDate, dark, onChooseCity, onOpenSettings)
-                    Box(Modifier.padding(horizontal = 22.dp, vertical = 20.dp)) {
-                        HeroCard(next, reached, zone, locale, dark)
+                    LocationHeader(location, gregorianDate, hijriDate, dark, short, onChooseCity, onOpenSettings)
+                    Box(Modifier.padding(horizontal = 22.dp, vertical = if (short) 12.dp else 20.dp)) {
+                        HeroCard(next, reached, zone, locale, dark, short)
                     }
                     Column(Modifier.padding(horizontal = 22.dp).padding(bottom = 16.dp)) {
                         PrayerList(day, next.prayer.takeIf { next.isToday }, zone, locale, dark) {
@@ -178,21 +182,26 @@ private fun LocationHeader(
     gregorianDate: String,
     hijriDate: String,
     dark: Boolean,
+    short: Boolean,
     onChooseCity: () -> Unit,
     onOpenSettings: () -> Unit
 ) {
     Row(
-        Modifier.fillMaxWidth().padding(start = 24.dp, end = 24.dp, top = 22.dp),
+        Modifier.fillMaxWidth().padding(start = 24.dp, end = 24.dp, top = if (short) 12.dp else 22.dp),
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.Top
     ) {
         Column(Modifier.weight(1f)) {
-            Text(location.displayName, fontSize = 26.sp, fontWeight = FontWeight.Bold)
+            Text(
+                location.displayName,
+                fontSize = if (short) 22.sp else 26.sp,
+                fontWeight = FontWeight.Bold
+            )
             Text(
                 "$gregorianDate · $hijriDate",
-                fontSize = 15.sp,
+                fontSize = if (short) 13.sp else 15.sp,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
-                modifier = Modifier.padding(top = 5.dp)
+                modifier = Modifier.padding(top = if (short) 2.dp else 5.dp)
             )
         }
         Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
@@ -223,7 +232,8 @@ private fun HeroCard(
     reached: Int,
     zone: ZoneId,
     locale: Locale,
-    dark: Boolean
+    dark: Boolean,
+    short: Boolean
 ) {
     val palette = heroPalette(dark)
     val shape = RoundedCornerShape(30.dp)
@@ -232,7 +242,12 @@ private fun HeroCard(
             Modifier.fillMaxWidth()
                 .background(palette.surface, shape)
                 .then(palette.border?.let { Modifier.border(1.dp, it, shape) } ?: Modifier)
-                .padding(start = 26.dp, end = 26.dp, top = 26.dp, bottom = 22.dp)
+                .padding(
+                    start = 26.dp,
+                    end = 26.dp,
+                    top = if (short) 14.dp else 26.dp,
+                    bottom = if (short) 12.dp else 22.dp
+                )
         ) {
             Row(
                 Modifier.fillMaxWidth(),
@@ -259,17 +274,17 @@ private fun HeroCard(
             }
             Text(
                 next.prayer.adaptiveLabel(),
-                fontSize = 26.sp,
+                fontSize = if (short) 18.sp else 26.sp,
                 fontWeight = FontWeight.Medium,
-                modifier = Modifier.padding(top = 14.dp)
+                modifier = Modifier.padding(top = if (short) 6.dp else 14.dp)
             )
             Text(
                 adaptiveFormat(next.epochMillis, zone, locale),
-                fontSize = 72.sp,
+                fontSize = if (short) 40.sp else 72.sp,
                 fontWeight = FontWeight.ExtraLight,
                 style = Tabular
             )
-            DayStrip(reached, palette)
+            DayStrip(reached, palette, short)
         }
     }
 }
@@ -280,9 +295,9 @@ private fun HeroCard(
  * mark the next prayer carries in the list below.
  */
 @Composable
-private fun DayStrip(reached: Int, palette: HeroPalette) {
+private fun DayStrip(reached: Int, palette: HeroPalette, short: Boolean) {
     Row(
-        Modifier.fillMaxWidth().padding(top = 18.dp),
+        Modifier.fillMaxWidth().padding(top = if (short) 10.dp else 18.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
         PrayerName.entries.forEachIndexed { index, _ ->
