@@ -118,7 +118,7 @@ private fun WearPrayerScreen(store: WearTimelineStore) {
         val progress = if (span <= 0L) 0f
         else ((nowMillis - (next.atMillis - span)).toFloat() / span).coerceIn(0f, 1f)
 
-        IntervalRing(progress)
+        IntervalRing(progress, if (timeline.status(nowMillis)?.kerahat != null) WearKerahat else WearAccent)
 
         Column(
             Modifier.fillMaxWidth(0.72f),
@@ -155,7 +155,8 @@ private fun WearPrayerScreen(store: WearTimelineStore) {
                 style = WearTabular
             )
             Text(
-                remainingText(next.atMillis - nowMillis),
+                // In kerahat the number people want is when the window lifts.
+                remainingText((kerahat?.endMillis ?: next.atMillis) - nowMillis),
                 fontSize = 12.sp,
                 color = WearMuted,
                 style = WearTabular
@@ -198,7 +199,7 @@ private fun WearPrayerScreen(store: WearTimelineStore) {
 }
 
 @Composable
-private fun IntervalRing(progress: Float) {
+private fun IntervalRing(progress: Float, accent: Color) {
     Canvas(Modifier.fillMaxSize()) {
         // Proportions from the artboard: r 104 and stroke 5 within a 224pt face.
         val stroke = size.minDimension * (5f / 224f)
@@ -216,7 +217,7 @@ private fun IntervalRing(progress: Float) {
         )
         if (progress > 0f) {
             drawArc(
-                color = WearAccent,
+                color = accent,
                 startAngle = -90f,
                 sweepAngle = 360f * progress,
                 useCenter = false,

@@ -5,6 +5,7 @@ import kotlin.test.assertEquals
 import kotlin.test.assertNull
 import kotlin.test.assertNotNull
 import kotlin.test.assertTrue
+import app.salat.model.PrayerName
 
 private const val HOUR = 3_600_000L
 private const val MINUTE = 60_000L
@@ -70,6 +71,21 @@ class DayStatusCalculatorTest {
         assertEquals(2 * HOUR + 30 * MINUTE, period.remainingMillis(14 * HOUR))
         // Never negative, so a late tick cannot render a minus sign.
         assertEquals(0L, period.remainingMillis(99 * HOUR))
+    }
+
+    @Test
+    fun the_marked_prayer_is_the_one_whose_window_is_open() {
+        // Before sunrise you are in the Fajr window; marking sunrise instead made the
+        // screen read as though the sun had already risen.
+        assertEquals(PrayerName.FAJR, statusAt(5 * HOUR + 30 * MINUTE).period.id.prayer)
+        assertEquals(PrayerName.DHUHR, statusAt(14 * HOUR).period.id.prayer)
+        assertEquals(PrayerName.ISHA, statusAt(2 * HOUR).period.id.prayer)
+    }
+
+    @Test
+    fun nothing_is_marked_between_sunrise_and_dhuhr() {
+        // No obligatory prayer occupies that stretch, so no prayer may claim it.
+        assertNull(statusAt(8 * HOUR).period.id.prayer)
     }
 
     @Test

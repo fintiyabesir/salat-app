@@ -13,6 +13,8 @@ struct TodayStatus {
     let headline: String
     let isKerahat: Bool
     let endsAtMillis: Int64
+    /// The prayer whose window is open, which is what every surface marks.
+    let currentPrayerId: String?
 }
 
 struct TodayPrayerDisplay {
@@ -25,15 +27,10 @@ struct TodayPrayerDisplay {
     let nextPrayerIsToday: Bool
     let status: TodayStatus?
 
-    /// Where today has got to. Everything after this is still ahead; once the day is
-    /// spent the whole strip reads as behind us.
-    var reachedIndex: Int {
-        guard nextPrayerIsToday,
-              let index = prayers.firstIndex(where: { $0.id == nextPrayer.id }) else {
-            return prayers.count
-        }
-        return index
-    }
+    /// The prayer whose window is open, or nil between sunrise and Dhuhr. This is
+    /// what every surface marks: before sunrise you are still inside Fajr, and
+    /// marking sunrise made the screen read as though the sun had already risen.
+    var currentPrayerId: String? { status?.currentPrayerId }
 }
 
 /// Formats KMP prayer snapshots for SwiftUI. Prayer calculation remains entirely
@@ -160,13 +157,15 @@ struct SharedPrayerProvider {
             return TodayStatus(
                 headline: L10n.text("kerahat_\(kerahat.id.name.lowercased())"),
                 isKerahat: true,
-                endsAtMillis: kerahat.endMillis
+                endsAtMillis: kerahat.endMillis,
+                currentPrayerId: status.period.id.prayer?.name.lowercased()
             )
         }
         return TodayStatus(
             headline: L10n.text("period_\(status.period.id.name.lowercased())"),
             isKerahat: false,
-            endsAtMillis: status.period.endMillis
+            endsAtMillis: status.period.endMillis,
+            currentPrayerId: status.period.id.prayer?.name.lowercased()
         )
     }
 
