@@ -111,7 +111,7 @@ class SalatAppWidgetProvider : AppWidgetProvider() {
                     if (dense) {
                         views.setTextViewText(R.id.widget_location, timeline.locationName)
                         views.setTextViewText(R.id.widget_hijri, hijriToday(context, zone, locale))
-                        renderDayStrip(context, views, timeline, zone, locale, next.prayer, now)
+                        renderDayStrip(context, views, timeline, zone, locale, status?.period?.id?.prayer, now)
                     }
                 }
                 manager.updateAppWidget(id, views)
@@ -130,7 +130,7 @@ class SalatAppWidgetProvider : AppWidgetProvider() {
             timeline: AndroidGlanceTimeline,
             zone: ZoneId,
             locale: Locale,
-            nextPrayer: PrayerName,
+            current: PrayerName?,
             nowMillis: Long
         ) {
             val today = LocalDate.now(zone)
@@ -138,7 +138,7 @@ class SalatAppWidgetProvider : AppWidgetProvider() {
                 Instant.ofEpochMilli(it.atMillis).atZone(zone).toLocalDate() == today
             }.associateBy { it.prayer }
             val past = context.getColor(R.color.widget_slot_past)
-            val current = context.getColor(R.color.widget_slot_current)
+            val open = context.getColor(R.color.widget_slot_current)
             val label = context.getColor(R.color.widget_text_secondary)
             val value = context.getColor(R.color.widget_text_primary)
 
@@ -150,7 +150,9 @@ class SalatAppWidgetProvider : AppWidgetProvider() {
                 val labelColor: Int
                 val valueColor: Int
                 when {
-                    prayer == nextPrayer -> { labelColor = current; valueColor = current }
+                    // The open window, not the next instant: marking sunrise made the
+                    // widget read as though the sun had already risen.
+                    prayer == current -> { labelColor = open; valueColor = open }
                     event != null && event.atMillis <= nowMillis -> { labelColor = past; valueColor = past }
                     else -> { labelColor = label; valueColor = value }
                 }

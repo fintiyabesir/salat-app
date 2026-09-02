@@ -118,9 +118,10 @@ private struct DayStripRow: View {
 
     var body: some View {
         let events = entry.payload?.events(on: entry.date) ?? []
+        let open = entry.status?.currentPrayerId
         HStack(spacing: 0) {
             ForEach(events, id: \.epochMillis) { event in
-                let isNext = event.epochMillis == entry.nextPrayer?.epochMillis
+                let isNext = event.prayerId.lowercased() == open
                 let passed = !isNext && event.date <= entry.date
                 VStack(spacing: 2) {
                     Text(GlanceL10n.prayerShort(event.prayerId, fallback: event.localizedPrayerName))
@@ -241,9 +242,10 @@ private struct DenseWidgetView: View {
             Rectangle().fill(palette.divider).frame(height: 1).padding(.top, 8)
 
             let events = entry.payload?.events(on: entry.date) ?? []
+            let open = entry.status?.currentPrayerId
             VStack(spacing: 0) {
                 ForEach(events, id: \.epochMillis) { event in
-                    let isNext = event.epochMillis == entry.nextPrayer?.epochMillis
+                    let isNext = event.prayerId.lowercased() == open
                     let passed = !isNext && event.date <= entry.date
                     HStack {
                         Text(event.localizedPrayerName)

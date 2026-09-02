@@ -132,21 +132,23 @@ struct TodayView: View {
     /// The six prayers as one line of the day, so "where am I in today" is a glance.
     @ViewBuilder
     private func dayStrip(_ model: TodayPrayerDisplay, palette: HeroPalette, short: Bool) -> some View {
-        let reached = model.reachedIndex
+        let open = model.currentPrayerId
+        let now = Date()
         VStack(alignment: .leading, spacing: 8) {
             HStack(spacing: 0) {
-                ForEach(Array(model.prayers.enumerated()), id: \.element.id) { index, _ in
+                ForEach(Array(model.prayers.enumerated()), id: \.element.id) { index, prayer in
+                    let elapsed = Double(prayer.epochMillis) / 1000 <= now.timeIntervalSince1970
                     if index > 0 {
                         Rectangle()
-                            .fill(index <= reached ? palette.accent : palette.track)
+                            .fill(elapsed ? palette.accent : palette.track)
                             .frame(height: 2)
                     }
                     ZStack {
-                        if index < reached {
-                            Circle().fill(palette.accent).frame(width: 9, height: 9)
-                        } else if index == reached {
+                        if prayer.id == open {
                             Circle().fill(Awqat.gold.opacity(0.22)).frame(width: 21, height: 21)
                             Circle().fill(Awqat.gold).frame(width: 13, height: 13)
+                        } else if elapsed {
+                            Circle().fill(palette.accent).frame(width: 9, height: 9)
                         } else {
                             Circle().fill(palette.track).frame(width: 9, height: 9)
                         }
@@ -158,8 +160,8 @@ struct TodayView: View {
                 ForEach(Array(model.prayers.enumerated()), id: \.element.id) { index, prayer in
                     if index > 0 { Spacer(minLength: 0) }
                     Text(L10n.prayerShort(prayer.id))
-                        .font(.system(size: 11, weight: index == reached ? .semibold : .regular))
-                        .foregroundStyle(index == reached ? Awqat.gold : palette.trackLabel)
+                        .font(.system(size: 11, weight: prayer.id == open ? .semibold : .regular))
+                        .foregroundStyle(prayer.id == open ? Awqat.gold : palette.trackLabel)
                         .lineLimit(1)
                         .fixedSize()
                         .frame(width: 21)
@@ -172,9 +174,10 @@ struct TodayView: View {
     @ViewBuilder
     private func prayerList(_ model: TodayPrayerDisplay) -> some View {
         let nowMillis = Int64(Date().timeIntervalSince1970 * 1000)
+        let open = model.currentPrayerId
         VStack(spacing: 4) {
             ForEach(model.prayers) { prayer in
-                let active = model.nextPrayerIsToday && prayer.id == model.nextPrayer.id
+                let active = prayer.id == open
                 let passed = !active && prayer.epochMillis <= nowMillis
                 Button {
                     selectedPrayer = prayer

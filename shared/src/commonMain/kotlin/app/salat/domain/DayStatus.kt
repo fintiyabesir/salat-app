@@ -12,7 +12,26 @@ import app.salat.model.PrayerName
  * which no obligatory prayer occupies — sunrise ends the Fajr window rather than
  * opening one of its own.
  */
-enum class DayPeriodId { FAJR, DUHA, DHUHR, ASR, MAGHRIB, ISHA }
+enum class DayPeriodId {
+    FAJR, DUHA, DHUHR, ASR, MAGHRIB, ISHA;
+
+    /**
+     * The prayer whose window this is — the one you may pray right now, and so the
+     * one every surface marks.
+     *
+     * Null for DUHA, because sunrise is not a prayer: marking it made the screen
+     * read as "the sun is up" while the user was still inside the Fajr window.
+     */
+    val prayer: PrayerName?
+        get() = when (this) {
+            FAJR -> PrayerName.FAJR
+            DUHA -> null
+            DHUHR -> PrayerName.DHUHR
+            ASR -> PrayerName.ASR
+            MAGHRIB -> PrayerName.MAGHRIB
+            ISHA -> PrayerName.ISHA
+        }
+}
 
 /** The window we are in, and the instant it gives way to the next. */
 data class DayPeriod(

@@ -159,9 +159,10 @@ fun AdaptiveTodayScreen(
             dayAdjustment = settings.hijriDayAdjustment
         )
     }
-    // Everything after the next prayer is still ahead; once the day is spent the
-    // whole strip reads as behind us.
-    val reached = if (next.isToday) PrayerName.entries.indexOf(next.prayer) else PrayerName.entries.size
+    // The marked prayer is the one whose window is open, not the next instant to
+    // arrive: before sunrise you are still inside Fajr, and marking sunrise made
+    // the screen read as though the sun had already risen.
+    val current = status.period.id.prayer
 
     Surface(modifier = Modifier.fillMaxSize(), color = MaterialTheme.colorScheme.background) {
         BoxWithConstraints(Modifier.fillMaxSize()) {
@@ -176,9 +177,9 @@ fun AdaptiveTodayScreen(
                         Modifier.fillMaxWidth().padding(top = if (short) 12.dp else 20.dp, bottom = 16.dp),
                         horizontalArrangement = Arrangement.spacedBy(30.dp)
                     ) {
-                        Box(Modifier.weight(1f)) { HeroCard(next, status, reached, zone, locale, dark, short) }
+                        Box(Modifier.weight(1f)) { HeroCard(next, status, day, current, zone, locale, dark, short) }
                         Column(Modifier.weight(1f)) {
-                            PrayerList(day, next.prayer.takeIf { next.isToday }, zone, locale, dark) {
+                            PrayerList(day, current, zone, locale, dark) {
                                 selectedPrayer = it
                             }
                         }
@@ -188,10 +189,10 @@ fun AdaptiveTodayScreen(
                 Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState())) {
                     LocationHeader(location, gregorianDate, hijriDate, dark, short, onChooseCity, onOpenSettings)
                     Box(Modifier.padding(horizontal = 22.dp, vertical = if (short) 12.dp else 20.dp)) {
-                        HeroCard(next, status, reached, zone, locale, dark, short)
+                        HeroCard(next, status, day, current, zone, locale, dark, short)
                     }
                     Column(Modifier.padding(horizontal = 22.dp).padding(bottom = 16.dp)) {
-                        PrayerList(day, next.prayer.takeIf { next.isToday }, zone, locale, dark) {
+                        PrayerList(day, current, zone, locale, dark) {
                             selectedPrayer = it
                         }
                     }
@@ -263,7 +264,8 @@ internal fun HeaderAction(@DrawableRes id: Int, label: String, dark: Boolean, on
 private fun HeroCard(
     next: NextPrayerUi,
     status: DayStatus,
-    reached: Int,
+    day: PrayerDay,
+    current: PrayerName?,
     zone: ZoneId,
     locale: Locale,
     dark: Boolean,
@@ -333,7 +335,7 @@ private fun HeroCard(
                     modifier = Modifier.padding(start = 10.dp, bottom = if (short) 8.dp else 14.dp)
                 )
             }
-            DayStrip(reached, palette, short)
+            DayStrip(day, current, palette, short)
         }
     }
 }
@@ -344,26 +346,28 @@ private fun HeroCard(
  * mark the next prayer carries in the list below.
  */
 @Composable
-private fun DayStrip(reached: Int, palette: HeroPalette, short: Boolean) {
+private fun DayStrip(day: PrayerDay, current: PrayerName?, palette: HeroPalette, short: Boolean) {
+    val nowMillis = System.currentTimeMillis()
+    fun elapsed(prayer: PrayerName) = day.time(prayer).toEpochMilliseconds() <= nowMillis
     Row(
         Modifier.fillMaxWidth().padding(top = if (short) 10.dp else 18.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        PrayerName.entries.forEachIndexed { index, _ ->
+        PrayerName.entries.forEachIndexed { index, prayer ->
             if (index > 0) {
                 Box(
                     Modifier.weight(1f)
                         .height(2.dp)
-                        .background(if (index <= reached) palette.accent else palette.track)
+                        .background(if (elapsed(prayer)) palette.accent else palette.track)
                 )
             }
             Box(Modifier.size(21.dp), contentAlignment = Alignment.Center) {
                 when {
-                    index < reached -> Dot(9.dp, palette.accent)
-                    index == reached -> {
+                    prayer == current -> {
                         Dot(21.dp, AwqatGold.copy(alpha = 0.22f))
                         Dot(13.dp, AwqatGold)
                     }
+                    elapsed(prayer) -> Dot(9.dp, palette.accent)
                     else -> Dot(9.dp, palette.track)
                 }
             }
@@ -379,8 +383,8 @@ private fun DayStrip(reached: Int, palette: HeroPalette, short: Boolean) {
                     prayer.shortLabel(),
                     fontSize = 11.sp,
                     maxLines = 1,
-                    color = if (index == reached) AwqatGold else palette.trackLabel,
-                    fontWeight = if (index == reached) FontWeight.SemiBold else FontWeight.Normal,
+                    color = if (prayer == current) AwqatGold else palette.trackLabel,
+                    fontWeight = if (prayer == current) FontWeight.SemiBold else FontWeight.Normal,
                     modifier = Modifier.wrapContentWidth(unbounded = true)
                 )
             }
@@ -419,7 +423,7 @@ private fun countdownText(epochMillis: Long, locale: Locale): String {
 @Composable
 private fun PrayerList(
     day: PrayerDay,
-    nextToday: PrayerName?,
+    current: PrayerName?,
     zone: ZoneId,
     locale: Locale,
     dark: Boolean,
@@ -430,7 +434,7 @@ private fun PrayerList(
     val spent = if (dark) Color(0xFF6D716E) else Color(0xFF9AA09A)
     val activeContent = if (dark) Color(0xFF91C9B5) else AwqatHeroSurface
     PrayerName.entries.forEach { prayer ->
-        val active = prayer == nextToday
+        val active = prayer == current
         val passed = !active && day.time(prayer).toEpochMilliseconds() <= nowMillis
         val content = when {
             active -> activeContent

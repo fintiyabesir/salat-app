@@ -111,6 +111,16 @@ enum GlanceDayPeriod: String {
     var localizedName: String {
         GlanceL10n.text("period.\(rawValue)", fallback: rawValue.capitalized)
     }
+
+    /// The prayer whose window this is — the one every surface marks. Null for duha,
+    /// because sunrise is not a prayer: marking it made the widget read as though
+    /// the sun had already risen while the user was still inside Fajr.
+    var prayerId: String? {
+        switch self {
+        case .duha: return nil
+        default: return rawValue
+        }
+    }
 }
 
 enum GlanceKerahat: String {
@@ -129,6 +139,7 @@ struct GlanceDayStatus {
 
     /// What the surface leads with: the window being withheld, or the one we are in.
     var headline: String { kerahat?.localizedName ?? period.localizedName }
+    var currentPrayerId: String? { period.prayerId }
     var isKerahat: Bool { kerahat != nil }
     var endsAt: Date { kerahatEnds ?? periodEnds }
 }

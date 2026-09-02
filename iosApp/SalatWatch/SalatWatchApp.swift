@@ -87,9 +87,10 @@ private struct WatchPrayerView: View {
             }
             .font(.system(size: 12))
 
+            let open = payload.status(at: now)?.currentPrayerId
             VStack(spacing: 0) {
                 ForEach(payload.events(on: now), id: \.epochMillis) { event in
-                    let isNext = event.epochMillis == next.epochMillis
+                    let isNext = event.prayerId.lowercased() == open
                     HStack {
                         Text(event.localizedPrayerName)
                             .foregroundStyle(isNext ? accent : muted)
