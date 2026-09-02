@@ -7,6 +7,7 @@ private struct SalatWidgetEntry: TimelineEntry {
     let nextPrayer: GlancePrayerEvent?
 
     var locationName: String? { payload?.locationName }
+    var status: GlanceDayStatus? { payload?.status(at: date) }
 }
 
 private struct SalatWidgetProvider: TimelineProvider {
@@ -173,6 +174,14 @@ private struct DenseWidgetView: View {
             .font(.system(size: 12))
             .foregroundStyle(palette.label)
 
+            if let status = entry.status {
+                Text(status.headline)
+                    .font(.system(size: 12, weight: .semibold))
+                    .foregroundStyle(status.isKerahat ? palette.current : palette.name)
+                    .lineLimit(1)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+            }
+
             Spacer(minLength: 4)
             if let prayer = entry.nextPrayer {
                 HStack(spacing: 12) {
@@ -205,6 +214,15 @@ private struct DenseWidgetView: View {
     private func smallDense(_ palette: WidgetPalette) -> some View {
         VStack(spacing: 0) {
             if let prayer = entry.nextPrayer {
+                if let status = entry.status {
+                    Text(status.headline)
+                        .font(.system(size: 11, weight: .semibold))
+                        .foregroundStyle(status.isKerahat ? palette.current : palette.name)
+                        .lineLimit(1)
+                        .minimumScaleFactor(0.7)
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                        .padding(.bottom, 2)
+                }
                 HStack(alignment: .firstTextBaseline) {
                     Text(prayer.localizedPrayerName)
                         .font(.system(size: 15, weight: .bold))
@@ -284,6 +302,9 @@ private struct DenseWidgetView: View {
     private var rectangularView: some View {
         VStack(alignment: .leading, spacing: 2) {
             if let prayer = entry.nextPrayer {
+                if let status = entry.status {
+                    Text(status.headline).font(.caption2).foregroundStyle(.secondary).lineLimit(1)
+                }
                 Text(prayer.localizedPrayerName).font(.headline)
                 HStack {
                     Text(timeText(prayer.date, entry.payload)).fontWeight(.semibold)
@@ -321,6 +342,11 @@ private struct LargeTextWidgetView: View {
     private func smallLarge(_ palette: WidgetPalette) -> some View {
         VStack(alignment: .leading, spacing: 0) {
             if let prayer = entry.nextPrayer {
+                if let status = entry.status {
+                    Text(status.headline)
+                        .font(.system(size: 14, weight: .semibold))
+                        .foregroundStyle(status.isKerahat ? palette.current : palette.label)
+                }
                 Text(prayer.localizedPrayerName)
                     .font(.system(size: 26, weight: .bold))
                     .foregroundStyle(palette.name)
@@ -346,6 +372,11 @@ private struct LargeTextWidgetView: View {
         HStack {
             if let prayer = entry.nextPrayer {
                 VStack(alignment: .leading, spacing: 6) {
+                    if let status = entry.status {
+                        Text(status.headline)
+                            .font(.system(size: 15, weight: .semibold))
+                            .foregroundStyle(status.isKerahat ? palette.current : palette.label)
+                    }
                     Text(prayer.localizedPrayerName)
                         .font(.system(size: 30, weight: .bold))
                         .foregroundStyle(palette.name)

@@ -13,4 +13,13 @@
     <string name="prayer_isha">Yatsı</string>
     <string name="remaining_minutes">%1$d dk</string>
     <string name="remaining_hours_minutes">%1$d:%2$02d</string>
+    <string name="period_fajr">İmsak vakti</string>
+    <string name="period_duha">Kuşluk</string>
+    <string name="period_dhuhr">Öğle vakti</string>
+    <string name="period_asr">İkindi vakti</string>
+    <string name="period_maghrib">Akşam vakti</string>
+    <string name="period_isha">Yatsı vakti</string>
+    <string name="kerahat_sunrise">Güneş kerahati</string>
+    <string name="kerahat_zenith">İstiva kerahati</string>
+    <string name="kerahat_sunset">Gurub kerahati</string>
 </resources>

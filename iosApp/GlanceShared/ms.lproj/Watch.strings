@@ -21,3 +21,12 @@
 "watch.widget_large_title" = "Awqat · Teks besar";
 "watch.widget_large_description" = "Solat seterusnya dalam teks terbesar";
 "watch.today" = "Hari ini";
+"period.fajr" = "Waktu Subuh";
+"period.duha" = "Dhuha";
+"period.dhuhr" = "Waktu Zohor";
+"period.asr" = "Waktu Asar";
+"period.maghrib" = "Waktu Maghrib";
+"period.isha" = "Waktu Isyak";
+"kerahat.sunrise" = "Karahah syuruk";
+"kerahat.zenith" = "Karahah istiwa";
+"kerahat.sunset" = "Karahah maghrib";

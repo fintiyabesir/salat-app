@@ -106,6 +106,33 @@ internal data class HeroPalette(
     val trackLabel: Color
 )
 
+/**
+ * Kerahat keeps the hero's shape and weight and changes only its hue: a deep clay
+ * at the same value as the pine. Loud enough that it cannot be missed, quiet enough
+ * that three times a day it still reads as a state of the day rather than an alarm.
+ */
+internal fun heroPalette(dark: Boolean, kerahat: Boolean): HeroPalette = when {
+    kerahat && dark -> HeroPalette(
+        surface = Color(0xFF2A211E),
+        border = Color(0xFF4A322B),
+        content = Color(0xFFF2F1EC),
+        accent = Color(0xFFE0B878),
+        chip = Color(0xFFE0B878).copy(alpha = 0.16f),
+        track = Color(0xFF3A302C),
+        trackLabel = Color(0xFF8A7A72)
+    )
+    kerahat -> HeroPalette(
+        surface = Color(0xFF3A2420),
+        border = null,
+        content = ShellCanvas,
+        accent = Color(0xFFD9A066),
+        chip = Color(0xFFD9A066).copy(alpha = 0.20f),
+        track = Color(0xFF5A3E36),
+        trackLabel = Color(0xFFA88778)
+    )
+    else -> heroPalette(dark)
+}
+
 internal fun heroPalette(dark: Boolean): HeroPalette = if (dark) {
     HeroPalette(
         surface = ShellCardDark,

@@ -13,4 +13,13 @@
     <string name="prayer_isha">ইশা</string>
     <string name="remaining_minutes">%1$d মি</string>
     <string name="remaining_hours_minutes">%1$d:%2$02d</string>
+    <string name="period_fajr">ফজরের সময়</string>
+    <string name="period_duha">চাশত</string>
+    <string name="period_dhuhr">যোহরের সময়</string>
+    <string name="period_asr">আসরের সময়</string>
+    <string name="period_maghrib">মাগরিবের সময়</string>
+    <string name="period_isha">এশার সময়</string>
+    <string name="kerahat_sunrise">সূর্যোদয় কারাহাত</string>
+    <string name="kerahat_zenith">দ্বিপ্রহর কারাহাত</string>
+    <string name="kerahat_sunset">সূর্যাস্ত কারাহাত</string>
 </resources>

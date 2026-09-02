@@ -26,4 +26,8 @@
     <string name="settings_data_credit">شہروں کا ڈیٹا: GeoNames · CC BY 4.0</string>
     <string name="settings_appearance_language">ظاہری شکل اور زبان</string>
     <string name="settings_theme">تھیم</string>
+    <string name="settings_kerahat">کراہت کے اوقات</string>
+    <string name="settings_kerahat_off">بند</string>
+    <string name="settings_kerahat_minutes">%1$d منٹ</string>
+    <string name="settings_kerahat_note">صرف وقت اور اس کا اختتام دکھایا جاتا ہے۔ اس دوران کیا پڑھا جا سکتا ہے یہ مسلک کے مطابق مختلف ہے، ایپ اس پر فیصلہ نہیں دیتی۔</string>
 </resources>

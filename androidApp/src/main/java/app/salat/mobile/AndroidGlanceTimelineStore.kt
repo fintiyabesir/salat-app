@@ -146,6 +146,8 @@ class AndroidGlanceTimelineStore(context: Context) {
         events: JSONArray
     ): ByteArray = JSONObject()
             .put("version", 1)
+            // 0 means the user turned kerahat off; the watch must not invent a default.
+            .put("kerahatMinutes", AndroidAppSettingsStore(appContext).load().kerahatMinutes ?: 0)
             .put("generatedAt", preferences.getLong(KEY_GENERATED_AT, System.currentTimeMillis()))
             .put("locationName", locationName)
             .put("timeZoneId", timeZoneId)

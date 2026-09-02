@@ -32,3 +32,14 @@
 "prayer.asr.short" = "عصر";
 "prayer.maghrib.short" = "مغرب";
 "prayer.isha.short" = "عشاء";
+"period_now" = "ابھی";
+"period_fajr" = "فجر کا وقت";
+"period_duha" = "چاشت";
+"period_dhuhr" = "ظہر کا وقت";
+"period_asr" = "عصر کا وقت";
+"period_maghrib" = "مغرب کا وقت";
+"period_isha" = "عشاء کا وقت";
+"kerahat_sunrise" = "طلوع کی کراہت";
+"kerahat_zenith" = "استوا کی کراہت";
+"kerahat_sunset" = "غروب کی کراہت";
+"kerahat_label" = "کراہت";

@@ -26,3 +26,7 @@
 "settings_data_credit" = "داده‌های شهرها: GeoNames · CC BY 4.0";
 "settings_appearance_language" = "ظاهر و زبان";
 "settings_theme" = "پوسته";
+"settings_kerahat" = "اوقات کراهت";
+"settings_kerahat_off" = "خاموش";
+"settings_kerahat_note" = "تنها بازه و پایان آن نشان داده می‌شود. آنچه در آن جایز است میان مذاهب تفاوت دارد و برنامه در آن حکم نمی‌کند.";
+"settings_kerahat_minutes" = "%d د";

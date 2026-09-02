@@ -75,30 +75,46 @@ struct TodayView: View {
 
     @ViewBuilder
     private func nextPrayerHero(_ model: TodayPrayerDisplay, short: Bool) -> some View {
-        let palette = HeroPalette.of(colorScheme)
+        let status = model.status
+        let palette = HeroPalette.of(colorScheme, kerahat: status?.isKerahat == true)
         VStack(alignment: .leading, spacing: 0) {
             HStack {
-                Text(L10n.text("next_prayer"))
-                    .font(.system(size: 12, weight: .semibold))
-                    .tracking(L10n.labelTracking)
-                    .foregroundStyle(palette.accent)
+                // Which window you are standing in, not merely what comes next: the
+                // countdown is the same number either way, but only one of them is
+                // the question people are actually asking.
+                Text(
+                    status?.isKerahat == true
+                        ? L10n.text("kerahat_label")
+                        : L10n.text("period_now")
+                )
+                .font(.system(size: 12, weight: .semibold))
+                .tracking(L10n.labelTracking)
+                .foregroundStyle(palette.accent)
                 Spacer()
-                // A one-second tick keeps the chip honest; .timer would show a clock,
-                // and the design asks for units.
                 TimelineView(.periodic(from: .now, by: 1)) { context in
-                    Text(L10n.countdown(until: model.nextPrayer.epochMillis, now: context.date))
-                        .font(.system(size: 14).monospacedDigit())
-                        .foregroundStyle(palette.accent)
-                        .padding(.horizontal, 12)
-                        .padding(.vertical, 5)
-                        .background(palette.chip, in: Capsule())
+                    Text(L10n.countdown(
+                        until: status?.endsAtMillis ?? model.nextPrayer.epochMillis,
+                        now: context.date
+                    ))
+                    .font(.system(size: 14).monospacedDigit())
+                    .foregroundStyle(palette.accent)
+                    .padding(.horizontal, 12)
+                    .padding(.vertical, 5)
+                    .background(palette.chip, in: Capsule())
                 }
             }
-            Text(model.nextPrayer.name)
+            Text(status?.headline ?? model.nextPrayer.name)
                 .font(.system(size: short ? 18 : 26, weight: .medium))
                 .padding(.top, short ? 6 : 14)
-            Text(model.nextPrayer.time)
-                .font(.system(size: short ? 40 : 72, weight: .ultraLight).monospacedDigit())
+            // The next prayer keeps the design's anchor: a clock time you can read
+            // across a room.
+            HStack(alignment: .lastTextBaseline, spacing: 10) {
+                Text(model.nextPrayer.time)
+                    .font(.system(size: short ? 40 : 72, weight: .ultraLight).monospacedDigit())
+                Text(model.nextPrayer.name)
+                    .font(.system(size: short ? 13 : 15))
+                    .foregroundStyle(palette.accent)
+            }
             dayStrip(model, palette: palette, short: short)
         }
         .foregroundStyle(palette.content)

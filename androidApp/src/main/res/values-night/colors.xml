@@ -10,4 +10,6 @@
     <color name="widget_chip">#2491C9B5</color>
     <color name="widget_countdown_large">#E0B878</color>
     <color name="window_background">#171916</color>
+    <!-- Kerahat: the same clay the hero card turns. -->
+    <color name="widget_kerahat">#E0B878</color>
 </resources>

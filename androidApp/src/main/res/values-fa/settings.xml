@@ -26,4 +26,8 @@
     <string name="settings_data_credit">داده‌های شهرها: GeoNames · CC BY 4.0</string>
     <string name="settings_appearance_language">ظاهر و زبان</string>
     <string name="settings_theme">پوسته</string>
+    <string name="settings_kerahat">اوقات کراهت</string>
+    <string name="settings_kerahat_off">خاموش</string>
+    <string name="settings_kerahat_minutes">%1$d د</string>
+    <string name="settings_kerahat_note">تنها بازه و پایان آن نشان داده می‌شود. آنچه در آن جایز است میان مذاهب تفاوت دارد و برنامه در آن حکم نمی‌کند.</string>
 </resources>

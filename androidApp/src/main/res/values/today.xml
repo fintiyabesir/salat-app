@@ -3,4 +3,19 @@
     <!-- The hero countdown; units rather than a bare clock, as in the design. -->
     <string name="countdown_hours_minutes">%1$dh %2$dm</string>
     <string name="countdown_minutes_seconds">%1$dm %2$ds</string>
+    <!-- The window you are standing in, as distinct from the instant a prayer starts. -->
+    <string name="period_now">NOW</string>
+    <string name="period_fajr">Fajr time</string>
+    <string name="period_duha">Duha</string>
+    <string name="period_dhuhr">Dhuhr time</string>
+    <string name="period_asr">Asr time</string>
+    <string name="period_maghrib">Maghrib time</string>
+    <string name="period_isha">Isha time</string>
+    <string name="period_remaining">%1$s left</string>
+    <string name="kerahat_label">KERAHAT</string>
+    <string name="kerahat_sunrise">Sunrise kerahat</string>
+    <string name="kerahat_zenith">Midday kerahat</string>
+    <string name="kerahat_sunset">Sunset kerahat</string>
+    <string name="kerahat_ends_in">Ends in %1$s</string>
+    <string name="kerahat_short">Kerahat</string>
 </resources>

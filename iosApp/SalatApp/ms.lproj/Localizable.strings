@@ -32,3 +32,14 @@
 "prayer.asr.short" = "Asr";
 "prayer.maghrib.short" = "Mag";
 "prayer.isha.short" = "Isy";
+"period_now" = "KINI";
+"period_fajr" = "Waktu Subuh";
+"period_duha" = "Dhuha";
+"period_dhuhr" = "Waktu Zohor";
+"period_asr" = "Waktu Asar";
+"period_maghrib" = "Waktu Maghrib";
+"period_isha" = "Waktu Isyak";
+"kerahat_sunrise" = "Karahah syuruk";
+"kerahat_zenith" = "Karahah istiwa";
+"kerahat_sunset" = "Karahah maghrib";
+"kerahat_label" = "KARAHAH";

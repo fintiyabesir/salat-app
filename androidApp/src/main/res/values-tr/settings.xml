@@ -26,4 +26,8 @@
     <string name="settings_data_credit">Şehir verisi: GeoNames · CC BY 4.0</string>
     <string name="settings_appearance_language">Görünüm ve dil</string>
     <string name="settings_theme">Tema</string>
+    <string name="settings_kerahat">Kerahat vakitleri</string>
+    <string name="settings_kerahat_off">Kapalı</string>
+    <string name="settings_kerahat_minutes">%1$d dk</string>
+    <string name="settings_kerahat_note">Pencere ve bitişi gösterilir. O sırada hangi namazın kılınabileceği mezhebe göre değişir; uygulama buna hüküm vermez.</string>
 </resources>

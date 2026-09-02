@@ -21,3 +21,12 @@
 "watch.widget_large_title" = "اوقات · خط بزرگ";
 "watch.widget_large_description" = "نماز بعدی با بزرگ‌ترین خط ممکن";
 "watch.today" = "امروز";
+"period.fajr" = "وقت صبح";
+"period.duha" = "چاشت";
+"period.dhuhr" = "وقت ظهر";
+"period.asr" = "وقت عصر";
+"period.maghrib" = "وقت مغرب";
+"period.isha" = "وقت عشاء";
+"kerahat.sunrise" = "کراهت طلوع";
+"kerahat.zenith" = "کراهت استوا";
+"kerahat.sunset" = "کراهت غروب";

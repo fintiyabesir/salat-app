@@ -26,3 +26,7 @@
 "settings_data_credit" = "City data: GeoNames · CC BY 4.0";
 "settings_appearance_language" = "Appearance & language";
 "settings_theme" = "Theme";
+"settings_kerahat" = "Kerahat times";
+"settings_kerahat_off" = "Off";
+"settings_kerahat_note" = "The window and when it ends are shown. What may be prayed then differs by school, so the app does not rule on it.";
+"settings_kerahat_minutes" = "%d min";

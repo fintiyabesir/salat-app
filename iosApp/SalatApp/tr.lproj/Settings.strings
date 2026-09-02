@@ -26,3 +26,7 @@
 "settings_data_credit" = "Şehir verisi: GeoNames · CC BY 4.0";
 "settings_appearance_language" = "Görünüm ve dil";
 "settings_theme" = "Tema";
+"settings_kerahat" = "Kerahat vakitleri";
+"settings_kerahat_off" = "Kapalı";
+"settings_kerahat_note" = "Pencere ve bitişi gösterilir. O sırada hangi namazın kılınabileceği mezhebe göre değişir; uygulama buna hüküm vermez.";
+"settings_kerahat_minutes" = "%d dk";

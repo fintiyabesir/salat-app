@@ -13,4 +13,13 @@
     <string name="prayer_isha">宵禮</string>
     <string name="remaining_minutes">%1$d 分鐘</string>
     <string name="remaining_hours_minutes">%1$d:%2$02d</string>
+    <string name="period_fajr">晨禮時段</string>
+    <string name="period_duha">上午</string>
+    <string name="period_dhuhr">晌禮時段</string>
+    <string name="period_asr">晡禮時段</string>
+    <string name="period_maghrib">昏禮時段</string>
+    <string name="period_isha">宵禮時段</string>
+    <string name="kerahat_sunrise">日出嫌惡時</string>
+    <string name="kerahat_zenith">正午嫌惡時</string>
+    <string name="kerahat_sunset">日落嫌惡時</string>
 </resources>

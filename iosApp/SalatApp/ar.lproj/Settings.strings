@@ -26,3 +26,7 @@
 "settings_data_credit" = "بيانات المدن: GeoNames · CC BY 4.0";
 "settings_appearance_language" = "المظهر واللغة";
 "settings_theme" = "السمة";
+"settings_kerahat" = "أوقات الكراهة";
+"settings_kerahat_off" = "مغلق";
+"settings_kerahat_note" = "يُعرض الوقت ونهايته فقط. وما يجوز فيه يختلف بين المذاهب، فلا يفتي التطبيق فيه.";
+"settings_kerahat_minutes" = "%d د";

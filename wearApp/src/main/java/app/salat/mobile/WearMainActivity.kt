@@ -28,6 +28,9 @@ import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.text.TextStyle
 import java.util.Locale
+import app.salat.domain.DayPeriodId
+import app.salat.domain.KerahatId
+import app.salat.domain.KerahatWindow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -122,13 +125,28 @@ private fun WearPrayerScreen(store: WearTimelineStore) {
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Text(timeline.locationName, maxLines = 1, fontSize = 12.sp, color = WearMuted)
+            // Which window we are standing in, the same line the phone and the
+            // widget lead with.
+            val status = timeline.status(nowMillis)
+            val kerahat = status?.kerahat
+            status?.let {
+                Text(
+                    kerahat?.let { k -> context.getString(k.labelRes()) }
+                        ?: context.getString(it.period.id.labelRes()),
+                    maxLines = 1,
+                    fontSize = 13.sp,
+                    fontWeight = FontWeight.SemiBold,
+                    color = if (kerahat != null) WearKerahat else WearAccent,
+                    modifier = Modifier.padding(top = 1.dp)
+                )
+            }
             Text(
                 next.localizedName(context),
                 maxLines = 1,
-                fontSize = 16.sp,
+                fontSize = 15.sp,
                 fontWeight = FontWeight.SemiBold,
-                color = WearAccent,
-                modifier = Modifier.padding(top = 2.dp)
+                color = WearMuted,
+                modifier = Modifier.padding(top = 1.dp)
             )
             Text(
                 timeFormat.format(Date(next.atMillis)),
@@ -214,7 +232,23 @@ private val WearCanvas = Color(0xFF171916)
 private val WearTrack = Color(0xFF22251F)
 private val WearAccent = Color(0xFF91C9B5)
 private val WearMuted = Color(0xFFAAB0A8)
+private val WearKerahat = Color(0xFFE0B878)
 private val WearTabular = TextStyle(fontFeatureSettings = "tnum")
+
+private fun DayPeriodId.labelRes(): Int = when (this) {
+    DayPeriodId.FAJR -> R.string.period_fajr
+    DayPeriodId.DUHA -> R.string.period_duha
+    DayPeriodId.DHUHR -> R.string.period_dhuhr
+    DayPeriodId.ASR -> R.string.period_asr
+    DayPeriodId.MAGHRIB -> R.string.period_maghrib
+    DayPeriodId.ISHA -> R.string.period_isha
+}
+
+private fun KerahatWindow.labelRes(): Int = when (id) {
+    KerahatId.SUNRISE -> R.string.kerahat_sunrise
+    KerahatId.ZENITH -> R.string.kerahat_zenith
+    KerahatId.SUNSET -> R.string.kerahat_sunset
+}
 
 /** With no earlier prayer to measure from, assume a three-hour interval. */
 private const val DEFAULT_SPAN_MILLIS = 3 * 60 * 60 * 1000L

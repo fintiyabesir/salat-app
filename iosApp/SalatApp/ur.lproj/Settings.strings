@@ -26,3 +26,7 @@
 "settings_data_credit" = "شہروں کا ڈیٹا: GeoNames · CC BY 4.0";
 "settings_appearance_language" = "ظاہری شکل اور زبان";
 "settings_theme" = "تھیم";
+"settings_kerahat" = "کراہت کے اوقات";
+"settings_kerahat_off" = "بند";
+"settings_kerahat_note" = "صرف وقت اور اس کا اختتام دکھایا جاتا ہے۔ اس دوران کیا پڑھا جا سکتا ہے یہ مسلک کے مطابق مختلف ہے، ایپ اس پر فیصلہ نہیں دیتی۔";
+"settings_kerahat_minutes" = "%d منٹ";
