@@ -9,7 +9,7 @@
 "watch.brand_name" = "مواقيت الصلاة";
 "watch.open_app" = "افتح التطبيق";
 "watch.update_prayer_times" = "لتحديث مواقيت الصلاة";
-"watch.widget_description" = "الصلاة القادمة والوقت المتبقي";
+"watch.widget_description" = "الوقت الذي أنت فيه والمدة المتبقية";
 "countdown_hours_minutes" = "%d س %d د";
 "countdown_minutes" = "%d د";
 "prayer.fajr.short" = "فجر";

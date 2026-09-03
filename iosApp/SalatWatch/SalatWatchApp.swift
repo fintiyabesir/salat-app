@@ -56,19 +56,22 @@ private struct WatchPrayerView: View {
                 VStack(spacing: 0) {
                     let status = payload.status(at: now)
                     Text(status?.headline ?? next.localizedPrayerName)
-                        .font(.system(size: 20, weight: .semibold))
+                        .font(.system(size: 18, weight: .semibold))
                         .foregroundStyle(status?.isKerahat == true ? gold : accent)
                         .lineLimit(1)
                         .minimumScaleFactor(0.6)
-                    Text(time(next.date, payload))
-                        .font(.system(size: 46, weight: .light).monospacedDigit())
-                        .lineLimit(1)
-                        .minimumScaleFactor(0.6)
                     Text(remaining(to: status?.endsAt ?? next.date, from: now))
-                        .font(.system(size: 17, weight: .semibold).monospacedDigit())
-                        .foregroundStyle(status?.isKerahat == true ? gold : muted)
+                        .font(.system(size: 40, weight: .light).monospacedDigit())
                         .lineLimit(1)
-                        .minimumScaleFactor(0.6)
+                        .minimumScaleFactor(0.5)
+                    HStack(spacing: 4) {
+                        Text(next.localizedPrayerName)
+                        Text(time(next.date, payload)).monospacedDigit()
+                    }
+                    .font(.system(size: 13))
+                    .foregroundStyle(muted)
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.6)
                 }
                 .padding(.horizontal, 34)
             }

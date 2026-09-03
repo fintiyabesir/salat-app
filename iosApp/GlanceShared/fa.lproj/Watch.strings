@@ -9,7 +9,7 @@
 "watch.brand_name" = "اوقات شرعی";
 "watch.open_app" = "برنامه را باز کنید";
 "watch.update_prayer_times" = "به‌روزرسانی اوقات شرعی";
-"watch.widget_description" = "نماز بعدی و زمان باقی‌مانده";
+"watch.widget_description" = "وقتی که در آن هستید و زمان باقی‌مانده";
 "countdown_hours_minutes" = "%d س %d د";
 "countdown_minutes" = "%d د";
 "prayer.fajr.short" = "صبح";

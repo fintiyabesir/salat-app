@@ -134,33 +134,30 @@ private fun WearPrayerScreen(store: WearTimelineStore) {
                     kerahat?.let { k -> context.getString(k.labelRes()) }
                         ?: context.getString(it.period.id.labelRes()),
                     maxLines = 1,
-                    fontSize = 13.sp,
+                    fontSize = 15.sp,
                     fontWeight = FontWeight.SemiBold,
                     color = if (kerahat != null) WearKerahat else WearAccent,
                     modifier = Modifier.padding(top = 1.dp)
                 )
             }
+            // What is left of the open window is the answer; the next prayer supports it.
             Text(
-                next.localizedName(context),
-                maxLines = 1,
-                fontSize = 15.sp,
-                fontWeight = FontWeight.SemiBold,
-                color = WearMuted,
-                modifier = Modifier.padding(top = 1.dp)
-            )
-            Text(
-                timeFormat.format(Date(next.atMillis)),
-                fontSize = 32.sp,
+                remainingText((kerahat?.endMillis ?: status?.period?.endMillis ?: next.atMillis) - nowMillis),
+                fontSize = 30.sp,
                 fontWeight = FontWeight.ExtraLight,
+                maxLines = 1,
                 style = WearTabular
             )
-            Text(
-                // In kerahat the number people want is when the window lifts.
-                remainingText((kerahat?.endMillis ?: next.atMillis) - nowMillis),
-                fontSize = 12.sp,
-                color = WearMuted,
-                style = WearTabular
-            )
+            Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+                Text(next.localizedName(context), maxLines = 1, fontSize = 12.sp, color = WearMuted)
+                Text(
+                    timeFormat.format(Date(next.atMillis)),
+                    maxLines = 1,
+                    fontSize = 12.sp,
+                    color = WearMuted,
+                    style = WearTabular
+                )
+            }
             // Two columns of what comes after, so the whole day fits one round face.
             val upcoming = today.filter { it.atMillis > next.atMillis }.take(4)
             if (upcoming.isNotEmpty()) {

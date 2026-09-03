@@ -91,29 +91,33 @@ struct TodayView: View {
                 .tracking(L10n.labelTracking)
                 .foregroundStyle(palette.accent)
                 Spacer()
-                TimelineView(.periodic(from: .now, by: 1)) { context in
-                    Text(L10n.countdown(
-                        until: status?.endsAtMillis ?? model.nextPrayer.epochMillis,
-                        now: context.date
-                    ))
-                    .font(.system(size: 14).monospacedDigit())
-                    .foregroundStyle(palette.accent)
-                    .padding(.horizontal, 12)
-                    .padding(.vertical, 5)
-                    .background(palette.chip, in: Capsule())
+                // The next prayer is supporting detail now, so it takes the chip the
+                // countdown used to sit in.
+                HStack(spacing: 6) {
+                    Text(model.nextPrayer.name)
+                    Text(model.nextPrayer.time).monospacedDigit()
                 }
+                .font(.system(size: 13))
+                .foregroundStyle(palette.accent)
+                .padding(.horizontal, 12)
+                .padding(.vertical, 5)
+                .background(palette.chip, in: Capsule())
             }
+            // The card answers one question: which window is open, and how much of
+            // it is left. Everything else on it is support.
             Text(status?.headline ?? model.nextPrayer.name)
-                .font(.system(size: short ? 18 : 26, weight: .medium))
-                .padding(.top, short ? 6 : 14)
-            // The next prayer keeps the design's anchor: a clock time you can read
-            // across a room.
-            HStack(alignment: .lastTextBaseline, spacing: 10) {
-                Text(model.nextPrayer.time)
-                    .font(.system(size: short ? 40 : 72, weight: .ultraLight).monospacedDigit())
-                Text(model.nextPrayer.name)
-                    .font(.system(size: short ? 13 : 15))
-                    .foregroundStyle(palette.accent)
+                .font(.system(size: short ? 20 : 28, weight: .medium))
+                .lineLimit(1)
+                .minimumScaleFactor(0.7)
+                .padding(.top, short ? 6 : 12)
+            TimelineView(.periodic(from: .now, by: 1)) { context in
+                Text(L10n.countdown(
+                    until: status?.endsAtMillis ?? model.nextPrayer.epochMillis,
+                    now: context.date
+                ))
+                .font(.system(size: short ? 36 : 56, weight: .ultraLight).monospacedDigit())
+                .lineLimit(1)
+                .minimumScaleFactor(0.6)
             }
             dayStrip(model, palette: palette, short: short)
         }

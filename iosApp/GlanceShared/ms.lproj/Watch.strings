@@ -9,7 +9,7 @@
 "watch.brand_name" = "WAKTU SOLAT";
 "watch.open_app" = "Buka aplikasi";
 "watch.update_prayer_times" = "Kemas kini waktu solat";
-"watch.widget_description" = "Waktu solat seterusnya dan baki masa";
+"watch.widget_description" = "Waktu yang anda berada di dalamnya dan bakinya";
 "countdown_hours_minutes" = "%d j %d min";
 "countdown_minutes" = "%d min";
 "prayer.fajr.short" = "Sub";

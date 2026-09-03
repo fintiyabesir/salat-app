@@ -1,4 +1,4 @@
 <resources>
-    <string name="widget_description">الصلاة القادمة والعد التنازلي</string>
+    <string name="widget_description">الوقت الذي أنت فيه والمدة المتبقية</string>
     <string name="widget_open_app_hint">افتح التطبيق لتحديث مواقيت الصلاة.</string>
 </resources>

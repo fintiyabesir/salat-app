@@ -303,38 +303,47 @@ private fun HeroCard(
                     // Arabic-script locales join their letters; spacing them breaks the word.
                     letterSpacing = if (LocalLayoutDirection.current == LayoutDirection.Rtl) 0.sp else 1.8.sp
                 )
-                Text(
-                    countdownText(kerahat?.endMillis ?: status.period.endMillis, locale),
-                    color = palette.accent,
-                    fontSize = 14.sp,
-                    style = Tabular,
-                    modifier = Modifier
+                // The next prayer is supporting detail now, so it takes the chip the
+                // countdown used to sit in.
+                Row(
+                    Modifier
                         .background(palette.chip, RoundedCornerShape(20.dp))
-                        .padding(horizontal = 12.dp, vertical = 5.dp)
-                )
+                        .padding(horizontal = 12.dp, vertical = 5.dp),
+                    horizontalArrangement = Arrangement.spacedBy(6.dp)
+                ) {
+                    Text(next.prayer.adaptiveLabel(), color = palette.accent, fontSize = 13.sp)
+                    Text(
+                        adaptiveFormat(next.epochMillis, zone, locale),
+                        color = palette.accent,
+                        fontSize = 13.sp,
+                        style = Tabular
+                    )
+                }
             }
+            // The card answers one question: which window is open, and how much of it
+            // is left. Everything else on it is support.
             Text(
                 kerahat?.label() ?: status.period.id.label(),
-                fontSize = if (short) 18.sp else 26.sp,
+                fontSize = if (short) 20.sp else 28.sp,
                 fontWeight = FontWeight.Medium,
-                modifier = Modifier.padding(top = if (short) 6.dp else 14.dp)
+                maxLines = 1,
+                modifier = Modifier.padding(top = if (short) 6.dp else 12.dp)
             )
-            // The next prayer keeps the design's anchor: a clock time you can read
-            // across a room.
-            Row(verticalAlignment = Alignment.Bottom) {
-                Text(
-                    adaptiveFormat(next.epochMillis, zone, locale),
-                    fontSize = if (short) 40.sp else 72.sp,
-                    fontWeight = FontWeight.ExtraLight,
-                    style = Tabular
-                )
-                Text(
-                    next.prayer.adaptiveLabel(),
-                    fontSize = if (short) 13.sp else 15.sp,
-                    color = palette.accent,
-                    modifier = Modifier.padding(start = 10.dp, bottom = if (short) 8.dp else 14.dp)
-                )
-            }
+            val remaining = countdownText(kerahat?.endMillis ?: status.period.endMillis, locale)
+            Text(
+                remaining,
+                // Nine languages write durations at very different widths, so the size
+                // follows the string rather than trusting one number to fit them all.
+                fontSize = when {
+                    short -> 36.sp
+                    remaining.length <= 8 -> 56.sp
+                    remaining.length <= 11 -> 46.sp
+                    else -> 38.sp
+                },
+                fontWeight = FontWeight.ExtraLight,
+                maxLines = 1,
+                style = Tabular
+            )
             DayStrip(day, current, palette, short)
         }
     }

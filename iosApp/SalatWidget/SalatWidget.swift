@@ -174,32 +174,21 @@ private struct DenseWidgetView: View {
             .font(.system(size: 12))
             .foregroundStyle(palette.label)
 
-            if let status = entry.status {
-                Text(status.headline)
-                    .font(.system(size: 12, weight: .semibold))
-                    .foregroundStyle(status.isKerahat ? palette.current : palette.name)
-                    .lineLimit(1)
-                    .frame(maxWidth: .infinity, alignment: .leading)
-            }
-
             Spacer(minLength: 4)
-            if let prayer = entry.nextPrayer {
-                HStack(spacing: 12) {
-                    Text(prayer.localizedPrayerName)
-                        .font(.system(size: 18, weight: .semibold))
-                        .foregroundStyle(palette.name)
-                    Text(timeText(prayer.date, entry.payload))
-                        .font(.system(size: 42, weight: .thin).monospacedDigit())
+            if let prayer = entry.nextPrayer, let status = entry.status {
+                HStack(spacing: 10) {
+                    Text(status.headline)
+                        .font(.system(size: 20, weight: .semibold))
+                        .foregroundStyle(status.isKerahat ? palette.current : palette.name)
+                    Spacer(minLength: 4)
+                    LiveCountdown(target: status.endsAt)
+                        .font(.system(size: 30, weight: .light))
                         .foregroundStyle(palette.content)
-                    LiveCountdown(target: entry.status?.endsAt ?? prayer.date)
-                        .font(.system(size: 14, weight: .semibold))
-                        .foregroundStyle(palette.chipText)
-                        .padding(.horizontal, 12)
-                        .padding(.vertical, 4)
-                        .background(palette.chipFill, in: Capsule())
                 }
                 .lineLimit(1)
-                .minimumScaleFactor(0.7)
+                .minimumScaleFactor(0.6)
+            } else if entry.nextPrayer != nil {
+                Text("").hidden()
             } else {
                 openAppNotice(palette)
             }
@@ -214,26 +203,19 @@ private struct DenseWidgetView: View {
     private func smallDense(_ palette: WidgetPalette) -> some View {
         VStack(spacing: 0) {
             if let prayer = entry.nextPrayer {
-                if let status = entry.status {
-                    Text(status.headline)
-                        .font(.system(size: 11, weight: .semibold))
-                        .foregroundStyle(status.isKerahat ? palette.current : palette.name)
-                        .lineLimit(1)
-                        .minimumScaleFactor(0.7)
-                        .frame(maxWidth: .infinity, alignment: .leading)
-                        .padding(.bottom, 2)
-                }
                 HStack(alignment: .firstTextBaseline) {
-                    Text(prayer.localizedPrayerName)
-                        .font(.system(size: 15, weight: .bold))
-                        .foregroundStyle(palette.name)
+                    Text(entry.status?.headline ?? prayer.localizedPrayerName)
+                        .font(.system(size: 14, weight: .bold))
+                        .foregroundStyle(
+                            entry.status?.isKerahat == true ? palette.current : palette.name
+                        )
                     Spacer(minLength: 4)
                     LiveCountdown(target: entry.status?.endsAt ?? prayer.date)
-                        .font(.system(size: 13, weight: .semibold))
-                        .foregroundStyle(palette.chipText)
+                        .font(.system(size: 14, weight: .semibold))
+                        .foregroundStyle(palette.content)
                 }
                 .lineLimit(1)
-                .minimumScaleFactor(0.7)
+                .minimumScaleFactor(0.6)
             } else {
                 openAppNotice(palette)
             }
@@ -343,20 +325,20 @@ private struct LargeTextWidgetView: View {
     private func smallLarge(_ palette: WidgetPalette) -> some View {
         VStack(alignment: .leading, spacing: 0) {
             if let prayer = entry.nextPrayer {
-                if let status = entry.status {
-                    Text(status.headline)
-                        .font(.system(size: 14, weight: .semibold))
-                        .foregroundStyle(status.isKerahat ? palette.current : palette.label)
-                }
-                Text(prayer.localizedPrayerName)
-                    .font(.system(size: 26, weight: .bold))
-                    .foregroundStyle(palette.name)
-                Text(timeText(prayer.date, entry.payload))
-                    .font(.system(size: 60, weight: .medium).monospacedDigit())
-                    .foregroundStyle(palette.content)
-                LiveCountdown(target: entry.status?.endsAt ?? prayer.date)
+                Text(entry.status?.headline ?? prayer.localizedPrayerName)
                     .font(.system(size: 24, weight: .bold))
-                    .foregroundStyle(palette.chipText)
+                    .foregroundStyle(
+                        entry.status?.isKerahat == true ? palette.current : palette.name
+                    )
+                LiveCountdown(target: entry.status?.endsAt ?? prayer.date)
+                    .font(.system(size: 46, weight: .medium))
+                    .foregroundStyle(palette.content)
+                HStack(spacing: 6) {
+                    Text(prayer.localizedPrayerName)
+                    Text(timeText(prayer.date, entry.payload)).monospacedDigit()
+                }
+                .font(.system(size: 15, weight: .semibold))
+                .foregroundStyle(palette.label)
             } else {
                 Text(GlanceL10n.text("watch.open_app", fallback: "Open the app"))
                     .font(.system(size: 22, weight: .bold))
@@ -373,21 +355,21 @@ private struct LargeTextWidgetView: View {
         HStack {
             if let prayer = entry.nextPrayer {
                 VStack(alignment: .leading, spacing: 6) {
-                    if let status = entry.status {
-                        Text(status.headline)
-                            .font(.system(size: 15, weight: .semibold))
-                            .foregroundStyle(status.isKerahat ? palette.current : palette.label)
-                    }
-                    Text(prayer.localizedPrayerName)
+                    Text(entry.status?.headline ?? prayer.localizedPrayerName)
                         .font(.system(size: 30, weight: .bold))
-                        .foregroundStyle(palette.name)
-                    LiveCountdown(target: entry.status?.endsAt ?? prayer.date)
-                        .font(.system(size: 25, weight: .bold))
-                        .foregroundStyle(palette.chipText)
+                        .foregroundStyle(
+                            entry.status?.isKerahat == true ? palette.current : palette.name
+                        )
+                    HStack(spacing: 6) {
+                        Text(prayer.localizedPrayerName)
+                        Text(timeText(prayer.date, entry.payload)).monospacedDigit()
+                    }
+                    .font(.system(size: 17, weight: .semibold))
+                    .foregroundStyle(palette.label)
                 }
                 Spacer(minLength: 8)
-                Text(timeText(prayer.date, entry.payload))
-                    .font(.system(size: 88, weight: .medium).monospacedDigit())
+                LiveCountdown(target: entry.status?.endsAt ?? prayer.date)
+                    .font(.system(size: 62, weight: .medium))
                     .foregroundStyle(palette.content)
             } else {
                 Text(GlanceL10n.text("watch.open_app", fallback: "Open the app"))
