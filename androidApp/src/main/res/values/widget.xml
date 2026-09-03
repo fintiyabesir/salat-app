@@ -1,4 +1,4 @@
 <resources>
-    <string name="widget_description">Next prayer and countdown</string>
+    <string name="widget_description">The window you are in and how long is left</string>
     <string name="widget_open_app_hint">Open the app to update prayer times.</string>
 </resources>

@@ -1,4 +1,4 @@
 <resources>
-    <string name="widget_description">下一次禮拜時間和倒數計時</string>
+    <string name="widget_description">目前所處的時段及剩餘時間</string>
     <string name="widget_open_app_hint">開啟應用程式以更新禮拜時間。</string>
 </resources>

@@ -1,4 +1,4 @@
 <resources>
-    <string name="widget_description">পরবর্তী নামাজ ও কাউন্টডাউন</string>
+    <string name="widget_description">আপনি যে ওয়াক্তে আছেন এবং কত বাকি</string>
     <string name="widget_open_app_hint">নামাজের সময় হালনাগাদ করতে অ্যাপটি খুলুন।</string>
 </resources>

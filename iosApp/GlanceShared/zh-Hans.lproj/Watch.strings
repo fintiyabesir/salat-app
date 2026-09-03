@@ -9,7 +9,7 @@
 "watch.brand_name" = "礼拜时间";
 "watch.open_app" = "打开应用";
 "watch.update_prayer_times" = "更新礼拜时间";
-"watch.widget_description" = "下一次礼拜与剩余时间";
+"watch.widget_description" = "当前所处的时段及剩余时间";
 "countdown_hours_minutes" = "%d 小时 %d 分";
 "countdown_minutes" = "%d 分";
 "prayer.fajr.short" = "晨";

@@ -67,6 +67,13 @@ class SalatAppWidgetProvider : AppWidgetProvider() {
             val now = System.currentTimeMillis()
             val locale = Locale.getDefault()
 
+            // The same "which window, how much left" the phone shows, so the widget is
+            // not telling a different story from the app behind it.
+            val status = timeline?.let {
+                val zone = runCatching { ZoneId.of(it.timeZoneId) }.getOrDefault(ZoneId.systemDefault())
+                dayStatus(context, it, zone, now)
+            }
+
             ids.forEach { id ->
                 val width = manager.getAppWidgetOptions(id)
                     ?.getInt(AppWidgetManager.OPTION_APPWIDGET_MIN_WIDTH, 0) ?: 0
@@ -85,22 +92,27 @@ class SalatAppWidgetProvider : AppWidgetProvider() {
                             views.setTextViewText(labelId, "")
                             views.setTextViewText(timeId, "")
                         }
+                    } else {
+                        views.setTextViewText(R.id.widget_prayer, context.getString(R.string.next_prayer))
+                        views.setTextViewText(R.id.widget_time, "—")
                     }
                     views.setTextViewText(R.id.widget_period, "")
-                    views.setTextViewText(R.id.widget_prayer, context.getString(R.string.next_prayer))
-                    views.setTextViewText(R.id.widget_time, "—")
                     views.setViewVisibility(R.id.widget_countdown, View.GONE)
                 } else {
                     val zone = runCatching { ZoneId.of(timeline.timeZoneId) }.getOrDefault(ZoneId.systemDefault())
-                    views.setTextViewText(R.id.widget_prayer, localizedPrayer(context, next.prayer))
-                    views.setTextViewText(R.id.widget_time, formatTime(next.atMillis, zone, locale))
+                    // Only the large-text layout still names the next prayer; the dense
+                    // one has the whole day in its strip and need not repeat it.
+                    if (!dense) {
+                        views.setTextViewText(R.id.widget_prayer, localizedPrayer(context, next.prayer))
+                        views.setTextViewText(R.id.widget_time, formatTime(next.atMillis, zone, locale))
+                    }
                     views.setViewVisibility(R.id.widget_countdown, View.VISIBLE)
-                    val base = SystemClock.elapsedRealtime() + max(0L, next.atMillis - now)
+                    // The countdown now runs to the end of the open window, which is
+                    // what the card is about.
+                    val target = status?.kerahat?.endMillis ?: status?.period?.endMillis ?: next.atMillis
+                    val base = SystemClock.elapsedRealtime() + max(0L, target - now)
                     views.setChronometer(R.id.widget_countdown, base, null, true)
                     views.setChronometerCountDown(R.id.widget_countdown, true)
-                    // The same "where am I / what is next" the phone shows, so the
-                    // widget is not telling a different story from the app behind it.
-                    val status = dayStatus(context, timeline, zone, now)
                     views.setTextViewText(R.id.widget_period, periodText(context, status))
                     views.setTextColor(
                         R.id.widget_period,

@@ -18,34 +18,41 @@
         android:layout_height="wrap_content"
         android:maxLines="1"
         android:ellipsize="end"
-        android:textSize="12sp"
+        android:textSize="24sp"
         android:textStyle="bold"
         android:textColor="@color/widget_brand" />
-
-    <TextView
-        android:id="@+id/widget_prayer"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:maxLines="1"
-        android:ellipsize="end"
-        android:textSize="25sp"
-        android:textStyle="bold"
-        android:textColor="@color/widget_brand" />
-
-    <TextView
-        android:id="@+id/widget_time"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:maxLines="1"
-        android:textSize="56sp"
-        android:textColor="@color/widget_text_primary" />
 
     <Chronometer
         android:id="@+id/widget_countdown"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:maxLines="1"
-        android:textSize="23sp"
-        android:textStyle="bold"
-        android:textColor="@color/widget_countdown_large" />
+        android:textSize="44sp"
+        android:textColor="@color/widget_text_primary" />
+
+    <!-- Supporting, not the answer: what comes after this window closes. -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:baselineAligned="false">
+
+        <TextView
+            android:id="@+id/widget_prayer"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:maxLines="1"
+            android:textSize="15sp"
+            android:textColor="@color/widget_text_secondary" />
+
+        <TextView
+            android:id="@+id/widget_time"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="6dp"
+            android:maxLines="1"
+            android:textSize="15sp"
+            android:textStyle="bold"
+            android:textColor="@color/widget_text_secondary" />
+    </LinearLayout>
 </LinearLayout>

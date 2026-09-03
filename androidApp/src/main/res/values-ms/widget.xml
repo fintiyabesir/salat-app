@@ -1,4 +1,4 @@
 <resources>
-    <string name="widget_description">Waktu solat seterusnya dan kira detik</string>
+    <string name="widget_description">Waktu yang anda berada di dalamnya dan bakinya</string>
     <string name="widget_open_app_hint">Buka aplikasi untuk mengemas kini waktu solat.</string>
 </resources>

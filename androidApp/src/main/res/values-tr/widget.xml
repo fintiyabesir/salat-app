@@ -1,4 +1,4 @@
 <resources>
-    <string name="widget_description">Sonraki vakit ve geri sayım</string>
+    <string name="widget_description">İçinde bulunduğun vakit ve kalan süre</string>
     <string name="widget_open_app_hint">Namaz vakitlerini güncellemek için uygulamayı açın.</string>
 </resources>
