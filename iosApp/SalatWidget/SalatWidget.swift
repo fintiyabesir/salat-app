@@ -31,13 +31,9 @@ private struct SalatWidgetProvider: TimelineProvider {
         let payload = GlanceTimelinePersistence.load()
         let now = Date()
         var dates = [now]
-        if let payload {
-            dates.append(contentsOf: payload.events
-                .map(\.date)
-                .filter { $0 > now }
-                .prefix(36)
-                .map { $0.addingTimeInterval(1) })
-        }
+        // Kerahat opens and closes between prayers, so prayer times alone leave the
+        // widget showing a state that ended hours ago.
+        dates.append(contentsOf: payload?.stateChanges(after: now) ?? [])
         let entries = dates.map(entry(at:))
         completion(Timeline(entries: entries, policy: .atEnd))
     }
@@ -102,14 +98,17 @@ private func timeText(_ date: Date, _ payload: GlanceTimelinePayload?) -> String
     return formatter.string(from: date)
 }
 
-/// The units the design writes, kept live by the widget's own timeline entries.
-private func countdownText(to date: Date, from now: Date) -> String {
-    let remaining = max(0, Int(date.timeIntervalSince(now)))
-    let hours = remaining / 3600
-    let minutes = (remaining % 3600) / 60
-    return hours > 0
-        ? GlanceL10n.format("countdown_hours_minutes", fallback: "%dh %dm", hours, minutes)
-        : GlanceL10n.format("countdown_minutes", fallback: "%d min", minutes)
+/// A widget cannot re-render every minute, so the countdown has to update itself.
+/// The design writes this in units; a self-updating Text only offers a clock, and a
+/// correct clock beats a frozen "6 sa 42 dk" that stopped hours ago.
+private struct LiveCountdown: View {
+    let target: Date
+
+    var body: some View {
+        Text(target, style: .timer)
+            .monospacedDigit()
+            .multilineTextAlignment(.trailing)
+    }
 }
 
 private struct DayStripRow: View {
@@ -192,8 +191,8 @@ private struct DenseWidgetView: View {
                     Text(timeText(prayer.date, entry.payload))
                         .font(.system(size: 42, weight: .thin).monospacedDigit())
                         .foregroundStyle(palette.content)
-                    Text(countdownText(to: prayer.date, from: entry.date))
-                        .font(.system(size: 14, weight: .semibold).monospacedDigit())
+                    LiveCountdown(target: entry.status?.endsAt ?? prayer.date)
+                        .font(.system(size: 14, weight: .semibold))
                         .foregroundStyle(palette.chipText)
                         .padding(.horizontal, 12)
                         .padding(.vertical, 4)
@@ -229,8 +228,8 @@ private struct DenseWidgetView: View {
                         .font(.system(size: 15, weight: .bold))
                         .foregroundStyle(palette.name)
                     Spacer(minLength: 4)
-                    Text(countdownText(to: prayer.date, from: entry.date))
-                        .font(.system(size: 13, weight: .semibold).monospacedDigit())
+                    LiveCountdown(target: entry.status?.endsAt ?? prayer.date)
+                        .font(.system(size: 13, weight: .semibold))
                         .foregroundStyle(palette.chipText)
                 }
                 .lineLimit(1)
@@ -355,8 +354,8 @@ private struct LargeTextWidgetView: View {
                 Text(timeText(prayer.date, entry.payload))
                     .font(.system(size: 60, weight: .medium).monospacedDigit())
                     .foregroundStyle(palette.content)
-                Text(countdownText(to: prayer.date, from: entry.date))
-                    .font(.system(size: 24, weight: .bold).monospacedDigit())
+                LiveCountdown(target: entry.status?.endsAt ?? prayer.date)
+                    .font(.system(size: 24, weight: .bold))
                     .foregroundStyle(palette.chipText)
             } else {
                 Text(GlanceL10n.text("watch.open_app", fallback: "Open the app"))
@@ -382,8 +381,8 @@ private struct LargeTextWidgetView: View {
                     Text(prayer.localizedPrayerName)
                         .font(.system(size: 30, weight: .bold))
                         .foregroundStyle(palette.name)
-                    Text(countdownText(to: prayer.date, from: entry.date))
-                        .font(.system(size: 25, weight: .bold).monospacedDigit())
+                    LiveCountdown(target: entry.status?.endsAt ?? prayer.date)
+                        .font(.system(size: 25, weight: .bold))
                         .foregroundStyle(palette.chipText)
                 }
                 Spacer(minLength: 8)

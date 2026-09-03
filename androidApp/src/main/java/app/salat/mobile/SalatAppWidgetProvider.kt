@@ -117,7 +117,9 @@ class SalatAppWidgetProvider : AppWidgetProvider() {
                 manager.updateAppWidget(id, views)
             }
 
-            if (next != null) scheduleRollover(context, next.atMillis)
+            // Kerahat opens and closes between prayers; waking only at the next
+            // prayer left the widget describing a window that had already lifted.
+            nextStateChange(context, timeline, now)?.let { scheduleRollover(context, it) }
         }
 
         /**
@@ -197,6 +199,28 @@ class SalatAppWidgetProvider : AppWidgetProvider() {
                 tomorrow = tomorrow,
                 kerahatMinutes = AndroidAppSettingsStore(context).load().kerahatMinutes
             )
+        }
+
+        /** The soonest instant at which the headline or the strip would read differently. */
+        private fun nextStateChange(
+            context: Context,
+            timeline: AndroidGlanceTimeline?,
+            nowMillis: Long
+        ): Long? {
+            if (timeline == null) return null
+            val minutes = AndroidAppSettingsStore(context).load().kerahatMinutes
+            val span = (minutes ?: 0) * 60_000L
+            val instants = buildList {
+                timeline.events.forEach { event ->
+                    add(event.atMillis)
+                    if (span > 0L) when (event.prayer) {
+                        PrayerName.SUNRISE -> add(event.atMillis + span)
+                        PrayerName.DHUHR, PrayerName.MAGHRIB -> add(event.atMillis - span)
+                        else -> Unit
+                    }
+                }
+            }
+            return instants.filter { it > nowMillis }.minOrNull()
         }
 
         private fun periodText(context: Context, status: DayStatus?): String = when {

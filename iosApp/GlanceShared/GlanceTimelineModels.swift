@@ -189,3 +189,34 @@ extension GlanceTimelinePayload {
         )
     }
 }
+
+extension GlanceTimelinePayload {
+    /**
+     Every instant at which what a glance surface displays would change.
+
+     Prayer times alone are not enough: a kerahat window opens and closes between
+     them, and a widget with no entry at those instants keeps showing the state it
+     was built in — which is how "Güneş kerahati" was still on screen at midday.
+     */
+    func stateChanges(after date: Date, limit: Int = 40) -> [Date] {
+        let millis = Int64(date.timeIntervalSince1970 * 1000)
+        var instants = events.map(\.epochMillis)
+        if let minutes = kerahatMinutes, minutes > 0 {
+            let span = Int64(minutes) * 60_000
+            for event in events {
+                switch event.prayerId.lowercased() {
+                case "sunrise": instants.append(contentsOf: [event.epochMillis, event.epochMillis + span])
+                case "dhuhr": instants.append(contentsOf: [event.epochMillis - span, event.epochMillis])
+                case "maghrib": instants.append(contentsOf: [event.epochMillis - span, event.epochMillis])
+                default: break
+                }
+            }
+        }
+        return Set(instants)
+            .filter { $0 > millis }
+            .sorted()
+            .prefix(limit)
+            // A second past the boundary, so the entry lands inside the new state.
+            .map { Date(timeIntervalSince1970: Double($0) / 1000 + 1) }
+    }
+}
