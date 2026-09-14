@@ -71,7 +71,10 @@ internal fun AndroidCalendarScreen(
 ) {
     val locale = LocalConfiguration.current.locales[0]
     val zone = remember(location.timeZoneId) { ZoneId.of(location.timeZoneId) }
-    val today = remember(location, zone) { LocalDate.now(zone) }
+    // Read through the ticking clock so the pinned "today" turns over at midnight
+    // for an app left open, instead of staying on the day it was first drawn.
+    val nowMillis = rememberNowMillis(stepMillis = 60_000L)
+    val today = java.time.Instant.ofEpochMilli(nowMillis).atZone(zone).toLocalDate()
     val engine = remember { SalatEngine() }
 
     fun timesFor(date: LocalDate): List<String> {

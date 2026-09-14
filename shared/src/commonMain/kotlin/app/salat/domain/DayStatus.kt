@@ -94,7 +94,13 @@ data class DayTimes(
 data class DayStatus(
     val period: DayPeriod,
     /** Non-null only while we are inside one of the three windows. */
-    val kerahat: KerahatWindow?
+    val kerahat: KerahatWindow?,
+    /**
+     * The soonest instant at which [DayStatusCalculator.evaluate] would answer
+     * differently. A surface that caches this status must refresh it by then, or it
+     * goes on naming a window that has already closed.
+     */
+    val nextChangeMillis: Long
 )
 
 /**
@@ -122,17 +128,24 @@ object DayStatusCalculator {
         yesterday: DayTimes,
         tomorrow: DayTimes,
         kerahatMinutes: Int? = DEFAULT_KERAHAT_MINUTES
-    ): DayStatus = DayStatus(
-        period = period(nowMillis, today, yesterday, tomorrow),
-        kerahat = kerahatMinutes
-            ?.let { minutes ->
-                // Yesterday's sunset window can still be running just after midnight
-                // only in the far north; checking both days costs nothing and avoids
-                // a class of edge case entirely.
-                (windows(yesterday, minutes) + windows(today, minutes) + windows(tomorrow, minutes))
-                    .firstOrNull { it.contains(nowMillis) }
-            }
-    )
+    ): DayStatus {
+        val period = period(nowMillis, today, yesterday, tomorrow)
+        // Yesterday's sunset window can still be running just after midnight only in
+        // the far north; checking all three days costs nothing and avoids a class of
+        // edge case entirely.
+        val allWindows = kerahatMinutes
+            ?.let { windows(yesterday, it) + windows(today, it) + windows(tomorrow, it) }
+            .orEmpty()
+        val nextChange = (allWindows.flatMap { listOf(it.startMillis, it.endMillis) } + period.endMillis)
+            .filter { it > nowMillis }
+            .minOrNull()
+            ?: period.endMillis
+        return DayStatus(
+            period = period,
+            kerahat = allWindows.firstOrNull { it.contains(nowMillis) },
+            nextChangeMillis = nextChange
+        )
+    }
 
     /** The three kerahat windows of one day, in the order they occur. */
     fun windows(times: DayTimes, minutes: Int): List<KerahatWindow> {

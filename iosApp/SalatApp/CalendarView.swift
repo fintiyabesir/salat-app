@@ -1,7 +1,7 @@
 import SalatShared
 import SwiftUI
 
-private struct CalendarDayDisplay: Identifiable {
+struct CalendarDayDisplay: Identifiable {
     let date: Date
     let label: String
     let prayers: [PrayerDisplay]
@@ -21,16 +21,36 @@ struct CalendarView: View {
 
     private let dateCellWidth: CGFloat = 70
 
+    @State private var cache = CalendarModelCache()
+
     var body: some View {
-        GeometryReader { proxy in
-            body(short: proxy.size.height < 520, sideBySide: proxy.size.width > proxy.size.height)
+        // A minute tick is enough for a table of days; what matters is that "today"
+        // turns over at midnight for an app left open, rather than staying on the
+        // day the screen was first drawn.
+        TimelineView(.everyMinute) { context in
+            GeometryReader { proxy in
+                body(
+                    model: cache.model(key: cacheKey(at: context.date)) { build(now: context.date) },
+                    short: proxy.size.height < 520,
+                    sideBySide: proxy.size.width > proxy.size.height
+                )
+            }
         }
         .background(Awqat.canvas(colorScheme))
     }
 
+    private func cacheKey(at now: Date) -> CalendarModelCache.Key {
+        var calendar = Calendar(identifier: .gregorian)
+        calendar.timeZone = TimeZone(identifier: location.timeZoneId) ?? .current
+        return .init(
+            location: location,
+            settings: settings,
+            day: calendar.dateComponents([.year, .month, .day], from: now)
+        )
+    }
+
     @ViewBuilder
-    private func body(short: Bool, sideBySide: Bool) -> some View {
-        let model = build()
+    private func body(model: CalendarModel, short: Bool, sideBySide: Bool) -> some View {
         VStack(alignment: .leading, spacing: 0) {
             HStack(alignment: .top) {
                 VStack(alignment: .leading, spacing: 4) {
@@ -201,7 +221,7 @@ struct CalendarView: View {
         return colorScheme == .dark ? Awqat.gold : Awqat.goldDeep
     }
 
-    private struct CalendarModel {
+    struct CalendarModel {
         let subtitle: String
         let todayLabel: String
         let hijriToday: String
@@ -209,12 +229,12 @@ struct CalendarView: View {
         let rows: [CalendarDayDisplay]
     }
 
-    private func build() -> CalendarModel {
+    private func build(now: Date) -> CalendarModel {
         let timeZone = TimeZone(identifier: location.timeZoneId) ?? .current
         var calendar = Calendar(identifier: .gregorian)
         calendar.timeZone = timeZone
         calendar.locale = L10n.selectedLocale
-        let start = calendar.startOfDay(for: Date())
+        let start = calendar.startOfDay(for: now)
 
         let rowFormatter = DateFormatter()
         rowFormatter.locale = L10n.selectedLocale
@@ -326,4 +346,24 @@ struct CalendarView: View {
 
 extension PrayerDisplay {
     static let orderedIds = ["fajr", "sunrise", "dhuhr", "asr", "maghrib", "isha"]
+}
+
+/// Holds the month table until the day it describes is over.
+final class CalendarModelCache {
+    struct Key: Equatable {
+        let location: PrayerLocation
+        let settings: IOSAppSettings
+        let day: DateComponents
+    }
+
+    private var key: Key?
+    private var model: CalendarView.CalendarModel?
+
+    func model(key: Key, build: () -> CalendarView.CalendarModel) -> CalendarView.CalendarModel {
+        if let model, key == self.key { return model }
+        let fresh = build()
+        self.key = key
+        self.model = fresh
+        return fresh
+    }
 }

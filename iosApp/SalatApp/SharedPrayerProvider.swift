@@ -15,6 +15,8 @@ struct TodayStatus {
     let endsAtMillis: Int64
     /// The prayer whose window is open, which is what every surface marks.
     let currentPrayerId: String?
+    /// When this reading stops being true — a window closing or a kerahat edge.
+    let nextChangeMillis: Int64
 }
 
 struct TodayPrayerDisplay {
@@ -26,6 +28,8 @@ struct TodayPrayerDisplay {
     let nextPrayer: PrayerDisplay
     let nextPrayerIsToday: Bool
     let status: TodayStatus?
+    /// Until this instant every field here still describes "now".
+    let validUntil: Date
 
     /// The prayer whose window is open, or nil between sunrise and Dhuhr. This is
     /// what every surface marks: before sunrise you are still inside Fajr, and
@@ -98,6 +102,15 @@ struct SharedPrayerProvider {
             }
             .joined(separator: " · ")
 
+        let status = dayStatus(
+            now: now,
+            calendar: calendar,
+            timeZone: timeZone,
+            location: location,
+            calculation: calculation,
+            kerahatMinutes: settings.kerahatMinutes
+        )
+
         return TodayPrayerDisplay(
             locationName: location.displayName,
             regionText: region,
@@ -106,13 +119,10 @@ struct SharedPrayerProvider {
             prayers: rows,
             nextPrayer: nextPrayer,
             nextPrayerIsToday: nextPrayerIsToday,
-            status: dayStatus(
-                now: now,
-                calendar: calendar,
-                timeZone: timeZone,
-                location: location,
-                calculation: calculation,
-                kerahatMinutes: settings.kerahatMinutes
+            status: status,
+            validUntil: min(
+                status.map { Date(timeIntervalSince1970: Double($0.nextChangeMillis) / 1000) } ?? .distantFuture,
+                calendar.date(byAdding: .day, value: 1, to: calendar.startOfDay(for: now)) ?? .distantFuture
             )
         )
     }
@@ -158,14 +168,16 @@ struct SharedPrayerProvider {
                 headline: L10n.text("kerahat_\(kerahat.id.name.lowercased())"),
                 isKerahat: true,
                 endsAtMillis: kerahat.endMillis,
-                currentPrayerId: status.period.id.prayer?.name.lowercased()
+                currentPrayerId: status.period.id.prayer?.name.lowercased(),
+                nextChangeMillis: status.nextChangeMillis
             )
         }
         return TodayStatus(
             headline: L10n.text("period_\(status.period.id.name.lowercased())"),
             isKerahat: false,
             endsAtMillis: status.period.endMillis,
-            currentPrayerId: status.period.id.prayer?.name.lowercased()
+            currentPrayerId: status.period.id.prayer?.name.lowercased(),
+            nextChangeMillis: status.nextChangeMillis
         )
     }
 
@@ -214,5 +226,36 @@ struct SharedPrayerProvider {
         formatter.locale = L10n.selectedLocale
         formatter.dateFormat = "HH:mm"
         return formatter.string(from: Date(timeIntervalSince1970: Double(epochMillis) / 1000.0))
+    }
+}
+
+/**
+ The Today screen asks for its model every second, because the screen describes
+ "now" and "now" moves. Recalculating three days of prayer times each tick would be
+ wasteful, so the model is kept until the moment it stops being true — the next
+ change of state or local midnight — and rebuilt then.
+
+ Computing it once in `body` instead is what froze the screen: an app left open
+ overnight still showed the previous day, and a window that had closed kept its
+ name while its countdown sat at zero.
+ */
+final class TodayModelCache {
+    private struct Key: Equatable {
+        let location: PrayerLocation
+        let settings: IOSAppSettings
+    }
+
+    private var key: Key?
+    private var model: TodayPrayerDisplay?
+
+    func model(location: PrayerLocation, settings: IOSAppSettings, now: Date) -> TodayPrayerDisplay {
+        let key = Key(location: location, settings: settings)
+        if let model, key == self.key, now < model.validUntil {
+            return model
+        }
+        let fresh = SharedPrayerProvider().today(location: location, settings: settings, now: now)
+        self.key = key
+        self.model = fresh
+        return fresh
     }
 }

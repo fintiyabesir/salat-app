@@ -8,9 +8,18 @@ struct TodayView: View {
     @Environment(\.horizontalSizeClass) private var horizontalSizeClass
     @Environment(\.colorScheme) private var colorScheme
     @State private var selectedPrayer: PrayerDisplay?
+    @State private var cache = TodayModelCache()
 
     var body: some View {
-        prayerContent(SharedPrayerProvider().today(location: location, settings: settings))
+        // The whole screen is drawn from the clock, not just the countdown. The model
+        // behind it is rebuilt only when it stops being true, so ticking every second
+        // costs a comparison.
+        TimelineView(.periodic(from: .now, by: 1)) { context in
+            prayerContent(
+                cache.model(location: location, settings: settings, now: context.date),
+                now: context.date
+            )
+        }
             .background(Awqat.canvas(colorScheme))
             .sheet(item: $selectedPrayer) { prayer in
                 PrayerNotificationSettingsView(prayer: prayer, location: location, appSettings: settings)
@@ -19,21 +28,21 @@ struct TodayView: View {
     }
 
     @ViewBuilder
-    private func prayerContent(_ model: TodayPrayerDisplay) -> some View {
+    private func prayerContent(_ model: TodayPrayerDisplay, now: Date) -> some View {
         GeometryReader { proxy in
-            content(model, short: proxy.size.height < 520)
+            content(model, now: now, short: proxy.size.height < 520)
         }
     }
 
     @ViewBuilder
-    private func content(_ model: TodayPrayerDisplay, short: Bool) -> some View {
+    private func content(_ model: TodayPrayerDisplay, now: Date, short: Bool) -> some View {
         ScrollView {
             if horizontalSizeClass == .regular {
                 VStack(alignment: .leading, spacing: short ? 12 : 20) {
                     locationHeader(model, short: short)
                     HStack(alignment: .top, spacing: 30) {
-                        nextPrayerHero(model, short: short).frame(maxWidth: .infinity, alignment: .topLeading)
-                        prayerList(model).frame(maxWidth: .infinity, alignment: .top)
+                        nextPrayerHero(model, now: now, short: short).frame(maxWidth: .infinity, alignment: .topLeading)
+                        prayerList(model, now: now).frame(maxWidth: .infinity, alignment: .top)
                     }
                 }
                 .padding(.horizontal, 30)
@@ -41,8 +50,8 @@ struct TodayView: View {
             } else {
                 VStack(alignment: .leading, spacing: short ? 12 : 20) {
                     locationHeader(model, short: short)
-                    nextPrayerHero(model, short: short).padding(.horizontal, 22)
-                    prayerList(model).padding(.horizontal, 22)
+                    nextPrayerHero(model, now: now, short: short).padding(.horizontal, 22)
+                    prayerList(model, now: now).padding(.horizontal, 22)
                 }
                 .padding(.bottom, 16)
             }
@@ -74,7 +83,7 @@ struct TodayView: View {
     }
 
     @ViewBuilder
-    private func nextPrayerHero(_ model: TodayPrayerDisplay, short: Bool) -> some View {
+    private func nextPrayerHero(_ model: TodayPrayerDisplay, now: Date, short: Bool) -> some View {
         let status = model.status
         let palette = HeroPalette.of(colorScheme, kerahat: status?.isKerahat == true)
         VStack(alignment: .leading, spacing: 0) {
@@ -110,16 +119,14 @@ struct TodayView: View {
                 .lineLimit(1)
                 .minimumScaleFactor(0.7)
                 .padding(.top, short ? 6 : 12)
-            TimelineView(.periodic(from: .now, by: 1)) { context in
-                Text(L10n.countdown(
-                    until: status?.endsAtMillis ?? model.nextPrayer.epochMillis,
-                    now: context.date
-                ))
-                .font(.system(size: short ? 36 : 56, weight: .ultraLight).monospacedDigit())
-                .lineLimit(1)
-                .minimumScaleFactor(0.6)
-            }
-            dayStrip(model, palette: palette, short: short)
+            Text(L10n.countdown(
+                until: status?.endsAtMillis ?? model.nextPrayer.epochMillis,
+                now: now
+            ))
+            .font(.system(size: short ? 36 : 56, weight: .ultraLight).monospacedDigit())
+            .lineLimit(1)
+            .minimumScaleFactor(0.6)
+            dayStrip(model, now: now, palette: palette, short: short)
         }
         .foregroundStyle(palette.content)
         .padding(.horizontal, 26)
@@ -135,9 +142,8 @@ struct TodayView: View {
 
     /// The six prayers as one line of the day, so "where am I in today" is a glance.
     @ViewBuilder
-    private func dayStrip(_ model: TodayPrayerDisplay, palette: HeroPalette, short: Bool) -> some View {
+    private func dayStrip(_ model: TodayPrayerDisplay, now: Date, palette: HeroPalette, short: Bool) -> some View {
         let open = model.currentPrayerId
-        let now = Date()
         VStack(alignment: .leading, spacing: 8) {
             HStack(spacing: 0) {
                 ForEach(Array(model.prayers.enumerated()), id: \.element.id) { index, prayer in
@@ -176,8 +182,8 @@ struct TodayView: View {
     }
 
     @ViewBuilder
-    private func prayerList(_ model: TodayPrayerDisplay) -> some View {
-        let nowMillis = Int64(Date().timeIntervalSince1970 * 1000)
+    private func prayerList(_ model: TodayPrayerDisplay, now: Date) -> some View {
+        let nowMillis = Int64(now.timeIntervalSince1970 * 1000)
         let open = model.currentPrayerId
         VStack(spacing: 4) {
             ForEach(model.prayers) { prayer in

@@ -30,7 +30,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.produceState
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -48,6 +47,7 @@ import androidx.compose.ui.unit.sp
 import kotlinx.coroutines.delay
 import app.salat.domain.SalatEngine
 import app.salat.domain.dayTimes
+import app.salat.domain.toDayTimes
 import app.salat.domain.KerahatWindow
 import app.salat.domain.KerahatId
 import app.salat.domain.DayStatusCalculator
@@ -98,7 +98,11 @@ fun AdaptiveTodayScreen(
 ) {
     val locale = LocalConfiguration.current.locales[0]
     val zone = remember(location.timeZoneId) { ZoneId.of(location.timeZoneId) }
-    val today = remember(location, zone) { LocalDate.now(zone) }
+    // Everything below is derived from this one ticking clock. The heavy work is
+    // remembered per day; the cheap question "which window is open" is asked afresh
+    // every second, so the screen can never outlive the moment it describes.
+    val nowMillis = rememberNowMillis()
+    val today = Instant.ofEpochMilli(nowMillis).atZone(zone).toLocalDate()
     val engine = remember { SalatEngine() }
     var selectedPrayer by remember { mutableStateOf<PrayerName?>(null) }
     val day = remember(location, today, settings.calculation) {
@@ -113,40 +117,27 @@ fun AdaptiveTodayScreen(
             preferences = settings.calculation
         )
     }
-    val nowMillis = System.currentTimeMillis()
     // Isha runs past midnight and the small hours still belong to it, so the
     // surrounding days are not optional.
-    val status = remember(location, today, settings.calculation, settings.kerahatMinutes, nowMillis / 60_000L) {
-        DayStatusCalculator.evaluate(
-            nowMillis = nowMillis,
-            today = engine.dayTimes(location, today, settings.calculation),
-            yesterday = engine.dayTimes(location, today.minusDays(1L), settings.calculation),
-            tomorrow = engine.dayTimes(location, today.plusDays(1L), settings.calculation),
-            kerahatMinutes = settings.kerahatMinutes
-        )
+    val todayTimes = remember(location, today, settings.calculation) { day.toDayTimes() }
+    val yesterdayTimes = remember(location, today, settings.calculation) {
+        engine.dayTimes(location, today.minusDays(1L), settings.calculation)
     }
+    val tomorrowTimes = remember(location, today, settings.calculation) {
+        engine.dayTimes(location, today.plusDays(1L), settings.calculation)
+    }
+    val status = DayStatusCalculator.evaluate(
+        nowMillis = nowMillis,
+        today = todayTimes,
+        yesterday = yesterdayTimes,
+        tomorrow = tomorrowTimes,
+        kerahatMinutes = settings.kerahatMinutes
+    )
     val next = PrayerName.entries.firstOrNull {
         day.time(it).toEpochMilliseconds() > nowMillis
     }?.let { prayer ->
         NextPrayerUi(prayer, day.time(prayer).toEpochMilliseconds(), isToday = true)
-    } ?: run {
-        val tomorrow = today.plusDays(1)
-        val tomorrowDay = engine.calculateDay(
-            year = tomorrow.year,
-            month = tomorrow.monthValue,
-            day = tomorrow.dayOfMonth,
-            latitude = location.point.latitude,
-            longitude = location.point.longitude,
-            timeZoneId = location.timeZoneId,
-            countryCode = location.countryCode ?: "ZZ",
-            preferences = settings.calculation
-        )
-        NextPrayerUi(
-            prayer = PrayerName.FAJR,
-            epochMillis = tomorrowDay.time(PrayerName.FAJR).toEpochMilliseconds(),
-            isToday = false
-        )
-    }
+    } ?: NextPrayerUi(PrayerName.FAJR, tomorrowTimes.fajr, isToday = false)
     val gregorianDate = remember(today, locale) {
         today.format(DateTimeFormatter.ofPattern("d MMMM yyyy", locale))
     }
@@ -177,9 +168,9 @@ fun AdaptiveTodayScreen(
                         Modifier.fillMaxWidth().padding(top = if (short) 12.dp else 20.dp, bottom = 16.dp),
                         horizontalArrangement = Arrangement.spacedBy(30.dp)
                     ) {
-                        Box(Modifier.weight(1f)) { HeroCard(next, status, day, current, zone, locale, dark, short) }
+                        Box(Modifier.weight(1f)) { HeroCard(next, status, day, current, nowMillis, zone, locale, dark, short) }
                         Column(Modifier.weight(1f)) {
-                            PrayerList(day, current, zone, locale, dark) {
+                            PrayerList(day, current, nowMillis, zone, locale, dark) {
                                 selectedPrayer = it
                             }
                         }
@@ -189,10 +180,10 @@ fun AdaptiveTodayScreen(
                 Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState())) {
                     LocationHeader(location, gregorianDate, hijriDate, dark, short, onChooseCity, onOpenSettings)
                     Box(Modifier.padding(horizontal = 22.dp, vertical = if (short) 12.dp else 20.dp)) {
-                        HeroCard(next, status, day, current, zone, locale, dark, short)
+                        HeroCard(next, status, day, current, nowMillis, zone, locale, dark, short)
                     }
                     Column(Modifier.padding(horizontal = 22.dp).padding(bottom = 16.dp)) {
-                        PrayerList(day, current, zone, locale, dark) {
+                        PrayerList(day, current, nowMillis, zone, locale, dark) {
                             selectedPrayer = it
                         }
                     }
@@ -266,6 +257,7 @@ private fun HeroCard(
     status: DayStatus,
     day: PrayerDay,
     current: PrayerName?,
+    nowMillis: Long,
     zone: ZoneId,
     locale: Locale,
     dark: Boolean,
@@ -329,7 +321,7 @@ private fun HeroCard(
                 maxLines = 1,
                 modifier = Modifier.padding(top = if (short) 6.dp else 12.dp)
             )
-            val remaining = countdownText(kerahat?.endMillis ?: status.period.endMillis, locale)
+            val remaining = countdownText(kerahat?.endMillis ?: status.period.endMillis, nowMillis)
             Text(
                 remaining,
                 // Nine languages write durations at very different widths, so the size
@@ -344,7 +336,7 @@ private fun HeroCard(
                 maxLines = 1,
                 style = Tabular
             )
-            DayStrip(day, current, palette, short)
+            DayStrip(day, current, nowMillis, palette, short)
         }
     }
 }
@@ -355,8 +347,7 @@ private fun HeroCard(
  * mark the next prayer carries in the list below.
  */
 @Composable
-private fun DayStrip(day: PrayerDay, current: PrayerName?, palette: HeroPalette, short: Boolean) {
-    val nowMillis = System.currentTimeMillis()
+private fun DayStrip(day: PrayerDay, current: PrayerName?, nowMillis: Long, palette: HeroPalette, short: Boolean) {
     fun elapsed(prayer: PrayerName) = day.time(prayer).toEpochMilliseconds() <= nowMillis
     Row(
         Modifier.fillMaxWidth().padding(top = if (short) 10.dp else 18.dp),
@@ -406,19 +397,10 @@ private fun Dot(size: androidx.compose.ui.unit.Dp, color: Color) {
     Box(Modifier.size(size).background(color, CircleShape))
 }
 
-/**
- * Live countdown to the next prayer. Both widgets already showed remaining time and
- * the phone did not, which is the number people actually look for.
- */
+/** Time left until [epochMillis], in the units the design writes. */
 @Composable
-private fun countdownText(epochMillis: Long, locale: Locale): String {
-    val remaining by produceState(initialValue = epochMillis - System.currentTimeMillis(), epochMillis) {
-        while (true) {
-            value = epochMillis - System.currentTimeMillis()
-            delay(1_000L)
-        }
-    }
-    val total = (remaining / 1000L).coerceAtLeast(0L)
+private fun countdownText(epochMillis: Long, nowMillis: Long): String {
+    val total = ((epochMillis - nowMillis) / 1000L).coerceAtLeast(0L)
     val hours = (total / 3600L).toInt()
     val minutes = ((total % 3600L) / 60L).toInt()
     val seconds = (total % 60L).toInt()
@@ -433,12 +415,12 @@ private fun countdownText(epochMillis: Long, locale: Locale): String {
 private fun PrayerList(
     day: PrayerDay,
     current: PrayerName?,
+    nowMillis: Long,
     zone: ZoneId,
     locale: Locale,
     dark: Boolean,
     onPrayer: (PrayerName) -> Unit
 ) {
-    val nowMillis = System.currentTimeMillis()
     val activeShape = RoundedCornerShape(18.dp)
     val spent = if (dark) Color(0xFF6D716E) else Color(0xFF9AA09A)
     val activeContent = if (dark) Color(0xFF91C9B5) else AwqatHeroSurface
