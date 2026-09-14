@@ -89,6 +89,29 @@ class DayStatusCalculatorTest {
     }
 
     @Test
+    fun the_next_change_is_the_end_of_the_window_when_nothing_intervenes() {
+        // At two in the afternoon with kerahat off, nothing changes before Asr.
+        assertEquals(day().asr, statusAt(14 * HOUR, kerahatMinutes = null).nextChangeMillis)
+    }
+
+    @Test
+    fun a_kerahat_window_opening_is_a_change_even_mid_period() {
+        // Inside Asr the card must turn clay when the sunset window opens, which is
+        // before the period itself ends at Maghrib.
+        assertEquals(day().maghrib - 45 * MINUTE, statusAt(17 * HOUR).nextChangeMillis)
+    }
+
+    @Test
+    fun the_next_change_is_always_in_the_future() {
+        // A surface refreshing "by then" must never be told a moment already past,
+        // or it would recompute forever.
+        listOf(2, 5, 6, 7, 8, 12, 13, 14, 17, 19, 20, 22, 23).forEach { hour ->
+            val now = hour * HOUR + 7 * MINUTE
+            assertTrue(statusAt(now).nextChangeMillis > now, "hour=$hour")
+        }
+    }
+
+    @Test
     fun the_three_kerahat_windows_hang_off_the_sun_not_the_prayers() {
         val windows = DayStatusCalculator.windows(day(), 45)
         assertEquals(listOf(KerahatId.SUNRISE, KerahatId.ZENITH, KerahatId.SUNSET), windows.map { it.id })
