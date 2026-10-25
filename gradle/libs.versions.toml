@@ -1,8 +1,8 @@
 [versions]
-kotlin = "2.4.20"
+kotlin = "2.4.21"
 agp = "9.4.1"
 kotlinxDatetime = "0.8.0"
-kotlinxSerialization = "1.11.0"
+kotlinxSerialization = "1.12.0"
 adhan = "0.0.7"
 composeBom = "2026.04.01"
 activityCompose = "1.13.0"
